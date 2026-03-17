@@ -1,0 +1,19 @@
+namespace UniversityHistory.Domain.Entities;
+
+public class StudentGroupEnrollment
+{
+    public int EnrollmentId { get; set; }
+    public int StudentId { get; set; }
+    public int GroupId { get; set; }
+    public int? SubgroupId { get; set; }
+    public DateOnly DateFrom { get; set; }
+    public DateOnly? DateTo { get; set; }
+    public string ReasonStart { get; set; } = string.Empty;
+    public string? ReasonEnd { get; set; }
+
+    public Student Student { get; set; } = null!;
+    public StudyGroup Group { get; set; } = null!;
+    public Subgroup? Subgroup { get; set; }
+    public ICollection<AcademicLeave> AcademicLeaves { get; set; } = new List<AcademicLeave>();
+    public ICollection<ExternalTransfer> ExternalTransfers { get; set; } = new List<ExternalTransfer>();
+}

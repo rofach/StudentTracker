@@ -1,0 +1,20 @@
+using UniversityHistory.Domain.Enums;
+
+namespace UniversityHistory.Domain.Entities;
+
+public class Student
+{
+    public int StudentId { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public DateOnly? BirthDate { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public StudentStatus Status { get; set; } = StudentStatus.Active;
+
+
+    public ICollection<StudentGroupEnrollment> Enrollments { get; set; } = new List<StudentGroupEnrollment>();
+    public ICollection<AcademicLeave> AcademicLeaves { get; set; } = new List<AcademicLeave>();
+    public ICollection<ExternalTransfer> ExternalTransfers { get; set; } = new List<ExternalTransfer>();
+    public ICollection<StudentPlanAssignment> PlanAssignments { get; set; } = new List<StudentPlanAssignment>();
+}

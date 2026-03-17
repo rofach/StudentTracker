@@ -1,0 +1,26 @@
+using Microsoft.EntityFrameworkCore;
+using UniversityHistory.Domain.Entities;
+using UniversityHistory.Domain.Interfaces.Repositories;
+using UniversityHistory.Infrastructure.Data;
+
+namespace UniversityHistory.Infrastructure.Repositories;
+
+public class ExternalTransferRepository : IExternalTransferRepository
+{
+    private readonly UniversityDbContext _db;
+    public ExternalTransferRepository(UniversityDbContext db) => _db = db;
+
+    public async Task<IEnumerable<ExternalTransfer>> GetByStudentIdAsync(int studentId, CancellationToken ct = default) =>
+        await _db.ExternalTransfers.AsNoTracking()
+            .Include(t => t.Institution)
+            .Where(t => t.StudentId == studentId)
+            .OrderBy(t => t.TransferDate)
+            .ToListAsync(ct);
+
+    public async Task<ExternalTransfer> AddAsync(ExternalTransfer transfer, CancellationToken ct = default)
+    {
+        _db.ExternalTransfers.Add(transfer);
+        await _db.SaveChangesAsync(ct);
+        return transfer;
+    }
+}
