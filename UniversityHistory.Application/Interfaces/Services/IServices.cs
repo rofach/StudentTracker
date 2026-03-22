@@ -9,11 +9,14 @@ public interface IStudentService
     Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default);
     Task<IEnumerable<TimelineEventDto>> GetTimelineAsync(int studentId, CancellationToken ct = default);
     Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, CancellationToken ct = default);
+    Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(int studentId, DateOnly? date, CancellationToken ct = default);
 }
 
 public interface IGroupService
 {
     Task<IEnumerable<GroupCompositionMemberDto>> GetCompositionAsync(int groupId, DateOnly? date = null, CancellationToken ct = default);
+    Task<IEnumerable<ActiveGroupDto>> GetActiveGroupsAsync(DateOnly? date = null, CancellationToken ct = default);
+    Task<IEnumerable<GroupStudentDto>> GetStudentsInGroupAsync(int groupId, DateOnly? date = null, CancellationToken ct = default);
 }
 
 public interface IMovementService

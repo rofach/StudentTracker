@@ -38,6 +38,33 @@ public record GroupDto(
     string? Faculty
 );
 
+public record ActiveGroupDto(
+    int GroupId,
+    string GroupCode,
+    string? Faculty,
+    DateOnly DateCreated,
+    DateOnly? DateClosed
+);
+
+public record GroupStudentDto(
+    int EnrollmentId,
+    int StudentId,
+    string FirstName,
+    string LastName,
+    string? Email,
+    DateOnly DateFrom,
+    DateOnly? DateTo
+);
+
+public record StudentCurrentGroupDto(
+    int EnrollmentId,
+    int GroupId,
+    string GroupCode,
+    string? Faculty,
+    DateOnly DateFrom,
+    DateOnly? DateTo
+);
+
 public record GroupCompositionMemberDto(
     int StudentId,
     string FirstName,

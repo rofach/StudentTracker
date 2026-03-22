@@ -1,6 +1,7 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Queries.GetClassmates;
+using UniversityHistory.Application.Queries.GetStudentGroupOnDate;
 using UniversityHistory.Application.Queries.GetTimeline;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
@@ -14,15 +15,18 @@ public class StudentService : IStudentService
     private readonly IStudentRepository _studentRepo;
     private readonly IGetTimelineQueryHandler _timelineHandler;
     private readonly IGetClassmatesQueryHandler _classmatesHandler;
+    private readonly IGetStudentGroupOnDateQueryHandler _groupOnDateHandler;
 
     public StudentService(
         IStudentRepository studentRepo,
         IGetTimelineQueryHandler timelineHandler,
-        IGetClassmatesQueryHandler classmatesHandler)
+        IGetClassmatesQueryHandler classmatesHandler,
+        IGetStudentGroupOnDateQueryHandler groupOnDateHandler)
     {
         _studentRepo       = studentRepo;
         _timelineHandler   = timelineHandler;
         _classmatesHandler = classmatesHandler;
+        _groupOnDateHandler = groupOnDateHandler;
     }
 
     public async Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default)
@@ -58,6 +62,12 @@ public class StudentService : IStudentService
     public Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, CancellationToken ct = default)
     {
         return _classmatesHandler.HandleAsync(new GetClassmatesQuery(studentId), ct);
+    }
+
+    public Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(int studentId, DateOnly? date, CancellationToken ct = default)
+    {
+        return _groupOnDateHandler.HandleAsync(
+            new GetStudentGroupOnDateQuery(studentId, date ?? DateOnly.FromDateTime(DateTime.Today)), ct);
     }
 
     private static StudentDto MapToDto(Student s)
