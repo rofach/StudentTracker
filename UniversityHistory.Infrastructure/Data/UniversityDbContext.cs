@@ -53,6 +53,8 @@ public class UniversityDbContext : DbContext
             e.HasIndex(g => g.GroupCode).IsUnique();
             e.Property(g => g.CreationYear).HasColumnName("creation_year").IsRequired();
             e.Property(g => g.Faculty).HasColumnName("faculty").HasMaxLength(100);
+            e.Property(g => g.DateCreated).HasColumnName("date_created").IsRequired();
+            e.Property(g => g.DateClosed).HasColumnName("date_closed");
         });
 
         modelBuilder.Entity<Subgroup>(e =>

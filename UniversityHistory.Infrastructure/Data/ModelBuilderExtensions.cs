@@ -37,9 +37,9 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<StudyGroup>().HasData(
-            new StudyGroup { GroupId = 1, GroupCode = "CS-21", CreationYear = 2021, Faculty = "Computer Science" },
-            new StudyGroup { GroupId = 2, GroupCode = "CS-22", CreationYear = 2022, Faculty = "Computer Science" },
-            new StudyGroup { GroupId = 3, GroupCode = "CS-23", CreationYear = 2023, Faculty = "Computer Science" }
+            new StudyGroup { GroupId = 1, GroupCode = "CS-21", CreationYear = 2021, Faculty = "Computer Science", DateCreated = new DateOnly(2021, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 2, GroupCode = "CS-22", CreationYear = 2022, Faculty = "Computer Science", DateCreated = new DateOnly(2022, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 3, GroupCode = "CS-23", CreationYear = 2023, Faculty = "Computer Science", DateCreated = new DateOnly(2023, 9, 1), DateClosed = null }
         );
 
         modelBuilder.Entity<Subgroup>().HasData(
