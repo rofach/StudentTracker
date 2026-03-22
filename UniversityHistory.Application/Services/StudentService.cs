@@ -59,9 +59,9 @@ public class StudentService : IStudentService
         return _timelineHandler.HandleAsync(new GetTimelineQuery(studentId), ct);
     }
 
-    public Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, CancellationToken ct = default)
+    public Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, DateOnly? dateFrom, DateOnly? dateTo, CancellationToken ct = default)
     {
-        return _classmatesHandler.HandleAsync(new GetClassmatesQuery(studentId), ct);
+        return _classmatesHandler.HandleAsync(new GetClassmatesQuery(studentId, dateFrom, dateTo), ct);
     }
 
     public Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(int studentId, DateOnly? date, CancellationToken ct = default)

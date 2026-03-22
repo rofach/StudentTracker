@@ -8,7 +8,7 @@ public interface IStudentService
     Task<IEnumerable<StudentDto>> GetAllAsync(CancellationToken ct = default);
     Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default);
     Task<IEnumerable<TimelineEventDto>> GetTimelineAsync(int studentId, CancellationToken ct = default);
-    Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, CancellationToken ct = default);
+    Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, DateOnly? dateFrom, DateOnly? dateTo, CancellationToken ct = default);
     Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(int studentId, DateOnly? date, CancellationToken ct = default);
 }
 

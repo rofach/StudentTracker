@@ -18,6 +18,8 @@ public class GetClassmatesQueryHandler : IGetClassmatesQueryHandler
         if (!exists) throw new NotFoundException("Student", query.StudentId);
 
         var studentId = query.StudentId;
+        var dateFrom = query.DateFrom;
+        var dateTo = query.DateTo;
 
         return await _db.Database.SqlQuery<ClassmateDto>($"""
             SELECT DISTINCT
@@ -46,6 +48,10 @@ public class GetClassmatesQueryHandler : IGetClassmatesQueryHandler
             WHERE mine_e.student_id = {studentId}
               AND mine_e.date_from <= ISNULL(other_e.date_to, '9999-12-31')
               AND ISNULL(mine_e.date_to, '9999-12-31') >= other_e.date_from
+              AND ({dateFrom} IS NULL OR ISNULL(mine_e.date_to,  '9999-12-31') >= {dateFrom})
+              AND ({dateTo}   IS NULL OR mine_e.date_from <= {dateTo})
+              AND ({dateFrom} IS NULL OR ISNULL(other_e.date_to, '9999-12-31') >= {dateFrom})
+              AND ({dateTo}   IS NULL OR other_e.date_from <= {dateTo})
             ORDER BY SharedFrom, s.last_name, s.first_name
             """)
             .ToListAsync(ct);

@@ -42,9 +42,9 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{id:int}/classmates")]
-    public async Task<IActionResult> GetClassmates(int id, CancellationToken ct)
+    public async Task<IActionResult> GetClassmates(int id, [FromQuery] DateOnly? dateFrom, [FromQuery] DateOnly? dateTo, CancellationToken ct)
     {
-        return Ok(await _studentService.GetClassmatesAsync(id, ct));
+        return Ok(await _studentService.GetClassmatesAsync(id, dateFrom, dateTo, ct));
     }
 
     [HttpGet("{id:int}/group")]
