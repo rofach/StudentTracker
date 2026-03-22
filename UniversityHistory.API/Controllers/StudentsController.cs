@@ -47,6 +47,13 @@ public class StudentsController : ControllerBase
         return Ok(await _studentService.GetClassmatesAsync(id, ct));
     }
 
+    [HttpGet("{id:int}/group")]
+    public async Task<IActionResult> GetGroup(int id, [FromQuery] DateOnly? date, CancellationToken ct)
+    {
+        var result = await _studentService.GetGroupOnDateAsync(id, date, ct);
+        return result is null ? NotFound() : Ok(result);
+    }
+
     [HttpGet("{id:int}/movements")]
     public async Task<IActionResult> GetMovements(int id,
         [FromServices] IMovementService movementService, CancellationToken ct)
