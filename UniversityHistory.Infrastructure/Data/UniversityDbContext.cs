@@ -229,10 +229,9 @@ public class UniversityDbContext : DbContext
             e.HasKey(gr => gr.GradeId);
             e.Property(gr => gr.GradeId).HasColumnName("grade_id").UseIdentityColumn();
             e.Property(gr => gr.CourseEnrollmentId).HasColumnName("course_enrollment_id");
-            e.Property(gr => gr.AttemptNo).HasColumnName("attempt_no").HasDefaultValue(1);
             e.Property(gr => gr.GradeValue).HasColumnName("grade_value").HasMaxLength(20).IsRequired();
             e.Property(gr => gr.AssessmentDate).HasColumnName("assessment_date").IsRequired();
-            e.HasIndex(gr => new { gr.CourseEnrollmentId, gr.AttemptNo }).IsUnique();
+            e.HasIndex(gr => gr.CourseEnrollmentId).IsUnique();
             e.HasOne(gr => gr.CourseEnrollment).WithMany(ce => ce.GradeRecords)
                 .HasForeignKey(gr => gr.CourseEnrollmentId).OnDelete(DeleteBehavior.Cascade);
         });

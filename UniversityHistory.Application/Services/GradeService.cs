@@ -27,7 +27,6 @@ public class GradeService : IGradeService
             g.GradeId,
             g.CourseEnrollment.Discipline.DisciplineName,
             g.CourseEnrollment.SemesterNo,
-            g.AttemptNo,
             g.GradeValue,
             g.AssessmentDate));
     }

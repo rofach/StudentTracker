@@ -83,9 +83,9 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<GradeRecord>().HasData(
-            new GradeRecord { GradeId = 1, CourseEnrollmentId = 1, AttemptNo = 1, GradeValue = "A", AssessmentDate = new DateOnly(2022, 1, 15) },
-            new GradeRecord { GradeId = 2, CourseEnrollmentId = 2, AttemptNo = 1, GradeValue = "B+", AssessmentDate = new DateOnly(2022, 1, 18) },
-            new GradeRecord { GradeId = 3, CourseEnrollmentId = 3, AttemptNo = 1, GradeValue = "A-", AssessmentDate = new DateOnly(2022, 1, 15) }
+            new GradeRecord { GradeId = 1, CourseEnrollmentId = 1, GradeValue = "95", AssessmentDate = new DateOnly(2022, 1, 15) },
+            new GradeRecord { GradeId = 2, CourseEnrollmentId = 2, GradeValue = "88", AssessmentDate = new DateOnly(2022, 1, 18) },
+            new GradeRecord { GradeId = 3, CourseEnrollmentId = 3, GradeValue = "91", AssessmentDate = new DateOnly(2022, 1, 15) }
         );
     }
 }

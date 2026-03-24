@@ -120,7 +120,6 @@ public record GradeDto(
     int GradeId,
     string DisciplineName,
     int SemesterNo,
-    int AttemptNo,
     string GradeValue,
     DateOnly AssessmentDate
 );
