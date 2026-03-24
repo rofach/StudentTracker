@@ -26,13 +26,14 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
                 s.first_name        AS FirstName,
                 s.last_name         AS LastName,
                 s.email             AS Email,
-                e.subgroup_id       AS SubgroupId,
+                ssa.subgroup_id     AS SubgroupId,
                 sg.subgroup_name    AS SubgroupName,
                 e.date_from         AS DateFrom,
                 e.date_to           AS DateTo
             FROM Student_Group_Enrollment e
-            JOIN Student       s  ON s.student_id  = e.student_id
-            LEFT JOIN Subgroup sg ON sg.subgroup_id = e.subgroup_id
+            JOIN Student s ON s.student_id  = e.student_id
+            LEFT JOIN Student_Subgroup_Assignment ssa ON ssa.enrollment_id = e.enrollment_id
+            LEFT JOIN Subgroup sg ON sg.subgroup_id = ssa.subgroup_id
             WHERE e.group_id  = {groupId}
               AND e.date_from <= {date}
               AND (e.date_to IS NULL OR e.date_to >= {date})

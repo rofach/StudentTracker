@@ -34,7 +34,6 @@ public record CloseEnrollmentDto(
 public record GroupDto(
     int GroupId,
     string GroupCode,
-    int CreationYear,
     string? Faculty
 );
 

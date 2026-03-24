@@ -39,7 +39,8 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
                 al.start_date,
                 al.end_date
             FROM Academic_Leave al
-            WHERE al.student_id = {studentId}
+            JOIN Student_Group_Enrollment e_al ON e_al.enrollment_id = al.enrollment_id
+            WHERE e_al.student_id = {studentId}
 
             UNION ALL
 

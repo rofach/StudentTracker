@@ -16,6 +16,8 @@ public class GradeRepository : IGradeRepository
                 .ThenInclude(ce => ce.Discipline)
             .Include(g => g.CourseEnrollment)
                 .ThenInclude(ce => ce.Assignment)
+                    .ThenInclude(a => a.Plan)
+                        .ThenInclude(p => p.PlanDisciplines)
             .Where(g => g.CourseEnrollment.Assignment.StudentId == studentId)
             .OrderBy(g => g.AssessmentDate)
             .ToListAsync(ct);

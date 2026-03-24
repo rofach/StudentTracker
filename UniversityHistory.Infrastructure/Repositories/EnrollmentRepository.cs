@@ -22,14 +22,16 @@ public class EnrollmentRepository : IEnrollmentRepository
         await _db.StudentGroupEnrollments
             .Include(e => e.Student)
             .Include(e => e.Group)
-            .Include(e => e.Subgroup)
+            .Include(e => e.SubgroupAssignment!)
+                .ThenInclude(sa => sa.Subgroup)
             .FirstOrDefaultAsync(e => e.EnrollmentId == id, ct);
 
     public async Task<IEnumerable<StudentGroupEnrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct = default) =>
         await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Group)
-            .Include(e => e.Subgroup)
+            .Include(e => e.SubgroupAssignment!)
+                .ThenInclude(sa => sa.Subgroup)
             .Where(e => e.StudentId == studentId)
             .OrderBy(e => e.DateFrom)
             .ToListAsync(ct);
@@ -39,7 +41,8 @@ public class EnrollmentRepository : IEnrollmentRepository
         await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Student)
-            .Include(e => e.Subgroup)
+            .Include(e => e.SubgroupAssignment!)
+                .ThenInclude(sa => sa.Subgroup)
             .Where(e => e.GroupId == groupId
                      && e.DateFrom <= date
                      && (e.DateTo == null || e.DateTo >= date))

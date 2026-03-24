@@ -21,6 +21,7 @@ public class UniversityDbContext : DbContext
     public DbSet<StudentPlanAssignment> StudentPlanAssignments => Set<StudentPlanAssignment>();
     public DbSet<StudentCourseEnrollment> StudentCourseEnrollments => Set<StudentCourseEnrollment>();
     public DbSet<GradeRecord> GradeRecords => Set<GradeRecord>();
+    public DbSet<StudentSubgroupAssignment> StudentSubgroupAssignments => Set<StudentSubgroupAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,7 +52,6 @@ public class UniversityDbContext : DbContext
             e.Property(g => g.GroupId).HasColumnName("group_id").UseIdentityColumn();
             e.Property(g => g.GroupCode).HasColumnName("group_code").HasMaxLength(20).IsRequired();
             e.HasIndex(g => g.GroupCode).IsUnique();
-            e.Property(g => g.CreationYear).HasColumnName("creation_year").IsRequired();
             e.Property(g => g.Faculty).HasColumnName("faculty").HasMaxLength(100);
             e.Property(g => g.DateCreated).HasColumnName("date_created").IsRequired();
             e.Property(g => g.DateClosed).HasColumnName("date_closed");
@@ -95,7 +95,6 @@ public class UniversityDbContext : DbContext
             e.Property(p => p.PlanId).HasColumnName("plan_id").UseIdentityColumn();
             e.Property(p => p.SpecialtyCode).HasColumnName("specialty_code").HasMaxLength(20).IsRequired();
             e.Property(p => p.PlanName).HasColumnName("plan_name").HasMaxLength(100);
-            e.Property(p => p.TotalCredits).HasColumnName("total_credits").IsRequired();
             e.Property(p => p.ValidFrom).HasColumnName("valid_from").IsRequired();
         });
 
@@ -129,7 +128,6 @@ public class UniversityDbContext : DbContext
             e.Property(en => en.EnrollmentId).HasColumnName("enrollment_id").UseIdentityColumn();
             e.Property(en => en.StudentId).HasColumnName("student_id");
             e.Property(en => en.GroupId).HasColumnName("group_id");
-            e.Property(en => en.SubgroupId).HasColumnName("subgroup_id");
             e.Property(en => en.DateFrom).HasColumnName("date_from").IsRequired();
             e.Property(en => en.DateTo).HasColumnName("date_to");
             e.Property(en => en.ReasonStart).HasColumnName("reason_start").HasMaxLength(50).IsRequired();
@@ -138,10 +136,20 @@ public class UniversityDbContext : DbContext
                 .HasForeignKey(en => en.StudentId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(en => en.Group).WithMany(g => g.Enrollments)
                 .HasForeignKey(en => en.GroupId).OnDelete(DeleteBehavior.Restrict);
-            e.HasOne(en => en.Subgroup).WithMany(sg => sg.Enrollments)
-                .HasForeignKey(en => en.SubgroupId).OnDelete(DeleteBehavior.SetNull);
             e.HasIndex(en => new { en.GroupId, en.DateFrom })
                 .HasDatabaseName("IX_Enrollment_GroupId_DateFrom");
+        });
+
+        modelBuilder.Entity<StudentSubgroupAssignment>(e =>
+        {
+            e.ToTable("Student_Subgroup_Assignment");
+            e.HasKey(sa => sa.EnrollmentId);
+            e.Property(sa => sa.EnrollmentId).HasColumnName("enrollment_id");
+            e.Property(sa => sa.SubgroupId).HasColumnName("subgroup_id");
+            e.HasOne(sa => sa.Enrollment).WithOne(en => en.SubgroupAssignment)
+                .HasForeignKey<StudentSubgroupAssignment>(sa => sa.EnrollmentId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(sa => sa.Subgroup).WithMany(s => s.SubgroupAssignments)
+                .HasForeignKey(sa => sa.SubgroupId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<AcademicLeave>(e =>
@@ -149,13 +157,10 @@ public class UniversityDbContext : DbContext
             e.ToTable("Academic_Leave");
             e.HasKey(l => l.LeaveId);
             e.Property(l => l.LeaveId).HasColumnName("leave_id").UseIdentityColumn();
-            e.Property(l => l.StudentId).HasColumnName("student_id");
             e.Property(l => l.EnrollmentId).HasColumnName("enrollment_id");
             e.Property(l => l.StartDate).HasColumnName("start_date").IsRequired();
             e.Property(l => l.EndDate).HasColumnName("end_date");
             e.Property(l => l.Reason).HasColumnName("reason").HasMaxLength(200);
-            e.HasOne(l => l.Student).WithMany(s => s.AcademicLeaves)
-                .HasForeignKey(l => l.StudentId).OnDelete(DeleteBehavior.NoAction);
             e.HasOne(l => l.Enrollment).WithMany(en => en.AcademicLeaves)
                 .HasForeignKey(l => l.EnrollmentId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -208,7 +213,6 @@ public class UniversityDbContext : DbContext
             e.Property(ce => ce.CourseEnrollmentId).HasColumnName("course_enrollment_id").UseIdentityColumn();
             e.Property(ce => ce.AssignmentId).HasColumnName("assignment_id");
             e.Property(ce => ce.DisciplineId).HasColumnName("discipline_id");
-            e.Property(ce => ce.SemesterNo).HasColumnName("semester_no").IsRequired();
             e.Property(ce => ce.Status)
                 .HasColumnName("status")
                 .HasMaxLength(20)

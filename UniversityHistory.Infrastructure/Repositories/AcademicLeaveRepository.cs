@@ -12,7 +12,7 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
 
     public async Task<IEnumerable<AcademicLeave>> GetByStudentIdAsync(int studentId, CancellationToken ct = default) =>
         await _db.AcademicLeaves.AsNoTracking()
-            .Where(l => l.StudentId == studentId)
+            .Where(l => l.Enrollment.StudentId == studentId)
             .OrderBy(l => l.StartDate)
             .ToListAsync(ct);
 

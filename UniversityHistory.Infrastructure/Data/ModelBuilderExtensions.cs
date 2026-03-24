@@ -22,8 +22,8 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<StudyPlan>().HasData(
-            new StudyPlan { PlanId = 1, SpecialtyCode = "CS-101", PlanName = "BSc Computer Science v1", TotalCredits = 240, ValidFrom = new DateOnly(2021, 9, 1) },
-            new StudyPlan { PlanId = 2, SpecialtyCode = "CS-102", PlanName = "BSc Computer Science v2", TotalCredits = 240, ValidFrom = new DateOnly(2023, 9, 1) }
+            new StudyPlan { PlanId = 1, SpecialtyCode = "CS-101", PlanName = "BSc Computer Science v1", ValidFrom = new DateOnly(2021, 9, 1) },
+            new StudyPlan { PlanId = 2, SpecialtyCode = "CS-102", PlanName = "BSc Computer Science v2", ValidFrom = new DateOnly(2023, 9, 1) }
         );
 
         modelBuilder.Entity<PlanDiscipline>().HasData(
@@ -37,9 +37,9 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<StudyGroup>().HasData(
-            new StudyGroup { GroupId = 1, GroupCode = "CS-21", CreationYear = 2021, Faculty = "Computer Science", DateCreated = new DateOnly(2021, 9, 1), DateClosed = null },
-            new StudyGroup { GroupId = 2, GroupCode = "CS-22", CreationYear = 2022, Faculty = "Computer Science", DateCreated = new DateOnly(2022, 9, 1), DateClosed = null },
-            new StudyGroup { GroupId = 3, GroupCode = "CS-23", CreationYear = 2023, Faculty = "Computer Science", DateCreated = new DateOnly(2023, 9, 1), DateClosed = null }
+            new StudyGroup { GroupId = 1, GroupCode = "CS-21", Faculty = "Computer Science", DateCreated = new DateOnly(2021, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 2, GroupCode = "CS-22", Faculty = "Computer Science", DateCreated = new DateOnly(2022, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 3, GroupCode = "CS-23", Faculty = "Computer Science", DateCreated = new DateOnly(2023, 9, 1), DateClosed = null }
         );
 
         modelBuilder.Entity<Subgroup>().HasData(
@@ -56,15 +56,21 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<StudentGroupEnrollment>().HasData(
-            new StudentGroupEnrollment { EnrollmentId = 1, StudentId = 1, GroupId = 1, SubgroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2022, 6, 30), ReasonStart = "Admission", ReasonEnd = "Transfer to new group" },
-            new StudentGroupEnrollment { EnrollmentId = 2, StudentId = 1, GroupId = 2, SubgroupId = 3, DateFrom = new DateOnly(2022, 9, 1), DateTo = null, ReasonStart = "Transfer", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 3, StudentId = 2, GroupId = 1, SubgroupId = 2, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2024, 6, 30), ReasonStart = "Admission", ReasonEnd = "Graduation" },
-            new StudentGroupEnrollment { EnrollmentId = 4, StudentId = 3, GroupId = 2, SubgroupId = null, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2023, 1, 15), ReasonStart = "Admission", ReasonEnd = "Academic Leave" },
-            new StudentGroupEnrollment { EnrollmentId = 5, StudentId = 4, GroupId = 3, SubgroupId = null, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Admission", ReasonEnd = null }
+            new StudentGroupEnrollment { EnrollmentId = 1, StudentId = 1, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2022, 6, 30), ReasonStart = "Admission", ReasonEnd = "Transfer to new group" },
+            new StudentGroupEnrollment { EnrollmentId = 2, StudentId = 1, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = null, ReasonStart = "Transfer", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 3, StudentId = 2, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2024, 6, 30), ReasonStart = "Admission", ReasonEnd = "Graduation" },
+            new StudentGroupEnrollment { EnrollmentId = 4, StudentId = 3, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2023, 1, 15), ReasonStart = "Admission", ReasonEnd = "Academic Leave" },
+            new StudentGroupEnrollment { EnrollmentId = 5, StudentId = 4, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Admission", ReasonEnd = null }
+        );
+
+        modelBuilder.Entity<StudentSubgroupAssignment>().HasData(
+            new StudentSubgroupAssignment { EnrollmentId = 1, SubgroupId = 1 },
+            new StudentSubgroupAssignment { EnrollmentId = 2, SubgroupId = 3 },
+            new StudentSubgroupAssignment { EnrollmentId = 3, SubgroupId = 2 }
         );
 
         modelBuilder.Entity<AcademicLeave>().HasData(
-            new AcademicLeave { LeaveId = 1, StudentId = 3, EnrollmentId = 4, StartDate = new DateOnly(2023, 1, 16), EndDate = null, Reason = "Medical leave" }
+            new AcademicLeave { LeaveId = 1, EnrollmentId = 4, StartDate = new DateOnly(2023, 1, 16), EndDate = null, Reason = "Medical leave" }
         );
 
         modelBuilder.Entity<ExternalTransfer>().HasData(
@@ -77,9 +83,9 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<StudentCourseEnrollment>().HasData(
-            new StudentCourseEnrollment { CourseEnrollmentId = 1, AssignmentId = 1, DisciplineId = 1, SemesterNo = 1, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 2, AssignmentId = 1, DisciplineId = 2, SemesterNo = 1, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 3, AssignmentId = 2, DisciplineId = 1, SemesterNo = 1, Status = CourseStatus.Completed }
+            new StudentCourseEnrollment { CourseEnrollmentId = 1, AssignmentId = 1, DisciplineId = 1, Status = CourseStatus.Completed },
+            new StudentCourseEnrollment { CourseEnrollmentId = 2, AssignmentId = 1, DisciplineId = 2, Status = CourseStatus.Completed },
+            new StudentCourseEnrollment { CourseEnrollmentId = 3, AssignmentId = 2, DisciplineId = 1, Status = CourseStatus.Completed }
         );
 
         modelBuilder.Entity<GradeRecord>().HasData(

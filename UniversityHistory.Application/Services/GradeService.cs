@@ -26,7 +26,7 @@ public class GradeService : IGradeService
         return grades.Select(g => new GradeDto(
             g.GradeId,
             g.CourseEnrollment.Discipline.DisciplineName,
-            g.CourseEnrollment.SemesterNo,
+            g.CourseEnrollment.Assignment.Plan.PlanDisciplines.First(pd => pd.DisciplineId == g.CourseEnrollment.DisciplineId).SemesterNo,
             g.GradeValue,
             g.AssessmentDate));
     }

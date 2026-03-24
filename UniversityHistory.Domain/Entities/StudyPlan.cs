@@ -5,7 +5,6 @@ public class StudyPlan
     public int PlanId { get; set; }
     public string SpecialtyCode { get; set; } = string.Empty;
     public string? PlanName { get; set; }
-    public int TotalCredits { get; set; }
     public DateOnly ValidFrom { get; set; }
 
     public ICollection<PlanDiscipline> PlanDisciplines { get; set; } = new List<PlanDiscipline>();

@@ -35,9 +35,11 @@ public class EnrollmentService : IEnrollmentService
         {
             StudentId = dto.StudentId,
             GroupId = dto.GroupId,
-            SubgroupId = dto.SubgroupId,
             DateFrom = dto.DateFrom,
-            ReasonStart = dto.ReasonStart
+            ReasonStart = dto.ReasonStart,
+            SubgroupAssignment = dto.SubgroupId.HasValue 
+                ? new StudentSubgroupAssignment { SubgroupId = dto.SubgroupId.Value } 
+                : null
         };
 
         var created = await _enrollmentRepo.AddAsync(enrollment, ct);

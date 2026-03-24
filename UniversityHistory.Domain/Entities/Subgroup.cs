@@ -7,5 +7,5 @@ public class Subgroup
     public string SubgroupName { get; set; } = string.Empty;
 
     public StudyGroup Group { get; set; } = null!;
-    public ICollection<StudentGroupEnrollment> Enrollments { get; set; } = new List<StudentGroupEnrollment>();
+    public ICollection<StudentSubgroupAssignment> SubgroupAssignments { get; set; } = new List<StudentSubgroupAssignment>();
 }

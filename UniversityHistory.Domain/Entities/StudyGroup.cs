@@ -4,7 +4,6 @@ public class StudyGroup
 {
     public int GroupId { get; set; }
     public string GroupCode { get; set; } = string.Empty;
-    public int CreationYear { get; set; }
     public string? Faculty { get; set; }
     public DateOnly DateCreated { get; set; }
     public DateOnly? DateClosed { get; set; }
