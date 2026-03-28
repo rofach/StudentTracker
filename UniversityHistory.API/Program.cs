@@ -8,6 +8,7 @@ using UniversityHistory.Application.Queries.GetGroupComposition;
 using UniversityHistory.Application.Queries.GetStudentGroupOnDate;
 using UniversityHistory.Application.Queries.GetStudentsInGroup;
 using UniversityHistory.Application.Queries.GetTimeline;
+using UniversityHistory.Application.Queries.GetAverageGrade;
 using UniversityHistory.Application.Services;
 using UniversityHistory.Domain.Interfaces.Repositories;
 using UniversityHistory.Infrastructure.Data;
@@ -33,6 +34,7 @@ builder.Services.AddScoped<IGetGroupCompositionQueryHandler, GetGroupComposition
 builder.Services.AddScoped<IGetActiveGroupsQueryHandler, GetActiveGroupsQueryHandler>();
 builder.Services.AddScoped<IGetStudentsInGroupQueryHandler, GetStudentsInGroupQueryHandler>();
 builder.Services.AddScoped<IGetStudentGroupOnDateQueryHandler, GetStudentGroupOnDateQueryHandler>();
+builder.Services.AddScoped<IGetAverageGradeQueryHandler, GetAverageGradeQueryHandler>();
 
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IGroupService, GroupService>();

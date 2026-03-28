@@ -32,6 +32,7 @@ public interface IStudyPlanService
 public interface IGradeService
 {
     Task<IEnumerable<GradeDto>> GetGradesAsync(int studentId, CancellationToken ct = default);
+    Task<AverageGradeDto> GetAverageGradeAsync(int studentId, int? semesterNo, int? disciplineId, int? academicYearStart, CancellationToken ct = default);
 }
 
 public interface IEnrollmentService

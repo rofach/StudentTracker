@@ -74,4 +74,16 @@ public class StudentsController : ControllerBase
     {
         return Ok(await gradeService.GetGradesAsync(id, ct));
     }
+
+    [HttpGet("{id:int}/grades/average")]
+    public async Task<IActionResult> GetAverageGrade(
+        int id,
+        [FromServices] IGradeService gradeService,
+        [FromQuery] int? semesterNo,
+        [FromQuery] int? disciplineId,
+        [FromQuery] int? academicYearStart,
+        CancellationToken ct)
+    {
+        return Ok(await gradeService.GetAverageGradeAsync(id, semesterNo, disciplineId, academicYearStart, ct));
+    }
 }
