@@ -213,6 +213,7 @@ public class UniversityDbContext : DbContext
             e.Property(ce => ce.CourseEnrollmentId).HasColumnName("course_enrollment_id").UseIdentityColumn();
             e.Property(ce => ce.AssignmentId).HasColumnName("assignment_id");
             e.Property(ce => ce.DisciplineId).HasColumnName("discipline_id");
+            e.Property(ce => ce.AcademicYearStart).HasColumnName("academic_year_start").IsRequired();
             e.Property(ce => ce.Status)
                 .HasColumnName("status")
                 .HasMaxLength(20)

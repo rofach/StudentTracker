@@ -83,9 +83,9 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<StudentCourseEnrollment>().HasData(
-            new StudentCourseEnrollment { CourseEnrollmentId = 1, AssignmentId = 1, DisciplineId = 1, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 2, AssignmentId = 1, DisciplineId = 2, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 3, AssignmentId = 2, DisciplineId = 1, Status = CourseStatus.Completed }
+            new StudentCourseEnrollment { CourseEnrollmentId = 1, AssignmentId = 1, DisciplineId = 1, AcademicYearStart = 2021, Status = CourseStatus.Completed },
+            new StudentCourseEnrollment { CourseEnrollmentId = 2, AssignmentId = 1, DisciplineId = 2, AcademicYearStart = 2021, Status = CourseStatus.Completed },
+            new StudentCourseEnrollment { CourseEnrollmentId = 3, AssignmentId = 2, DisciplineId = 1, AcademicYearStart = 2021, Status = CourseStatus.Completed }
         );
 
         modelBuilder.Entity<GradeRecord>().HasData(

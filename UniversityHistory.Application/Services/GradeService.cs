@@ -26,8 +26,19 @@ public class GradeService : IGradeService
         return grades.Select(g => new GradeDto(
             g.GradeId,
             g.CourseEnrollment.Discipline.DisciplineName,
-            g.CourseEnrollment.Assignment.Plan.PlanDisciplines.First(pd => pd.DisciplineId == g.CourseEnrollment.DisciplineId).SemesterNo,
+            ResolveSemesterNo(g),
             g.GradeValue,
             g.AssessmentDate));
+    }
+
+    private static int ResolveSemesterNo(GradeRecord grade)
+    {
+        var semesterNo = grade.CourseEnrollment.Assignment.Plan.PlanDisciplines
+            .SingleOrDefault(pd => pd.DisciplineId == grade.CourseEnrollment.DisciplineId)
+            ?.SemesterNo;
+
+        return semesterNo ?? throw new DomainException(
+            $"No semester mapping found in plan {grade.CourseEnrollment.Assignment.PlanId} " +
+            $"for discipline {grade.CourseEnrollment.DisciplineId}.");
     }
 }

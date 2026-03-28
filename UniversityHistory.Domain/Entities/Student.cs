@@ -14,7 +14,6 @@ public class Student
 
 
     public ICollection<StudentGroupEnrollment> Enrollments { get; set; } = new List<StudentGroupEnrollment>();
-    public ICollection<AcademicLeave> AcademicLeaves { get; set; } = new List<AcademicLeave>();
     public ICollection<ExternalTransfer> ExternalTransfers { get; set; } = new List<ExternalTransfer>();
     public ICollection<StudentPlanAssignment> PlanAssignments { get; set; } = new List<StudentPlanAssignment>();
 }

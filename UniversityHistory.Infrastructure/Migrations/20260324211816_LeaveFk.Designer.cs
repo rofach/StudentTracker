@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UniversityHistory.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using UniversityHistory.Infrastructure.Data;
 namespace UniversityHistory.Infrastructure.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    partial class UniversityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324211816_LeaveFk")]
+    partial class LeaveFk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -465,10 +468,6 @@ namespace UniversityHistory.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseEnrollmentId"));
 
-                    b.Property<int>("AcademicYearStart")
-                        .HasColumnType("int")
-                        .HasColumnName("academic_year_start");
-
                     b.Property<int>("AssignmentId")
                         .HasColumnType("int")
                         .HasColumnName("assignment_id");
@@ -500,7 +499,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         new
                         {
                             CourseEnrollmentId = 1,
-                            AcademicYearStart = 2021,
                             AssignmentId = 1,
                             DisciplineId = 1,
                             Status = "Completed"
@@ -508,7 +506,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         new
                         {
                             CourseEnrollmentId = 2,
-                            AcademicYearStart = 2021,
                             AssignmentId = 1,
                             DisciplineId = 2,
                             Status = "Completed"
@@ -516,7 +513,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         new
                         {
                             CourseEnrollmentId = 3,
-                            AcademicYearStart = 2021,
                             AssignmentId = 2,
                             DisciplineId = 1,
                             Status = "Completed"
