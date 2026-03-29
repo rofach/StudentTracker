@@ -17,6 +17,9 @@ public class ExternalTransferRepository : IExternalTransferRepository
             .OrderBy(t => t.TransferDate)
             .ToListAsync(ct);
 
+    public async Task<Institution?> GetInstitutionByIdAsync(int institutionId, CancellationToken ct = default) =>
+        await _db.Institutions.FindAsync(new object[] { institutionId }, ct);
+
     public async Task<ExternalTransfer> AddAsync(ExternalTransfer transfer, CancellationToken ct = default)
     {
         _db.ExternalTransfers.Add(transfer);

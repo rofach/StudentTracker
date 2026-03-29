@@ -16,6 +16,10 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
             .OrderBy(l => l.StartDate)
             .ToListAsync(ct);
 
+    public async Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default) =>
+        await _db.AcademicLeaves
+            .FirstOrDefaultAsync(l => l.EnrollmentId == enrollmentId && l.EndDate == null, ct);
+
     public async Task<AcademicLeave> AddAsync(AcademicLeave leave, CancellationToken ct = default)
     {
         _db.AcademicLeaves.Add(leave);

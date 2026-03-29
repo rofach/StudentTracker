@@ -5,6 +5,13 @@ export type StudentDto = {
   status: string
 }
 
+export type PagedResult<T> = {
+  items: T[]
+  page: number
+  pageSize: number
+  totalCount: number
+}
+
 export type GradeDto = {
   gradeId: number
   disciplineName: string

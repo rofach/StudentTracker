@@ -22,9 +22,18 @@ public class EnrollmentRepository : IEnrollmentRepository
         await _db.StudentGroupEnrollments
             .Include(e => e.Student)
             .Include(e => e.Group)
+                .ThenInclude(g => g.Subgroups)
             .Include(e => e.SubgroupAssignment!)
                 .ThenInclude(sa => sa.Subgroup)
             .FirstOrDefaultAsync(e => e.EnrollmentId == id, ct);
+
+    public async Task<StudentGroupEnrollment?> GetActiveByStudentIdAsync(int studentId, CancellationToken ct = default) =>
+        await _db.StudentGroupEnrollments
+            .Include(e => e.Group)
+                .ThenInclude(g => g.Subgroups)
+            .Include(e => e.SubgroupAssignment!)
+                .ThenInclude(sa => sa.Subgroup)
+            .FirstOrDefaultAsync(e => e.StudentId == studentId && e.DateTo == null, ct);
 
     public async Task<IEnumerable<StudentGroupEnrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct = default) =>
         await _db.StudentGroupEnrollments

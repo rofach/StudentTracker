@@ -166,6 +166,43 @@
   padding: 0.55rem 0.65rem;
 }
 
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.pager-button {
+  border: 1px solid #cbdbe7;
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  background: #f8fbfd;
+  color: #24485f;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pager-button:hover {
+  background: #eef6fb;
+  transform: translateY(-1px);
+}
+
+.pager-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pager-status {
+  margin: 0;
+  color: #44657b;
+  font-size: 0.92rem;
+  text-align: center;
+}
+
 .summary {
   align-self: start;
 }
@@ -384,5 +421,10 @@ tbody tr:hover {
 
   .filters {
     grid-template-columns: 1fr;
+  }
+
+  .pager {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

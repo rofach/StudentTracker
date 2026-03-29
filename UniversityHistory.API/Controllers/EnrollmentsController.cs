@@ -28,4 +28,11 @@ public class EnrollmentsController : ControllerBase
         await _enrollmentService.CloseEnrollmentAsync(id, dto, ct);
         return NoContent();
     }
+
+    [HttpPut("{id:int}/subgroup")]
+    public async Task<IActionResult> AssignSubgroup(int id, [FromBody] AssignSubgroupDto dto, CancellationToken ct)
+    {
+        await _enrollmentService.AssignSubgroupAsync(id, dto, ct);
+        return NoContent();
+    }
 }

@@ -1,27 +1,44 @@
 import type { StudentDto, TimelineEventDto } from '../types'
 import { formatRange, mapEventTypeLabel } from '../utils/formatters'
+import { PaginationControls } from './PaginationControls'
 import { Spinner } from './Spinner'
 
 type TimelinePageProps = {
   students: StudentDto[]
+  studentsPage: number
+  studentsPageSize: number
+  studentsTotalCount: number
   selectedStudentId: number | null
   isLoadingStudents: boolean
   isLoadingTimeline: boolean
   hasLoadedTimeline: boolean
   timelineEvents: TimelineEventDto[]
+  timelinePage: number
+  timelinePageSize: number
+  timelineTotalCount: number
   onStudentChange: (studentId: number) => void
+  onStudentsPageChange: (page: number) => void
   onRefreshTimeline: () => void
+  onTimelinePageChange: (page: number) => void
 }
 
 export function TimelinePage({
   students,
+  studentsPage,
+  studentsPageSize,
+  studentsTotalCount,
   selectedStudentId,
   isLoadingStudents,
   isLoadingTimeline,
   hasLoadedTimeline,
   timelineEvents,
+  timelinePage,
+  timelinePageSize,
+  timelineTotalCount,
   onStudentChange,
+  onStudentsPageChange,
   onRefreshTimeline,
+  onTimelinePageChange,
 }: TimelinePageProps) {
   return (
     <main className="timeline-grid">
@@ -44,6 +61,15 @@ export function TimelinePage({
             {isLoadingStudents && <Spinner />}
           </div>
         </label>
+
+        <PaginationControls
+          currentPage={studentsPage}
+          pageSize={studentsPageSize}
+          totalCount={studentsTotalCount}
+          disabled={isLoadingStudents}
+          onPageChange={onStudentsPageChange}
+        />
+
         <button
           className="primary"
           type="button"
@@ -78,6 +104,16 @@ export function TimelinePage({
 
         {!isLoadingTimeline && hasLoadedTimeline && timelineEvents.length === 0 && (
           <p>Для цього студента подій таймлайна поки немає.</p>
+        )}
+
+        {timelineTotalCount > 0 && (
+          <PaginationControls
+            currentPage={timelinePage}
+            pageSize={timelinePageSize}
+            totalCount={timelineTotalCount}
+            disabled={isLoadingTimeline}
+            onPageChange={onTimelinePageChange}
+          />
         )}
       </section>
     </main>

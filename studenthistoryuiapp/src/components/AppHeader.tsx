@@ -10,7 +10,7 @@ export function AppHeader({ page }: AppHeaderProps) {
       <div className="hero-top">
         <div>
           <h1>Облік студентів</h1>
-        </div>  
+        </div>
         <nav className="tabs">
           <a href="#/" className={page === 'dashboard' ? 'tab is-active' : 'tab'}>
             Огляд

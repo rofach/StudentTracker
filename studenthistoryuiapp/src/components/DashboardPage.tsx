@@ -1,10 +1,14 @@
 import type { FormEvent } from 'react'
 import type { AverageGradeDto, GradeDto, StudentDto } from '../types'
 import { formatDate } from '../utils/formatters'
+import { PaginationControls } from './PaginationControls'
 import { Spinner } from './Spinner'
 
 export type DashboardPageProps = {
   students: StudentDto[]
+  studentsPage: number
+  studentsPageSize: number
+  studentsTotalCount: number
   selectedStudentId: number | null
   isLoadingStudents: boolean
   semesterNo: string
@@ -15,17 +19,25 @@ export type DashboardPageProps = {
   average: AverageGradeDto | null
   hasLoadedAverage: boolean
   grades: GradeDto[]
+  gradesPage: number
+  gradesPageSize: number
+  gradesTotalCount: number
   hasLoadedGrades: boolean
   error: string | null
   onStudentChange: (studentId: number) => void
+  onStudentsPageChange: (page: number) => void
   onSemesterNoChange: (value: string) => void
   onDisciplineIdChange: (value: string) => void
   onAcademicYearStartChange: (value: string) => void
   onAverageSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onGradesPageChange: (page: number) => void
 }
 
 export function DashboardPage({
   students,
+  studentsPage,
+  studentsPageSize,
+  studentsTotalCount,
   selectedStudentId,
   isLoadingStudents,
   semesterNo,
@@ -36,13 +48,18 @@ export function DashboardPage({
   average,
   hasLoadedAverage,
   grades,
+  gradesPage,
+  gradesPageSize,
+  gradesTotalCount,
   hasLoadedGrades,
   error,
   onStudentChange,
+  onStudentsPageChange,
   onSemesterNoChange,
   onDisciplineIdChange,
   onAcademicYearStartChange,
   onAverageSubmit,
+  onGradesPageChange,
 }: DashboardPageProps) {
   return (
     <main className="grid">
@@ -67,6 +84,14 @@ export function DashboardPage({
               {isLoadingStudents && <Spinner />}
             </div>
           </label>
+
+          <PaginationControls
+            currentPage={studentsPage}
+            pageSize={studentsPageSize}
+            totalCount={studentsTotalCount}
+            disabled={isLoadingStudents}
+            onPageChange={onStudentsPageChange}
+          />
 
           <div className="filters">
             <label>
@@ -166,6 +191,16 @@ export function DashboardPage({
 
         {!isLoadingGrades && hasLoadedGrades && grades.length === 0 && (
           <p>Поки немає даних для відображення.</p>
+        )}
+
+        {gradesTotalCount > 0 && (
+          <PaginationControls
+            currentPage={gradesPage}
+            pageSize={gradesPageSize}
+            totalCount={gradesTotalCount}
+            disabled={isLoadingGrades}
+            onPageChange={onGradesPageChange}
+          />
         )}
       </section>
     </main>

@@ -7,9 +7,12 @@ import type {
   AppPage,
   AverageGradeDto,
   GradeDto,
+  PagedResult,
   StudentDto,
   TimelineEventDto,
 } from './types'
+
+const DEFAULT_PAGE_SIZE = 20
 
 function getPageFromHash(hash: string): AppPage {
   if (hash === '#/timeline') return 'timeline'
@@ -28,10 +31,20 @@ async function fetchJson<T>(url: string): Promise<T> {
 function App() {
   const [page, setPage] = useState<AppPage>(getPageFromHash(window.location.hash))
   const [students, setStudents] = useState<StudentDto[]>([])
+  const [studentsPage, setStudentsPage] = useState(1)
+  const [studentsTotalCount, setStudentsTotalCount] = useState(0)
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
+
   const [grades, setGrades] = useState<GradeDto[]>([])
+  const [gradesPage, setGradesPage] = useState(1)
+  const [gradesTotalCount, setGradesTotalCount] = useState(0)
+
   const [average, setAverage] = useState<AverageGradeDto | null>(null)
+
   const [timelineEvents, setTimelineEvents] = useState<TimelineEventDto[]>([])
+  const [timelinePage, setTimelinePage] = useState(1)
+  const [timelineTotalCount, setTimelineTotalCount] = useState(0)
+
   const [hasLoadedGrades, setHasLoadedGrades] = useState(false)
   const [hasLoadedAverage, setHasLoadedAverage] = useState(false)
   const [hasLoadedTimeline, setHasLoadedTimeline] = useState(false)
@@ -57,12 +70,23 @@ function App() {
     const loadStudents = async () => {
       try {
         setIsLoadingStudents(true)
-        const data = await fetchJson<StudentDto[]>('/api/students')
+        setError(null)
+
+        const data = await fetchJson<PagedResult<StudentDto>>(
+          `/api/students?page=${studentsPage}&pageSize=${DEFAULT_PAGE_SIZE}`,
+        )
+
         if (cancelled) return
-        setStudents(data)
-        if (data.length > 0) {
-          setSelectedStudentId(data[0].studentId)
-        }
+
+        setStudents(data.items)
+        setStudentsTotalCount(data.totalCount)
+        setSelectedStudentId((currentStudentId) => {
+          if (data.items.length === 0) return null
+          if (currentStudentId !== null && data.items.some((student) => student.studentId === currentStudentId)) {
+            return currentStudentId
+          }
+          return data.items[0].studentId
+        })
       } catch (e) {
         if (!cancelled) setError((e as Error).message)
       } finally {
@@ -71,19 +95,28 @@ function App() {
     }
 
     void loadStudents()
+
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [studentsPage])
 
-  const loadGrades = async (studentId: number) => {
+  const loadGrades = async (studentId: number, currentPage: number) => {
     try {
       setIsLoadingGrades(true)
-      const data = await fetchJson<GradeDto[]>(`/api/students/${studentId}/grades`)
-      setGrades(data)
+      setError(null)
+
+      const data = await fetchJson<PagedResult<GradeDto>>(
+        `/api/students/${studentId}/grades?page=${currentPage}&pageSize=${DEFAULT_PAGE_SIZE}`,
+      )
+
+      setGrades(data.items)
+      setGradesTotalCount(data.totalCount)
       setHasLoadedGrades(true)
     } catch (e) {
       setError((e as Error).message)
+      setGrades([])
+      setGradesTotalCount(0)
     } finally {
       setIsLoadingGrades(false)
     }
@@ -115,15 +148,22 @@ function App() {
     }
   }
 
-  const loadTimeline = async (studentId: number) => {
+  const loadTimeline = async (studentId: number, currentPage: number) => {
     try {
       setIsLoadingTimeline(true)
-      const data = await fetchJson<TimelineEventDto[]>(`/api/students/${studentId}/timeline`)
-      setTimelineEvents(data)
+      setError(null)
+
+      const data = await fetchJson<PagedResult<TimelineEventDto>>(
+        `/api/students/${studentId}/timeline?page=${currentPage}&pageSize=${DEFAULT_PAGE_SIZE}`,
+      )
+
+      setTimelineEvents(data.items)
+      setTimelineTotalCount(data.totalCount)
       setHasLoadedTimeline(true)
     } catch (e) {
       setError((e as Error).message)
       setTimelineEvents([])
+      setTimelineTotalCount(0)
     } finally {
       setIsLoadingTimeline(false)
     }
@@ -131,9 +171,17 @@ function App() {
 
   useEffect(() => {
     if (selectedStudentId === null) return
-    void loadGrades(selectedStudentId)
+    void loadGrades(selectedStudentId, gradesPage)
+  }, [selectedStudentId, gradesPage])
+
+  useEffect(() => {
+    if (selectedStudentId === null) return
+    void loadTimeline(selectedStudentId, timelinePage)
+  }, [selectedStudentId, timelinePage])
+
+  useEffect(() => {
+    if (selectedStudentId === null) return
     void loadAverage(selectedStudentId)
-    void loadTimeline(selectedStudentId)
   }, [selectedStudentId])
 
   const handleAverageSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -145,11 +193,15 @@ function App() {
 
   const handleStudentChange = (studentId: number) => {
     setSelectedStudentId(studentId)
+    setGradesPage(1)
+    setTimelinePage(1)
+    setHasLoadedGrades(false)
+    setHasLoadedTimeline(false)
   }
 
   const handleRefreshTimeline = () => {
     if (selectedStudentId !== null) {
-      void loadTimeline(selectedStudentId)
+      void loadTimeline(selectedStudentId, timelinePage)
     }
   }
 
@@ -160,6 +212,9 @@ function App() {
       {page === 'dashboard' ? (
         <DashboardPage
           students={students}
+          studentsPage={studentsPage}
+          studentsPageSize={DEFAULT_PAGE_SIZE}
+          studentsTotalCount={studentsTotalCount}
           selectedStudentId={selectedStudentId}
           isLoadingStudents={isLoadingStudents}
           semesterNo={semesterNo}
@@ -170,24 +225,37 @@ function App() {
           average={average}
           hasLoadedAverage={hasLoadedAverage}
           grades={grades}
+          gradesPage={gradesPage}
+          gradesPageSize={DEFAULT_PAGE_SIZE}
+          gradesTotalCount={gradesTotalCount}
           hasLoadedGrades={hasLoadedGrades}
           error={error}
           onStudentChange={handleStudentChange}
+          onStudentsPageChange={setStudentsPage}
           onSemesterNoChange={setSemesterNo}
           onDisciplineIdChange={setDisciplineId}
           onAcademicYearStartChange={setAcademicYearStart}
           onAverageSubmit={handleAverageSubmit}
+          onGradesPageChange={setGradesPage}
         />
       ) : (
         <TimelinePage
           students={students}
+          studentsPage={studentsPage}
+          studentsPageSize={DEFAULT_PAGE_SIZE}
+          studentsTotalCount={studentsTotalCount}
           selectedStudentId={selectedStudentId}
           isLoadingStudents={isLoadingStudents}
           isLoadingTimeline={isLoadingTimeline}
           hasLoadedTimeline={hasLoadedTimeline}
           timelineEvents={timelineEvents}
+          timelinePage={timelinePage}
+          timelinePageSize={DEFAULT_PAGE_SIZE}
+          timelineTotalCount={timelineTotalCount}
           onStudentChange={handleStudentChange}
+          onStudentsPageChange={setStudentsPage}
           onRefreshTimeline={handleRefreshTimeline}
+          onTimelinePageChange={setTimelinePage}
         />
       )}
     </div>

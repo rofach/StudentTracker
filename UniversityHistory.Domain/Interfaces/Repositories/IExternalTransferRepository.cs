@@ -5,5 +5,6 @@ namespace UniversityHistory.Domain.Interfaces.Repositories;
 public interface IExternalTransferRepository
 {
     Task<IEnumerable<ExternalTransfer>> GetByStudentIdAsync(int studentId, CancellationToken ct = default);
+    Task<Institution?> GetInstitutionByIdAsync(int institutionId, CancellationToken ct = default);
     Task<ExternalTransfer> AddAsync(ExternalTransfer transfer, CancellationToken ct = default);
 }

@@ -135,3 +135,63 @@ public record StudentMovementDto(
     IEnumerable<AcademicLeaveDto> Leaves,
     IEnumerable<ExternalTransferDto> Transfers
 );
+
+public record StudentUpdateDto(
+    string FirstName,
+    string LastName,
+    DateOnly? BirthDate,
+    string? Email,
+    string? Phone
+);
+
+public record ChangeStatusDto(string Status);
+
+public record MoveStudentDto(
+    int NewGroupId,
+    int? NewSubgroupId,
+    DateOnly MoveDate,
+    string ReasonEnd,
+    string ReasonStart
+);
+
+public record AssignSubgroupDto(int SubgroupId);
+
+public record AssignPlanDto(int PlanId, DateOnly DateFrom);
+
+public record CreateTransferDto(
+    int InstitutionId,
+    string TransferType,
+    DateOnly TransferDate,
+    string? Notes
+);
+
+public record CreateLeaveDto(
+    int EnrollmentId,
+    DateOnly StartDate,
+    string? Reason
+);
+
+public record EnrollmentSummaryDto(
+    int EnrollmentId,
+    int GroupId,
+    string GroupCode,
+    string? Faculty,
+    DateOnly DateFrom,
+    DateOnly? DateTo,
+    int? SubgroupId,
+    string? SubgroupName
+);
+
+public record StudentDetailDto(
+    int StudentId,
+    string FirstName,
+    string LastName,
+    DateOnly? BirthDate,
+    string? Email,
+    string? Phone,
+    string Status,
+    IEnumerable<EnrollmentSummaryDto> Enrollments,
+    IEnumerable<StudyPlanAssignmentDto> Plans,
+    IEnumerable<AcademicLeaveDto> Leaves,
+    IEnumerable<ExternalTransferDto> Transfers
+);
