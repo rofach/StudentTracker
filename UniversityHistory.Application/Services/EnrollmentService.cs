@@ -24,8 +24,15 @@ public class EnrollmentService : IEnrollmentService
     {
         _ = await _studentRepo.GetByIdAsync(dto.StudentId, ct)
             ?? throw new NotFoundException(nameof(Student), dto.StudentId);
-        _ = await _groupRepo.GetByIdAsync(dto.GroupId, ct)
+        var group = await _groupRepo.GetByIdAsync(dto.GroupId, ct)
             ?? throw new NotFoundException(nameof(StudyGroup), dto.GroupId);
+
+        if (dto.SubgroupId.HasValue)
+        {
+            var isValidSubgroup = group.Subgroups.Any(sg => sg.SubgroupId == dto.SubgroupId.Value);
+            if (!isValidSubgroup)
+                throw new DomainException($"Validation Failed: Subgroup {dto.SubgroupId.Value} does not belong to Group {dto.GroupId}.");
+        }
 
         var hasOverlap = await _enrollmentRepo.HasOverlapAsync(dto.StudentId, dto.DateFrom, null, null, ct);
         if (hasOverlap)
