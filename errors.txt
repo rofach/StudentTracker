@@ -1,0 +1,55 @@
+﻿
+c:\Users\rofach\source\repos\StudentHistoryCour
+seWork\StudentHistoryCourseWork\UniversityHisto
+ry.Application\Services\GradeService.cs(29,48):
+ error CS1501: No overload for method 'GetByStu
+dentIdAsync' takes 4 arguments [c:\Users\rofach
+\source\repos\StudentHistoryCourseWork\StudentH
+istoryCourseWork\UniversityHistory.Application\
+UniversityHistory.Application.csproj]
+c:\Users\rofach\source\repos\StudentHistoryCour
+seWork\StudentHistoryCourseWork\UniversityHisto
+ry.Application\Services\GradeService.cs(29,14):
+ error CS8130: Cannot infer the type of implici
+tly-typed deconstruction variable 'grades'. [c:
+\Users\rofach\source\repos\StudentHistoryCourse
+Work\StudentHistoryCourseWork\UniversityHistory
+.Application\UniversityHistory.Application.cspr
+oj]
+c:\Users\rofach\source\repos\StudentHistoryCour
+seWork\StudentHistoryCourseWork\UniversityHisto
+ry.Application\Services\GradeService.cs(29,22):
+ error CS8130: Cannot infer the type of implici
+tly-typed deconstruction variable 'count'. [c:\
+Users\rofach\source\repos\StudentHistoryCourseW
+ork\StudentHistoryCourseWork\UniversityHistory.
+Application\UniversityHistory.Application.cspro
+j]
+c:\Users\rofach\source\repos\StudentHistoryCour
+seWork\StudentHistoryCourseWork\UniversityHisto
+ry.Application\Services\GradeService.cs(29,48):
+ error CS1501: No overload for method 'GetByStu
+dentIdAsync' takes 4 arguments [c:\Users\rofach
+\source\repos\StudentHistoryCourseWork\StudentH
+istoryCourseWork\UniversityHistory.Application\
+UniversityHistory.Application.csproj]
+c:\Users\rofach\source\repos\StudentHistoryCour
+seWork\StudentHistoryCourseWork\UniversityHisto
+ry.Application\Services\GradeService.cs(29,14):
+ error CS8130: Cannot infer the type of implici
+tly-typed deconstruction variable 'grades'. [c:
+\Users\rofach\source\repos\StudentHistoryCourse
+Work\StudentHistoryCourseWork\UniversityHistory
+.Application\UniversityHistory.Application.cspr
+oj]
+c:\Users\rofach\source\repos\StudentHistoryCour
+seWork\StudentHistoryCourseWork\UniversityHisto
+ry.Application\Services\GradeService.cs(29,22):
+ error CS8130: Cannot infer the type of implici
+tly-typed deconstruction variable 'count'. [c:\
+Users\rofach\source\repos\StudentHistoryCourseW
+ork\StudentHistoryCourseWork\UniversityHistory.
+Application\UniversityHistory.Application.cspro
+j]
+
+

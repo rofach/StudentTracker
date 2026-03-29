@@ -26,18 +26,18 @@ public class GroupService : IGroupService
         _studentsInGroupHandler = studentsInGroupHandler;
     }
 
-    public Task<IEnumerable<GroupCompositionMemberDto>> GetCompositionAsync(
-        int groupId, DateOnly? date = null, CancellationToken ct = default) =>
+    public Task<PagedResult<GroupCompositionMemberDto>> GetCompositionAsync(
+        int groupId, DateOnly? date = null, int page = 1, int pageSize = 20, CancellationToken ct = default) =>
         _compositionHandler.HandleAsync(
-            new GetGroupCompositionQuery(groupId, date ?? DateOnly.FromDateTime(DateTime.Today)), ct);
+            new GetGroupCompositionQuery(groupId, date ?? DateOnly.FromDateTime(DateTime.Today), page, pageSize), ct);
 
     public Task<IEnumerable<ActiveGroupDto>> GetActiveGroupsAsync(
         DateOnly? date = null, CancellationToken ct = default) =>
         _activeGroupsHandler.HandleAsync(
             new GetActiveGroupsQuery(date ?? DateOnly.FromDateTime(DateTime.Today)), ct);
 
-    public Task<IEnumerable<GroupStudentDto>> GetStudentsInGroupAsync(
-        int groupId, DateOnly? date = null, CancellationToken ct = default) =>
+    public Task<PagedResult<GroupStudentDto>> GetStudentsInGroupAsync(
+        int groupId, DateOnly? date = null, int page = 1, int pageSize = 20, CancellationToken ct = default) =>
         _studentsInGroupHandler.HandleAsync(
-            new GetStudentsInGroupQuery(groupId, date ?? DateOnly.FromDateTime(DateTime.Today)), ct);
+            new GetStudentsInGroupQuery(groupId, date ?? DateOnly.FromDateTime(DateTime.Today), page, pageSize), ct);
 }

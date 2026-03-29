@@ -11,7 +11,7 @@ public class GetStudentsInGroupQueryHandler : IGetStudentsInGroupQueryHandler
     private readonly UniversityDbContext _db;
     public GetStudentsInGroupQueryHandler(UniversityDbContext db) => _db = db;
 
-    public async Task<IEnumerable<GroupStudentDto>> HandleAsync(
+    public async Task<PagedResult<GroupStudentDto>> HandleAsync(
         GetStudentsInGroupQuery query, CancellationToken ct = default)
     {
         var exists = await _db.StudyGroups.AnyAsync(g => g.GroupId == query.GroupId, ct);
@@ -20,7 +20,7 @@ public class GetStudentsInGroupQueryHandler : IGetStudentsInGroupQueryHandler
         var groupId = query.GroupId;
         var date = query.Date;
 
-        return await _db.Database.SqlQuery<GroupStudentDto>($"""
+        var rawQuery = _db.Database.SqlQuery<GroupStudentDto>($"""
             SELECT
                 e.enrollment_id AS EnrollmentId,
                 e.student_id    AS StudentId,
@@ -34,8 +34,16 @@ public class GetStudentsInGroupQueryHandler : IGetStudentsInGroupQueryHandler
             WHERE e.group_id  = {groupId}
               AND e.date_from <= {date}
               AND (e.date_to IS NULL OR e.date_to >= {date})
-            ORDER BY s.last_name, s.first_name
-            """)
+            """);
+
+        var count = await rawQuery.CountAsync(ct);
+        var items = await rawQuery
+            .OrderBy(x => x.LastName)
+            .ThenBy(x => x.FirstName)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToListAsync(ct);
+
+        return new PagedResult<GroupStudentDto>(items, query.Page, query.PageSize, count);
     }
 }

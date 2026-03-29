@@ -21,13 +21,14 @@ public class GradeService : IGradeService
         _avgHandler  = avgHandler;
     }
 
-    public async Task<IEnumerable<GradeDto>> GetGradesAsync(int studentId, CancellationToken ct = default)
+    public async Task<PagedResult<GradeDto>> GetGradesAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
         _ = await _studentRepo.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        var grades = await _gradeRepo.GetByStudentIdAsync(studentId, ct);
-        return grades.Select(g => new GradeDto(
+        var (grades, count) = await _gradeRepo.GetByStudentIdAsync(studentId, page, pageSize, ct);
+        
+        var dtos = grades.Select(g => new GradeDto(
             g.GradeId,
             g.CourseEnrollment.Discipline.DisciplineName,
             ResolveSemesterNo(g),
@@ -35,6 +36,8 @@ public class GradeService : IGradeService
             $"{g.CourseEnrollment.AcademicYearStart}/{g.CourseEnrollment.AcademicYearStart + 1}",
             g.GradeValue,
             g.AssessmentDate));
+
+        return new PagedResult<GradeDto>(dtos, page, pageSize, count);
     }
 
     public async Task<AverageGradeDto> GetAverageGradeAsync(

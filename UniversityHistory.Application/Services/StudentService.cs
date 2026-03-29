@@ -35,9 +35,10 @@ public class StudentService : IStudentService
         return student is null ? null : MapToDto(student);
     }
 
-    public async Task<IEnumerable<StudentDto>> GetAllAsync(CancellationToken ct = default)
+    public async Task<PagedResult<StudentDto>> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
-        return (await _studentRepo.GetAllAsync(ct)).Select(MapToDto);
+        var (items, count) = await _studentRepo.GetAllAsync(page, pageSize, ct);
+        return new PagedResult<StudentDto>(items.Select(MapToDto), page, pageSize, count);
     }
 
     public async Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default)
@@ -54,9 +55,9 @@ public class StudentService : IStudentService
         return MapToDto(await _studentRepo.AddAsync(student, ct));
     }
 
-    public Task<IEnumerable<TimelineEventDto>> GetTimelineAsync(int studentId, CancellationToken ct = default)
+    public Task<PagedResult<TimelineEventDto>> GetTimelineAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
-        return _timelineHandler.HandleAsync(new GetTimelineQuery(studentId), ct);
+        return _timelineHandler.HandleAsync(new GetTimelineQuery(studentId, page, pageSize), ct);
     }
 
     public Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, DateOnly? dateFrom, DateOnly? dateTo, CancellationToken ct = default)

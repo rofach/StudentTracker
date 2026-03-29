@@ -5,18 +5,18 @@ namespace UniversityHistory.Application.Interfaces.Services;
 public interface IStudentService
 {
     Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default);
-    Task<IEnumerable<StudentDto>> GetAllAsync(CancellationToken ct = default);
+    Task<PagedResult<StudentDto>> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default);
     Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default);
-    Task<IEnumerable<TimelineEventDto>> GetTimelineAsync(int studentId, CancellationToken ct = default);
+    Task<PagedResult<TimelineEventDto>> GetTimelineAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default);
     Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, DateOnly? dateFrom, DateOnly? dateTo, CancellationToken ct = default);
     Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(int studentId, DateOnly? date, CancellationToken ct = default);
 }
 
 public interface IGroupService
 {
-    Task<IEnumerable<GroupCompositionMemberDto>> GetCompositionAsync(int groupId, DateOnly? date = null, CancellationToken ct = default);
+    Task<PagedResult<GroupCompositionMemberDto>> GetCompositionAsync(int groupId, DateOnly? date = null, int page = 1, int pageSize = 20, CancellationToken ct = default);
     Task<IEnumerable<ActiveGroupDto>> GetActiveGroupsAsync(DateOnly? date = null, CancellationToken ct = default);
-    Task<IEnumerable<GroupStudentDto>> GetStudentsInGroupAsync(int groupId, DateOnly? date = null, CancellationToken ct = default);
+    Task<PagedResult<GroupStudentDto>> GetStudentsInGroupAsync(int groupId, DateOnly? date = null, int page = 1, int pageSize = 20, CancellationToken ct = default);
 }
 
 public interface IMovementService
@@ -31,7 +31,7 @@ public interface IStudyPlanService
 
 public interface IGradeService
 {
-    Task<IEnumerable<GradeDto>> GetGradesAsync(int studentId, CancellationToken ct = default);
+    Task<PagedResult<GradeDto>> GetGradesAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default);
     Task<AverageGradeDto> GetAverageGradeAsync(int studentId, int? semesterNo, int? disciplineId, int? academicYearStart, CancellationToken ct = default);
 }
 

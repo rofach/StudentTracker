@@ -23,15 +23,19 @@ public class GroupsController : ControllerBase
 
     [HttpGet("{id:int}/composition")]
     public async Task<IActionResult> GetComposition(
-        int id, [FromQuery] DateOnly? date, CancellationToken ct)
+        int id, [FromQuery] DateOnly? date, CancellationToken ct, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        return Ok(await _groupService.GetCompositionAsync(id, date, ct));
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await _groupService.GetCompositionAsync(id, date, page, pageSize, ct));
     }
 
     [HttpGet("{id:int}/students")]
     public async Task<IActionResult> GetStudents(
-        int id, [FromQuery] DateOnly? date, CancellationToken ct)
+        int id, [FromQuery] DateOnly? date, CancellationToken ct, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        return Ok(await _groupService.GetStudentsInGroupAsync(id, date, ct));
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await _groupService.GetStudentsInGroupAsync(id, date, page, pageSize, ct));
     }
 }

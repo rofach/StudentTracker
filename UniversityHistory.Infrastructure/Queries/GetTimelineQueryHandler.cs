@@ -11,7 +11,7 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
     private readonly UniversityDbContext _db;
     public GetTimelineQueryHandler(UniversityDbContext db) => _db = db;
 
-    public async Task<IEnumerable<TimelineEventDto>> HandleAsync(
+    public async Task<PagedResult<TimelineEventDto>> HandleAsync(
         GetTimelineQuery query, CancellationToken ct = default)
     {
         var exists = await _db.Students.AnyAsync(s => s.StudentId == query.StudentId, ct);
@@ -19,7 +19,7 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
 
         var studentId = query.StudentId;
 
-        return await _db.Database.SqlQuery<TimelineEventDto>($"""
+        var rawQuery = _db.Database.SqlQuery<TimelineEventDto>($"""
             SELECT
                 'Enrollment'                                    AS EventType,
                 CONCAT('Enrolled in group ', g.group_code,
@@ -54,9 +54,16 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
             FROM External_Transfers et
             JOIN Institution i ON i.institution_id = et.institution_id
             WHERE et.student_id = {studentId}
+            """);
 
-            ORDER BY DateFrom, EventType
-            """)
+        var count = await rawQuery.CountAsync(ct);
+        var items = await rawQuery
+            .OrderBy(x => x.DateFrom)
+            .ThenBy(x => x.EventType)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToListAsync(ct);
+
+        return new PagedResult<TimelineEventDto>(items, query.Page, query.PageSize, count);
     }
 }

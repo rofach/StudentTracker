@@ -16,9 +16,11 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<IActionResult> GetAll(CancellationToken ct, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        return Ok(await _studentService.GetAllAsync(ct));
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await _studentService.GetAllAsync(page, pageSize, ct));
     }
 
     [HttpGet("{id:int}")]
@@ -36,9 +38,11 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{id:int}/timeline")]
-    public async Task<IActionResult> GetTimeline(int id, CancellationToken ct)
+    public async Task<IActionResult> GetTimeline(int id, CancellationToken ct, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        return Ok(await _studentService.GetTimelineAsync(id, ct));
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await _studentService.GetTimelineAsync(id, page, pageSize, ct));
     }
 
     [HttpGet("{id:int}/classmates")]
@@ -70,9 +74,11 @@ public class StudentsController : ControllerBase
 
     [HttpGet("{id:int}/grades")]
     public async Task<IActionResult> GetGrades(int id,
-        [FromServices] IGradeService gradeService, CancellationToken ct)
+        [FromServices] IGradeService gradeService, CancellationToken ct, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        return Ok(await gradeService.GetGradesAsync(id, ct));
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await gradeService.GetGradesAsync(id, page, pageSize, ct));
     }
 
     [HttpGet("{id:int}/grades/average")]

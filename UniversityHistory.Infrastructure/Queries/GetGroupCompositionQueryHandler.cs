@@ -11,7 +11,7 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
     private readonly UniversityDbContext _db;
     public GetGroupCompositionQueryHandler(UniversityDbContext db) => _db = db;
 
-    public async Task<IEnumerable<GroupCompositionMemberDto>> HandleAsync(
+    public async Task<PagedResult<GroupCompositionMemberDto>> HandleAsync(
         GetGroupCompositionQuery query, CancellationToken ct = default)
     {
         var exists = await _db.StudyGroups.AnyAsync(g => g.GroupId == query.GroupId, ct);
@@ -20,7 +20,7 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
         var groupId = query.GroupId;
         var date    = query.Date;
 
-        return await _db.Database.SqlQuery<GroupCompositionMemberDto>($"""
+        var rawQuery = _db.Database.SqlQuery<GroupCompositionMemberDto>($"""
             SELECT
                 e.student_id        AS StudentId,
                 s.first_name        AS FirstName,
@@ -37,8 +37,16 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
             WHERE e.group_id  = {groupId}
               AND e.date_from <= {date}
               AND (e.date_to IS NULL OR e.date_to >= {date})
-            ORDER BY s.last_name, s.first_name
-            """)
+            """);
+
+        var count = await rawQuery.CountAsync(ct);
+        var items = await rawQuery
+            .OrderBy(x => x.LastName)
+            .ThenBy(x => x.FirstName)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToListAsync(ct);
+
+        return new PagedResult<GroupCompositionMemberDto>(items, query.Page, query.PageSize, count);
     }
 }

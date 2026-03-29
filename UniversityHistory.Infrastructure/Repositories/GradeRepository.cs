@@ -10,17 +10,25 @@ public class GradeRepository : IGradeRepository
     private readonly UniversityDbContext _db;
     public GradeRepository(UniversityDbContext db) => _db = db;
 
-    public async Task<IEnumerable<GradeRecord>> GetByStudentIdAsync(int studentId, CancellationToken ct = default) =>
-        await _db.GradeRecords.AsNoTracking()
+    public async Task<(IEnumerable<GradeRecord> Items, int TotalCount)> GetByStudentIdAsync(int studentId, int page, int pageSize, CancellationToken ct = default)
+    {
+        var query = _db.GradeRecords.AsNoTracking()
             .Include(g => g.CourseEnrollment)
                 .ThenInclude(ce => ce.Discipline)
             .Include(g => g.CourseEnrollment)
                 .ThenInclude(ce => ce.Assignment)
                     .ThenInclude(a => a.Plan)
                         .ThenInclude(p => p.PlanDisciplines)
-            .Where(g => g.CourseEnrollment.Assignment.StudentId == studentId)
-            .OrderBy(g => g.AssessmentDate)
-            .ToListAsync(ct);
+            .Where(g => g.CourseEnrollment.Assignment.StudentId == studentId);
+
+        var count = await query.CountAsync(ct);
+        var items = await query.OrderBy(g => g.AssessmentDate)
+                               .Skip((page - 1) * pageSize)
+                               .Take(pageSize)
+                               .ToListAsync(ct);
+        
+        return (items, count);
+    }
 
     public async Task<GradeRecord> AddAsync(GradeRecord grade, CancellationToken ct = default)
     {
