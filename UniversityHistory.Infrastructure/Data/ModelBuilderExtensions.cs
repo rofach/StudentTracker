@@ -120,9 +120,9 @@ public static class ModelBuilderExtensions
         );
 
         modelBuilder.Entity<ExternalTransfer>().HasData(
-            new ExternalTransfer { TransferId = 1, StudentId = 4, InstitutionId = 2, TransferType = TransferType.In, TransferDate = new DateOnly(2023, 8, 25), EnrollmentId = 5, Notes = "Completed first year at Stanford" },
-            new ExternalTransfer { TransferId = 2, StudentId = 11, InstitutionId = 3, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 20), EnrollmentId = 12, Notes = "Transferred after first semester" },
-            new ExternalTransfer { TransferId = 3, StudentId = 12, InstitutionId = 4, TransferType = TransferType.Out, TransferDate = new DateOnly(2024, 7, 1), EnrollmentId = 13, Notes = "Started master's program" }
+            new ExternalTransfer { TransferId = 1, StudentId = 4, InstitutionId = 2, TransferType = TransferType.In, TransferDate = new DateOnly(2023, 8, 25), Notes = "Completed first year at Stanford" },
+            new ExternalTransfer { TransferId = 2, StudentId = 11, InstitutionId = 3, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 20), Notes = "Transferred after first semester" },
+            new ExternalTransfer { TransferId = 3, StudentId = 12, InstitutionId = 4, TransferType = TransferType.Out, TransferDate = new DateOnly(2024, 7, 1), Notes = "Started master's program" }
         );
 
         modelBuilder.Entity<StudentPlanAssignment>().HasData(

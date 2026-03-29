@@ -181,14 +181,11 @@ public class UniversityDbContext : DbContext
                 "chk_transfer_type",
                 "transfer_type IN ('In','Out')"));
             e.Property(t => t.TransferDate).HasColumnName("transfer_date").IsRequired();
-            e.Property(t => t.EnrollmentId).HasColumnName("enrollment_id");
             e.Property(t => t.Notes).HasColumnName("notes").HasMaxLength(200);
             e.HasOne(t => t.Student).WithMany(s => s.ExternalTransfers)
                 .HasForeignKey(t => t.StudentId).OnDelete(DeleteBehavior.NoAction);
             e.HasOne(t => t.Institution).WithMany(i => i.Transfers)
                 .HasForeignKey(t => t.InstitutionId).OnDelete(DeleteBehavior.Restrict);
-            e.HasOne(t => t.Enrollment).WithMany(en => en.ExternalTransfers)
-                .HasForeignKey(t => t.EnrollmentId).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<StudentPlanAssignment>(e =>

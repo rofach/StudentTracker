@@ -9,9 +9,8 @@ export function AppHeader({ page }: AppHeaderProps) {
     <header className="hero">
       <div className="hero-top">
         <div>
-          {/*<p className="eyebrow">Student History Dashboard</p>*/}
           <h1>Облік студентів</h1>
-        </div>
+        </div>  
         <nav className="tabs">
           <a href="#/" className={page === 'dashboard' ? 'tab is-active' : 'tab'}>
             Огляд
