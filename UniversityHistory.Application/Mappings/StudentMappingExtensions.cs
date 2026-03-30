@@ -1,0 +1,66 @@
+using UniversityHistory.Application.DTOs;
+using UniversityHistory.Domain.Entities;
+
+namespace UniversityHistory.Application.Mappings;
+
+public static class StudentMappingExtensions
+{
+    public static Student ToEntity(this StudentCreateDto dto)
+    {
+        return new Student
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            BirthDate = dto.BirthDate,
+            Email = dto.Email,
+            Phone = dto.Phone,
+            Status = Domain.Enums.StudentStatus.Active
+        };
+    }
+
+    public static StudentDto ToDto(this Student student)
+    {
+        return new StudentDto(
+            student.StudentId,
+            student.FirstName,
+            student.LastName,
+            student.BirthDate,
+            student.Email,
+            student.Phone,
+            student.Status.ToString());
+    }
+
+    public static EnrollmentSummaryDto ToDto(this StudentGroupEnrollment enrollment)
+    {
+        return new EnrollmentSummaryDto(
+            enrollment.EnrollmentId,
+            enrollment.GroupId,
+            enrollment.Group.GroupCode,
+            enrollment.Group.Faculty,
+            enrollment.DateFrom,
+            enrollment.DateTo,
+            enrollment.SubgroupAssignment?.SubgroupId,
+            enrollment.SubgroupAssignment?.Subgroup.SubgroupName);
+    }
+
+    public static StudentDetailDto ToDto(
+        this Student student,
+        IEnumerable<EnrollmentSummaryDto> enrollments,
+        IEnumerable<StudyPlanAssignmentDto> plans,
+        IEnumerable<AcademicLeaveDto> leaves,
+        IEnumerable<ExternalTransferDto> transfers)
+    {
+        return new StudentDetailDto(
+            student.StudentId,
+            student.FirstName,
+            student.LastName,
+            student.BirthDate,
+            student.Email,
+            student.Phone,
+            student.Status.ToString(),
+            enrollments,
+            plans,
+            leaves,
+            transfers);
+    }
+}

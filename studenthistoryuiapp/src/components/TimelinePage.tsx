@@ -2,6 +2,7 @@ import type { StudentDto, TimelineEventDto } from '../types'
 import { formatRange, mapEventTypeLabel } from '../utils/formatters'
 import { PaginationControls } from './PaginationControls'
 import { Spinner } from './Spinner'
+import { StudentSelectionPanel } from './StudentSelectionPanel'
 
 type TimelinePageProps = {
   students: StudentDto[]
@@ -42,34 +43,17 @@ export function TimelinePage({
 }: TimelinePageProps) {
   return (
     <main className="timeline-grid">
-      <section className="card controls">
-        <h2>Параметри таймлайна</h2>
-        <label>
-          Студент
-          <div className="field-row">
-            <select
-              value={selectedStudentId ?? ''}
-              onChange={(event) => onStudentChange(Number(event.target.value))}
-              disabled={isLoadingStudents || students.length === 0}
-            >
-              {students.map((student) => (
-                <option key={student.studentId} value={student.studentId}>
-                  {student.firstName} {student.lastName} ({student.status})
-                </option>
-              ))}
-            </select>
-            {isLoadingStudents && <Spinner />}
-          </div>
-        </label>
-
-        <PaginationControls
-          currentPage={studentsPage}
-          pageSize={studentsPageSize}
-          totalCount={studentsTotalCount}
-          disabled={isLoadingStudents}
-          onPageChange={onStudentsPageChange}
-        />
-
+      <StudentSelectionPanel
+        title="Параметри таймлайна"
+        students={students}
+        studentsPage={studentsPage}
+        studentsPageSize={studentsPageSize}
+        studentsTotalCount={studentsTotalCount}
+        selectedStudentId={selectedStudentId}
+        isLoadingStudents={isLoadingStudents}
+        onStudentChange={onStudentChange}
+        onStudentsPageChange={onStudentsPageChange}
+      >
         <button
           className="primary"
           type="button"
@@ -78,7 +62,7 @@ export function TimelinePage({
         >
           {isLoadingTimeline ? 'Оновлення...' : 'Оновити таймлайн'}
         </button>
-      </section>
+      </StudentSelectionPanel>
 
       <section className="card timeline-card">
         <h2>Таймлайн студента</h2>

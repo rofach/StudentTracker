@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
-using UniversityHistory.Application.Queries.GetClassmates;
-using UniversityHistory.Application.Queries.GetStudentGroupOnDate;
-using UniversityHistory.Application.Queries.GetTimeline;
 
 namespace UniversityHistory.API.Controllers;
 
@@ -17,28 +14,19 @@ public class StudentsController : ControllerBase
     private readonly IStudyPlanService _planService;
     private readonly IGradeService _gradeService;
     private readonly IEnrollmentService _enrollmentService;
-    private readonly IGetTimelineQueryHandler _timelineHandler;
-    private readonly IGetClassmatesQueryHandler _classmatesHandler;
-    private readonly IGetStudentGroupOnDateQueryHandler _groupOnDateHandler;
 
     public StudentsController(
         IStudentService studentService,
         IMovementService movementService,
         IStudyPlanService planService,
         IGradeService gradeService,
-        IEnrollmentService enrollmentService,
-        IGetTimelineQueryHandler timelineHandler,
-        IGetClassmatesQueryHandler classmatesHandler,
-        IGetStudentGroupOnDateQueryHandler groupOnDateHandler)
+        IEnrollmentService enrollmentService)
     {
-        _studentService     = studentService;
-        _movementService    = movementService;
-        _planService        = planService;
-        _gradeService       = gradeService;
-        _enrollmentService  = enrollmentService;
-        _timelineHandler    = timelineHandler;
-        _classmatesHandler  = classmatesHandler;
-        _groupOnDateHandler = groupOnDateHandler;
+        _studentService = studentService;
+        _movementService = movementService;
+        _planService = planService;
+        _gradeService = gradeService;
+        _enrollmentService = enrollmentService;
     }
 
     [HttpGet]
@@ -82,24 +70,32 @@ public class StudentsController : ControllerBase
         Ok(await _studentService.GetDetailAsync(id, ct));
 
     [HttpGet("{id:int}/timeline")]
-    public async Task<IActionResult> GetTimeline(int id, CancellationToken ct,
-        [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> GetTimeline(
+        int id,
+        CancellationToken ct,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
     {
-        page     = Math.Max(1, page);
+        page = Math.Max(1, page);
         pageSize = Math.Min(100, Math.Max(1, pageSize));
-        return Ok(await _timelineHandler.HandleAsync(new GetTimelineQuery(id, page, pageSize), ct));
+        return Ok(await _studentService.GetTimelineAsync(id, page, pageSize, ct));
     }
 
     [HttpGet("{id:int}/classmates")]
-    public async Task<IActionResult> GetClassmates(int id,
-        [FromQuery] DateOnly? dateFrom, [FromQuery] DateOnly? dateTo, CancellationToken ct) =>
-        Ok(await _classmatesHandler.HandleAsync(new GetClassmatesQuery(id, dateFrom, dateTo), ct));
+    public async Task<IActionResult> GetClassmates(
+        int id,
+        [FromQuery] DateOnly? dateFrom,
+        [FromQuery] DateOnly? dateTo,
+        CancellationToken ct)
+    {
+        var classmates = await _studentService.GetClassmatesAsync(id, dateFrom, dateTo, ct);
+        return Ok(classmates);
+    }
 
     [HttpGet("{id:int}/group")]
     public async Task<IActionResult> GetGroup(int id, [FromQuery] DateOnly? date, CancellationToken ct)
     {
-        var result = await _groupOnDateHandler.HandleAsync(
-            new GetStudentGroupOnDateQuery(id, date ?? DateOnly.FromDateTime(DateTime.Today)), ct);
+        var result = await _studentService.GetGroupOnDateAsync(id, date, ct);
         return result is null ? NotFound() : Ok(result);
     }
 

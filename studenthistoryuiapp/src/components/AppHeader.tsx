@@ -9,7 +9,11 @@ export function AppHeader({ page }: AppHeaderProps) {
     <header className="hero">
       <div className="hero-top">
         <div>
+          <p className="eyebrow">Університетська історія</p>
           <h1>Облік студентів</h1>
+          <p className="subtitle">
+            Переглядайте оцінки, академічні події та поточний стан навчання в одному інтерфейсі.
+          </p>
         </div>
         <nav className="tabs">
           <a href="#/" className={page === 'dashboard' ? 'tab is-active' : 'tab'}>

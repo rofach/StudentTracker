@@ -9,13 +9,22 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetTimelineQueryHandler : IGetTimelineQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetTimelineQueryHandler(UniversityDbContext db) => _db = db;
+
+    public GetTimelineQueryHandler(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<PagedResult<TimelineEventDto>> HandleAsync(
-        GetTimelineQuery query, CancellationToken ct = default)
+        GetTimelineQuery query,
+        CancellationToken ct = default)
     {
         var exists = await _db.Students.AnyAsync(s => s.StudentId == query.StudentId, ct);
-        if (!exists) throw new NotFoundException("Student", query.StudentId);
+
+        if (!exists)
+        {
+            throw new NotFoundException("Student", query.StudentId);
+        }
 
         var studentId = query.StudentId;
 
@@ -46,7 +55,7 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
 
             SELECT
                 'ExternalTransfer',
-                CONCAT(et.transfer_type, ' transfer — ', i.institution_name,
+                CONCAT(et.transfer_type, ' transfer - ', i.institution_name,
                        CASE WHEN et.notes IS NOT NULL
                             THEN CONCAT('. Notes: ', et.notes) ELSE '' END),
                 et.transfer_date,

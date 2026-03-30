@@ -1,5 +1,6 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
+using UniversityHistory.Application.Mappings;
 using UniversityHistory.Application.Queries.GetAverageGrade;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Exceptions;
@@ -13,12 +14,14 @@ public class GradeService : IGradeService
     private readonly IGradeRepository _gradeRepo;
     private readonly IGetAverageGradeQueryHandler _avgHandler;
 
-    public GradeService(IStudentRepository studentRepo, IGradeRepository gradeRepo,
+    public GradeService(
+        IStudentRepository studentRepo,
+        IGradeRepository gradeRepo,
         IGetAverageGradeQueryHandler avgHandler)
     {
         _studentRepo = studentRepo;
-        _gradeRepo   = gradeRepo;
-        _avgHandler  = avgHandler;
+        _gradeRepo = gradeRepo;
+        _avgHandler = avgHandler;
     }
 
     public async Task<PagedResult<GradeDto>> GetGradesAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
@@ -27,21 +30,16 @@ public class GradeService : IGradeService
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         var (grades, count) = await _gradeRepo.GetByStudentIdAsync(studentId, page, pageSize, ct);
-        
-        var dtos = grades.Select(g => new GradeDto(
-            g.GradeId,
-            g.CourseEnrollment.Discipline.DisciplineName,
-            ResolveSemesterNo(g),
-            g.CourseEnrollment.AcademicYearStart,
-            $"{g.CourseEnrollment.AcademicYearStart}/{g.CourseEnrollment.AcademicYearStart + 1}",
-            g.GradeValue,
-            g.AssessmentDate));
+        var dtos = grades.Select(grade => grade.ToDto(ResolveSemesterNo(grade)));
 
         return new PagedResult<GradeDto>(dtos, page, pageSize, count);
     }
 
     public async Task<AverageGradeDto> GetAverageGradeAsync(
-        int studentId, int? semesterNo, int? disciplineId, int? academicYearStart,
+        int studentId,
+        int? semesterNo,
+        int? disciplineId,
+        int? academicYearStart,
         CancellationToken ct = default)
     {
         _ = await _studentRepo.GetByIdAsync(studentId, ct)

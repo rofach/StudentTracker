@@ -2,6 +2,9 @@ export type StudentDto = {
   studentId: number
   firstName: string
   lastName: string
+  birthDate: string | null
+  email: string | null
+  phone: string | null
   status: string
 }
 
@@ -26,6 +29,12 @@ export type AverageGradeDto = {
   average: number | null
   gradeCount: number
   academicYearLabel: string | null
+}
+
+export type AverageGradeFilters = {
+  semesterNo: string
+  disciplineId: string
+  academicYearStart: string
 }
 
 export type TimelineEventDto = {

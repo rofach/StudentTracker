@@ -1,8 +1,8 @@
-import type { FormEvent } from 'react'
 import type { AverageGradeDto, GradeDto, StudentDto } from '../types'
 import { formatDate } from '../utils/formatters'
 import { PaginationControls } from './PaginationControls'
 import { Spinner } from './Spinner'
+import { StudentSelectionPanel } from './StudentSelectionPanel'
 
 export type DashboardPageProps = {
   students: StudentDto[]
@@ -29,7 +29,7 @@ export type DashboardPageProps = {
   onSemesterNoChange: (value: string) => void
   onDisciplineIdChange: (value: string) => void
   onAcademicYearStartChange: (value: string) => void
-  onAverageSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onRefreshAverage: () => void
   onGradesPageChange: (page: number) => void
 }
 
@@ -58,83 +58,63 @@ export function DashboardPage({
   onSemesterNoChange,
   onDisciplineIdChange,
   onAcademicYearStartChange,
-  onAverageSubmit,
+  onRefreshAverage,
   onGradesPageChange,
 }: DashboardPageProps) {
   return (
     <main className="grid">
-      <section className="card controls">
-        <h2>Налаштування</h2>
-
-        <form onSubmit={onAverageSubmit}>
+      <StudentSelectionPanel
+        title="Налаштування"
+        students={students}
+        studentsPage={studentsPage}
+        studentsPageSize={studentsPageSize}
+        studentsTotalCount={studentsTotalCount}
+        selectedStudentId={selectedStudentId}
+        isLoadingStudents={isLoadingStudents}
+        onStudentChange={onStudentChange}
+        onStudentsPageChange={onStudentsPageChange}
+      >
+        <div className="filters">
           <label>
-            Студент
-            <div className="field-row">
-              <select
-                value={selectedStudentId ?? ''}
-                onChange={(event) => onStudentChange(Number(event.target.value))}
-                disabled={isLoadingStudents || students.length === 0}
-              >
-                {students.map((student) => (
-                  <option key={student.studentId} value={student.studentId}>
-                    {student.firstName} {student.lastName} ({student.status})
-                  </option>
-                ))}
-              </select>
-              {isLoadingStudents && <Spinner />}
-            </div>
+            Семестр
+            <input
+              type="number"
+              min={1}
+              value={semesterNo}
+              onChange={(event) => onSemesterNoChange(event.target.value)}
+              placeholder="Напр. 1 або 3"
+            />
           </label>
 
-          <PaginationControls
-            currentPage={studentsPage}
-            pageSize={studentsPageSize}
-            totalCount={studentsTotalCount}
-            disabled={isLoadingStudents}
-            onPageChange={onStudentsPageChange}
-          />
+          <label>
+            ID предмета
+            <input
+              type="number"
+              min={1}
+              value={disciplineId}
+              onChange={(event) => onDisciplineIdChange(event.target.value)}
+              placeholder="Напр. 2"
+            />
+          </label>
 
-          <div className="filters">
-            <label>
-              Семестр
-              <input
-                type="number"
-                min={1}
-                value={semesterNo}
-                onChange={(event) => onSemesterNoChange(event.target.value)}
-                placeholder="Напр. 1 або 3"
-              />
-            </label>
+          <label>
+            Початок навчального року
+            <input
+              type="number"
+              min={2000}
+              value={academicYearStart}
+              onChange={(event) => onAcademicYearStartChange(event.target.value)}
+              placeholder="Напр. 2024"
+            />
+          </label>
+        </div>
 
-            <label>
-              ID предмета
-              <input
-                type="number"
-                min={1}
-                value={disciplineId}
-                onChange={(event) => onDisciplineIdChange(event.target.value)}
-                placeholder="Напр. 2"
-              />
-            </label>
-
-            <label>
-              Початок навчального року
-              <input
-                type="number"
-                min={2000}
-                value={academicYearStart}
-                onChange={(event) => onAcademicYearStartChange(event.target.value)}
-                placeholder="Напр. 2024"
-              />
-            </label>
-          </div>
-
-          <button className="primary" type="submit" disabled={isLoadingAverage}>
-            {isLoadingAverage ? 'Оновлення...' : 'Оновити середній бал'}
-          </button>
-        </form>
+        <button className="primary" type="button" disabled={isLoadingAverage} onClick={onRefreshAverage}>
+          {isLoadingAverage ? 'Оновлення...' : 'Оновити середній бал'}
+        </button>
 
         {error && <p className="error">{error}</p>}
-      </section>
+      </StudentSelectionPanel>
 
       <section className="card summary">
         <h2>Середній бал</h2>
@@ -143,14 +123,14 @@ export function DashboardPage({
             <span className="metric-value">
               {average?.average !== null && average?.average !== undefined
                 ? average.average.toFixed(2)
-                : '—'}
+                : '-'}
             </span>
             <span className="metric-label">AVG</span>
           </div>
           {isLoadingAverage && <Spinner big />}
         </div>
         <p>Кількість оцінок у вибірці: {average?.gradeCount ?? 0}</p>
-        <p>Навчальний рік: {hasLoadedAverage ? average?.academicYearLabel ?? 'усі роки' : '—'}</p>
+        <p>Навчальний рік: {hasLoadedAverage ? average?.academicYearLabel ?? 'усі роки' : '-'}</p>
       </section>
 
       <section className="card table-card">
