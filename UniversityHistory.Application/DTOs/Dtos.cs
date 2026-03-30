@@ -195,3 +195,56 @@ public record StudentDetailDto(
     IEnumerable<AcademicLeaveDto> Leaves,
     IEnumerable<ExternalTransferDto> Transfers
 );
+
+public record CreateDisciplineDto(string DisciplineName);
+
+public record UpdateDisciplineDto(string DisciplineName);
+
+public record DisciplineDto(
+    int DisciplineId,
+    string DisciplineName
+);
+
+public record StudyPlanDto(
+    int PlanId,
+    string SpecialtyCode,
+    string? PlanName,
+    DateOnly ValidFrom
+);
+
+public record CreateStudyPlanDto(
+    string SpecialtyCode,
+    string? PlanName,
+    DateOnly ValidFrom
+);
+
+public record UpdateStudyPlanDto(
+    string SpecialtyCode,
+    string? PlanName,
+    DateOnly ValidFrom
+);
+
+public record PlanDisciplineDto(
+    int PlanId,
+    int DisciplineId,
+    string DisciplineName,
+    int SemesterNo,
+    string ControlType,
+    int Hours,
+    decimal Credits
+);
+
+public record AddPlanDisciplineDto(
+    int DisciplineId,
+    int SemesterNo,
+    string ControlType,
+    int Hours,
+    decimal Credits
+);
+
+public record UpdatePlanDisciplineDto(
+    int SemesterNo,
+    string ControlType,
+    int Hours,
+    decimal Credits
+);

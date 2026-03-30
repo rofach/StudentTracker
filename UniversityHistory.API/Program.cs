@@ -28,6 +28,7 @@ builder.Services.AddScoped<IExternalTransferRepository, ExternalTransferReposito
 builder.Services.AddScoped<IStudyPlanRepository, StudyPlanRepository>();
 builder.Services.AddScoped<IGradeRepository, GradeRepository>();
 builder.Services.AddScoped<ISubgroupAssignmentRepository, SubgroupAssignmentRepository>();
+builder.Services.AddScoped<IDisciplineRepository, DisciplineRepository>();
 
 builder.Services.AddScoped<IGetTimelineQueryHandler, GetTimelineQueryHandler>();
 builder.Services.AddScoped<IGetClassmatesQueryHandler, GetClassmatesQueryHandler>();
@@ -43,6 +44,7 @@ builder.Services.AddScoped<IMovementService, MovementService>();
 builder.Services.AddScoped<IStudyPlanService, StudyPlanService>();
 builder.Services.AddScoped<IGradeService, GradeService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<IDisciplineService, DisciplineService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

@@ -1,8 +1,5 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
-using UniversityHistory.Application.Queries.GetClassmates;
-using UniversityHistory.Application.Queries.GetStudentGroupOnDate;
-using UniversityHistory.Application.Queries.GetTimeline;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
@@ -14,31 +11,19 @@ public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepo;
     private readonly IEnrollmentRepository _enrollmentRepo;
-    private readonly IAcademicLeaveRepository _leaveRepo;
-    private readonly IExternalTransferRepository _transferRepo;
-    private readonly IStudyPlanRepository _planRepo;
-    private readonly IGetTimelineQueryHandler _timelineHandler;
-    private readonly IGetClassmatesQueryHandler _classmatesHandler;
-    private readonly IGetStudentGroupOnDateQueryHandler _groupOnDateHandler;
+    private readonly IMovementService _movementService;
+    private readonly IStudyPlanService _planService;
 
     public StudentService(
         IStudentRepository studentRepo,
         IEnrollmentRepository enrollmentRepo,
-        IAcademicLeaveRepository leaveRepo,
-        IExternalTransferRepository transferRepo,
-        IStudyPlanRepository planRepo,
-        IGetTimelineQueryHandler timelineHandler,
-        IGetClassmatesQueryHandler classmatesHandler,
-        IGetStudentGroupOnDateQueryHandler groupOnDateHandler)
+        IMovementService movementService,
+        IStudyPlanService planService)
     {
-        _studentRepo       = studentRepo;
-        _enrollmentRepo    = enrollmentRepo;
-        _leaveRepo         = leaveRepo;
-        _transferRepo      = transferRepo;
-        _planRepo          = planRepo;
-        _timelineHandler   = timelineHandler;
-        _classmatesHandler = classmatesHandler;
-        _groupOnDateHandler = groupOnDateHandler;
+        _studentRepo    = studentRepo;
+        _enrollmentRepo = enrollmentRepo;
+        _movementService = movementService;
+        _planService    = planService;
     }
 
     public async Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default)
@@ -97,25 +82,14 @@ public class StudentService : IStudentService
         await _studentRepo.UpdateAsync(student, ct);
     }
 
-    public Task<PagedResult<TimelineEventDto>> GetTimelineAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default) =>
-        _timelineHandler.HandleAsync(new GetTimelineQuery(studentId, page, pageSize), ct);
-
-    public Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(int studentId, DateOnly? dateFrom, DateOnly? dateTo, CancellationToken ct = default) =>
-        _classmatesHandler.HandleAsync(new GetClassmatesQuery(studentId, dateFrom, dateTo), ct);
-
-    public Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(int studentId, DateOnly? date, CancellationToken ct = default) =>
-        _groupOnDateHandler.HandleAsync(
-            new GetStudentGroupOnDateQuery(studentId, date ?? DateOnly.FromDateTime(DateTime.Today)), ct);
-
     public async Task<StudentDetailDto> GetDetailAsync(int studentId, CancellationToken ct = default)
     {
         var student = await _studentRepo.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         var enrollments = await _enrollmentRepo.GetByStudentIdAsync(studentId, ct);
-        var plans       = await _planRepo.GetAssignmentsByStudentIdAsync(studentId, ct);
-        var leaves      = await _leaveRepo.GetByStudentIdAsync(studentId, ct);
-        var transfers   = await _transferRepo.GetByStudentIdAsync(studentId, ct);
+        var plans       = await _planService.GetPlanAssignmentsAsync(studentId, ct);
+        var movements   = await _movementService.GetMovementsAsync(studentId, ct);
 
         return new StudentDetailDto(
             student.StudentId,
@@ -134,11 +108,9 @@ public class StudentService : IStudentService
                 e.DateTo,
                 e.SubgroupAssignment?.SubgroupId,
                 e.SubgroupAssignment?.Subgroup.SubgroupName)),
-            plans.Select(a => new StudyPlanAssignmentDto(
-                a.AssignmentId, a.Plan.SpecialtyCode, a.Plan.PlanName, a.DateFrom, a.DateTo)),
-            leaves.Select(l => new AcademicLeaveDto(l.LeaveId, l.StartDate, l.EndDate, l.Reason)),
-            transfers.Select(t => new ExternalTransferDto(
-                t.TransferId, t.TransferType.ToString(), t.TransferDate, t.Institution.InstitutionName, t.Notes))
+            plans,
+            movements.Leaves,
+            movements.Transfers
         );
     }
 
