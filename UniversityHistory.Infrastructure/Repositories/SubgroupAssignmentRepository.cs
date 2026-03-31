@@ -8,18 +8,26 @@ namespace UniversityHistory.Infrastructure.Repositories;
 public class SubgroupAssignmentRepository : ISubgroupAssignmentRepository
 {
     private readonly UniversityDbContext _db;
-    public SubgroupAssignmentRepository(UniversityDbContext db) => _db = db;
-
-    public async Task<StudentSubgroupAssignment?> GetByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default) =>
-        await _db.StudentSubgroupAssignments
-            .FirstOrDefaultAsync(sa => sa.EnrollmentId == enrollmentId, ct);
-
-    public async Task UpsertAsync(StudentSubgroupAssignment assignment, CancellationToken ct = default)
+    public SubgroupAssignmentRepository(UniversityDbContext db)
     {
-        var existing = await GetByEnrollmentIdAsync(assignment.EnrollmentId, ct);
+        _db = db;
+    }
+
+    public async Task<StudentSubgroupAssignment?> GetByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default)
+    {
+        return await _db.StudentSubgroupAssignments
+            .FirstOrDefaultAsync(sa => sa.EnrollmentId == enrollmentId, ct);
+    }
+
+    public void Upsert(StudentSubgroupAssignment? existing, StudentSubgroupAssignment assignment)
+    {
         if (existing is null)
+        {
             _db.StudentSubgroupAssignments.Add(assignment);
+        }
         else
+        {
             existing.SubgroupId = assignment.SubgroupId;
+        }
     }
 }

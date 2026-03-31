@@ -66,8 +66,10 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{id:int}/details")]
-    public async Task<IActionResult> GetDetails(int id, CancellationToken ct) =>
-        Ok(await _studentService.GetDetailAsync(id, ct));
+    public async Task<IActionResult> GetDetails(int id, CancellationToken ct)
+    {
+        return Ok(await _studentService.GetDetailAsync(id, ct));
+    }
 
     [HttpGet("{id:int}/timeline")]
     public async Task<IActionResult> GetTimeline(
@@ -100,8 +102,10 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{id:int}/movements")]
-    public async Task<IActionResult> GetMovements(int id, CancellationToken ct) =>
-        Ok(await _movementService.GetMovementsAsync(id, ct));
+    public async Task<IActionResult> GetMovements(int id, CancellationToken ct)
+    {
+        return Ok(await _movementService.GetMovementsAsync(id, ct));
+    }
 
     [HttpPost("{id:int}/transfers")]
     public async Task<IActionResult> CreateTransfer(int id, [FromBody] CreateTransferDto dto, CancellationToken ct)
@@ -118,8 +122,10 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("{id:int}/plans")]
-    public async Task<IActionResult> GetPlans(int id, CancellationToken ct) =>
-        Ok(await _planService.GetPlanAssignmentsAsync(id, ct));
+    public async Task<IActionResult> GetPlans(int id, CancellationToken ct)
+    {
+        return Ok(await _planService.GetPlanAssignmentsAsync(id, ct));
+    }
 
     [HttpPost("{id:int}/plans")]
     public async Task<IActionResult> AssignPlan(int id, [FromBody] AssignPlanDto dto, CancellationToken ct)
@@ -147,6 +153,8 @@ public class StudentsController : ControllerBase
     [HttpGet("{id:int}/grades/average")]
     public async Task<IActionResult> GetAverageGrade(int id,
         [FromQuery] int? semesterNo, [FromQuery] int? disciplineId,
-        [FromQuery] int? academicYearStart, CancellationToken ct) =>
-        Ok(await _gradeService.GetAverageGradeAsync(id, semesterNo, disciplineId, academicYearStart, ct));
+        [FromQuery] int? academicYearStart, CancellationToken ct)
+    {
+        return Ok(await _gradeService.GetAverageGradeAsync(id, semesterNo, disciplineId, academicYearStart, ct));
+    }
 }

@@ -1,5 +1,3 @@
-using Dapper;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Interfaces.Repositories;
@@ -10,33 +8,36 @@ namespace UniversityHistory.Infrastructure.Repositories;
 public class EnrollmentRepository : IEnrollmentRepository
 {
     private readonly UniversityDbContext _db;
-    private readonly string _connectionString;
 
     public EnrollmentRepository(UniversityDbContext db)
     {
         _db = db;
-        _connectionString = db.Database.GetConnectionString()!;
     }
 
-    public async Task<StudentGroupEnrollment?> GetByIdAsync(int id, CancellationToken ct = default) =>
-        await _db.StudentGroupEnrollments
+    public async Task<StudentGroupEnrollment?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+       return  await _db.StudentGroupEnrollments
             .Include(e => e.Student)
             .Include(e => e.Group)
                 .ThenInclude(g => g.Subgroups)
             .Include(e => e.SubgroupAssignment!)
                 .ThenInclude(sa => sa.Subgroup)
             .FirstOrDefaultAsync(e => e.EnrollmentId == id, ct);
+    }
 
-    public async Task<StudentGroupEnrollment?> GetActiveByStudentIdAsync(int studentId, CancellationToken ct = default) =>
-        await _db.StudentGroupEnrollments
+    public async Task<StudentGroupEnrollment?> GetActiveByStudentIdAsync(int studentId, CancellationToken ct = default)
+    {
+        return await _db.StudentGroupEnrollments
             .Include(e => e.Group)
                 .ThenInclude(g => g.Subgroups)
             .Include(e => e.SubgroupAssignment!)
                 .ThenInclude(sa => sa.Subgroup)
             .FirstOrDefaultAsync(e => e.StudentId == studentId && e.DateTo == null, ct);
+    }
 
-    public async Task<IEnumerable<StudentGroupEnrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct = default) =>
-        await _db.StudentGroupEnrollments
+    public async Task<IEnumerable<StudentGroupEnrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct = default)
+    {
+        return await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Group)
             .Include(e => e.SubgroupAssignment!)
@@ -44,10 +45,12 @@ public class EnrollmentRepository : IEnrollmentRepository
             .Where(e => e.StudentId == studentId)
             .OrderBy(e => e.DateFrom)
             .ToListAsync(ct);
+    }
 
     public async Task<IEnumerable<StudentGroupEnrollment>> GetByGroupIdOnDateAsync(
-        int groupId, DateOnly date, CancellationToken ct = default) =>
-        await _db.StudentGroupEnrollments
+        int groupId, DateOnly date, CancellationToken ct = default)
+    {
+        return await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Student)
             .Include(e => e.SubgroupAssignment!)
@@ -58,15 +61,18 @@ public class EnrollmentRepository : IEnrollmentRepository
             .OrderBy(e => e.Student.LastName)
             .ThenBy(e => e.Student.FirstName)
             .ToListAsync(ct);
+    }
 
     public async Task<IEnumerable<StudentGroupEnrollment>> GetAllForGroupsAsync(
-        IEnumerable<int> groupIds, CancellationToken ct = default) =>
-        await _db.StudentGroupEnrollments
+        IEnumerable<int> groupIds, CancellationToken ct = default)
+    {
+        return await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Student)
             .Include(e => e.Group)
             .Where(e => groupIds.Contains(e.GroupId))
             .ToListAsync(ct);
+    }
 
     public async Task<bool> HasOverlapAsync(int studentId, DateOnly dateFrom, DateOnly? dateTo,
         int? excludeId = null, CancellationToken ct = default)
@@ -81,15 +87,14 @@ public class EnrollmentRepository : IEnrollmentRepository
             ct);
     }
 
-    public async Task<StudentGroupEnrollment> AddAsync(StudentGroupEnrollment enrollment, CancellationToken ct = default)
+    public StudentGroupEnrollment Add(StudentGroupEnrollment enrollment)
     {
         _db.StudentGroupEnrollments.Add(enrollment);
-        return await Task.FromResult(enrollment);
+        return enrollment;
     }
 
-    public Task UpdateAsync(StudentGroupEnrollment enrollment, CancellationToken ct = default)
+    public void Update(StudentGroupEnrollment enrollment)
     {
         _db.StudentGroupEnrollments.Update(enrollment);
-        return Task.CompletedTask;
     }
 }

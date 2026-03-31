@@ -9,7 +9,10 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetAverageGradeQueryHandler : IGetAverageGradeQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetAverageGradeQueryHandler(UniversityDbContext db) => _db = db;
+    public GetAverageGradeQueryHandler(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<AverageGradeDto> HandleAsync(GetAverageGradeQuery query, CancellationToken ct = default)
     {

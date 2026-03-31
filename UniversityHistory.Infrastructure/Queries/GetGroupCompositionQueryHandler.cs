@@ -11,7 +11,10 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetGroupCompositionQueryHandler(UniversityDbContext db) => _db = db;
+    public GetGroupCompositionQueryHandler(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<PagedResult<GroupCompositionMemberDto>> HandleAsync(
         GetGroupCompositionQuery query, CancellationToken ct = default)

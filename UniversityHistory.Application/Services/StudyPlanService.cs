@@ -44,11 +44,11 @@ public class StudyPlanService : IStudyPlanService
             }
 
             open.DateTo = dto.DateFrom.AddDays(-1);
-            await _unitOfWork.StudyPlans.UpdateAssignmentAsync(open, ct);
+            _unitOfWork.StudyPlans.UpdateAssignment(open);
         }
 
         var assignment = dto.ToEntity(studentId);
-        await _unitOfWork.StudyPlans.AddAssignmentAsync(assignment, ct);
+        _unitOfWork.StudyPlans.AddAssignment(assignment);
         await _unitOfWork.SaveChangesAsync(ct);
         return assignment.ToDto(plan.SpecialtyCode, plan.PlanName);
     }
@@ -68,7 +68,7 @@ public class StudyPlanService : IStudyPlanService
     public async Task<StudyPlanDto> CreatePlanAsync(CreateStudyPlanDto dto, CancellationToken ct = default)
     {
         var plan = dto.ToEntity();
-        await _unitOfWork.StudyPlans.AddPlanAsync(plan, ct);
+        _unitOfWork.StudyPlans.AddPlan(plan);
         await _unitOfWork.SaveChangesAsync(ct);
         return plan.ToDto();
     }
@@ -82,7 +82,7 @@ public class StudyPlanService : IStudyPlanService
         plan.PlanName = dto.PlanName;
         plan.ValidFrom = dto.ValidFrom;
 
-        await _unitOfWork.StudyPlans.UpdatePlanAsync(plan, ct);
+        _unitOfWork.StudyPlans.UpdatePlan(plan);
         await _unitOfWork.SaveChangesAsync(ct);
         return plan.ToDto();
     }
@@ -97,7 +97,7 @@ public class StudyPlanService : IStudyPlanService
             throw new DomainException($"Cannot delete plan {planId}: it has student plan assignments.");
         }
 
-        await _unitOfWork.StudyPlans.DeletePlanAsync(plan, ct);
+        _unitOfWork.StudyPlans.DeletePlan(plan);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
@@ -125,7 +125,7 @@ public class StudyPlanService : IStudyPlanService
         var controlType = Enum.Parse<ControlType>(dto.ControlType, ignoreCase: true);
 
         var planDiscipline = dto.ToEntity(planId, controlType);
-        await _unitOfWork.StudyPlans.AddPlanDisciplineAsync(planDiscipline, ct);
+        _unitOfWork.StudyPlans.AddPlanDiscipline(planDiscipline);
         await _unitOfWork.SaveChangesAsync(ct);
         return (await _unitOfWork.StudyPlans.GetPlanDisciplineAsync(planId, dto.DisciplineId, ct))!.ToDto();
     }
@@ -145,7 +145,7 @@ public class StudyPlanService : IStudyPlanService
         planDiscipline.Hours = dto.Hours;
         planDiscipline.Credits = dto.Credits;
 
-        await _unitOfWork.StudyPlans.UpdatePlanDisciplineAsync(planDiscipline, ct);
+        _unitOfWork.StudyPlans.UpdatePlanDiscipline(planDiscipline);
         await _unitOfWork.SaveChangesAsync(ct);
         return (await _unitOfWork.StudyPlans.GetPlanDisciplineAsync(planId, disciplineId, ct))!.ToDto();
     }
@@ -163,7 +163,7 @@ public class StudyPlanService : IStudyPlanService
             throw new DomainException($"Cannot remove discipline {disciplineId} from plan {planId}: students have course enrollments for it.");
         }
 
-        await _unitOfWork.StudyPlans.DeletePlanDisciplineAsync(planDiscipline, ct);
+        _unitOfWork.StudyPlans.DeletePlanDiscipline(planDiscipline);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 }

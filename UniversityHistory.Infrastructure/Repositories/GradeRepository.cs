@@ -9,7 +9,10 @@ namespace UniversityHistory.Infrastructure.Repositories;
 public class GradeRepository : IGradeRepository
 {
     private readonly UniversityDbContext _db;
-    public GradeRepository(UniversityDbContext db) => _db = db;
+    public GradeRepository(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<PagedData<GradeRecord>> GetByStudentIdAsync(int studentId, int page, int pageSize, CancellationToken ct = default)
     {
@@ -31,9 +34,9 @@ public class GradeRepository : IGradeRepository
         return new PagedData<GradeRecord>(items, count);
     }
 
-    public async Task<GradeRecord> AddAsync(GradeRecord grade, CancellationToken ct = default)
+    public GradeRecord Add(GradeRecord grade)
     {
         _db.GradeRecords.Add(grade);
-        return await Task.FromResult(grade);
+        return grade;
     }
 }

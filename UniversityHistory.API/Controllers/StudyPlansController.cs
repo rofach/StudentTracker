@@ -10,11 +10,16 @@ namespace UniversityHistory.API.Controllers;
 public class StudyPlansController : ControllerBase
 {
     private readonly IStudyPlanService _service;
-    public StudyPlansController(IStudyPlanService service) => _service = service;
+    public StudyPlansController(IStudyPlanService service)
+    {
+        _service = service;
+    }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct) =>
-        Ok(await _service.GetAllPlansAsync(ct));
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        return Ok(await _service.GetAllPlansAsync(ct));
+    }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
@@ -45,8 +50,10 @@ public class StudyPlansController : ControllerBase
     }
 
     [HttpGet("{id:int}/disciplines")]
-    public async Task<IActionResult> GetDisciplines(int id, CancellationToken ct) =>
-        Ok(await _service.GetPlanDisciplinesAsync(id, ct));
+    public async Task<IActionResult> GetDisciplines(int id, CancellationToken ct)
+    {
+        return Ok(await _service.GetPlanDisciplinesAsync(id, ct));
+    }
 
     [HttpPost("{id:int}/disciplines")]
     public async Task<IActionResult> AddDiscipline(int id, [FromBody] AddPlanDisciplineDto dto, CancellationToken ct)

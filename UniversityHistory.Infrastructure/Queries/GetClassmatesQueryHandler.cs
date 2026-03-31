@@ -9,7 +9,10 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetClassmatesQueryHandler : IGetClassmatesQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetClassmatesQueryHandler(UniversityDbContext db) => _db = db;
+    public GetClassmatesQueryHandler(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<IEnumerable<ClassmateDto>> HandleAsync(
         GetClassmatesQuery query, CancellationToken ct = default)

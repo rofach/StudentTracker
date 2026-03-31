@@ -36,7 +36,7 @@ public class DisciplineService : IDisciplineService
         }
 
         var discipline = dto.ToEntity();
-        await _unitOfWork.Disciplines.AddAsync(discipline, ct);
+        _unitOfWork.Disciplines.Add(discipline);
         await _unitOfWork.SaveChangesAsync(ct);
         return discipline.ToDto();
     }
@@ -52,7 +52,7 @@ public class DisciplineService : IDisciplineService
         }
 
         discipline.DisciplineName = dto.DisciplineName;
-        await _unitOfWork.Disciplines.UpdateAsync(discipline, ct);
+        _unitOfWork.Disciplines.Update(discipline);
         await _unitOfWork.SaveChangesAsync(ct);
         return discipline.ToDto();
     }
@@ -67,7 +67,7 @@ public class DisciplineService : IDisciplineService
             throw new DomainException($"Cannot delete discipline {disciplineId}: it is referenced by one or more study plans.");
         }
 
-        await _unitOfWork.Disciplines.DeleteAsync(discipline, ct);
+        _unitOfWork.Disciplines.Delete(discipline);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 }

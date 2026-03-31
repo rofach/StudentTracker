@@ -55,7 +55,7 @@ public class StudentService : IStudentService
     public async Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default)
     {
         var student = dto.ToEntity();
-        await _unitOfWork.Students.AddAsync(student, ct);
+        _unitOfWork.Students.Add(student);
         await _unitOfWork.SaveChangesAsync(ct);
         return student.ToDto();
     }
@@ -71,7 +71,7 @@ public class StudentService : IStudentService
         student.Email = dto.Email;
         student.Phone = dto.Phone;
 
-        await _unitOfWork.Students.UpdateAsync(student, ct);
+        _unitOfWork.Students.Update(student);
         await _unitOfWork.SaveChangesAsync(ct);
         return student.ToDto();
     }
@@ -89,7 +89,7 @@ public class StudentService : IStudentService
         }
 
         student.Status = newStatus;
-        await _unitOfWork.Students.UpdateAsync(student, ct);
+        _unitOfWork.Students.Update(student);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 

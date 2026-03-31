@@ -6,5 +6,5 @@ public interface IAcademicLeaveRepository
 {
     Task<IEnumerable<AcademicLeave>> GetByStudentIdAsync(int studentId, CancellationToken ct = default);
     Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default);
-    Task<AcademicLeave> AddAsync(AcademicLeave leave, CancellationToken ct = default);
+    AcademicLeave Add(AcademicLeave leave);
 }

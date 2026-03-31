@@ -9,10 +9,15 @@ namespace UniversityHistory.Infrastructure.Repositories;
 public class StudentRepository : IStudentRepository
 {
     private readonly UniversityDbContext _db;
-    public StudentRepository(UniversityDbContext db) => _db = db;
+    public StudentRepository(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
-    public async Task<Student?> GetByIdAsync(int id, CancellationToken ct = default) =>
-        await _db.Students.FindAsync(new object[] { id }, ct);
+    public async Task<Student?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await _db.Students.FindAsync(new object[] { id }, ct);
+    }
 
     public async Task<PagedData<Student>> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
@@ -25,24 +30,19 @@ public class StudentRepository : IStudentRepository
         return new PagedData<Student>(items, count);
     }
 
-    public async Task<Student> AddAsync(Student student, CancellationToken ct = default)
+    public Student Add(Student student)
     {
         _db.Students.Add(student);
-        return await Task.FromResult(student);
+        return student;
     }
 
-    public Task UpdateAsync(Student student, CancellationToken ct = default)
+    public void Update(Student student)
     {
         _db.Students.Update(student);
-        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    public void Delete(Student student)
     {
-        var student = await GetByIdAsync(id, ct);
-        if (student is not null)
-        {
-            _db.Students.Remove(student);
-        }
+        _db.Students.Remove(student);
     }
 }

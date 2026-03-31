@@ -9,7 +9,10 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetStudentGroupOnDateQueryHandler : IGetStudentGroupOnDateQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetStudentGroupOnDateQueryHandler(UniversityDbContext db) => _db = db;
+    public GetStudentGroupOnDateQueryHandler(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<StudentCurrentGroupDto?> HandleAsync(
         GetStudentGroupOnDateQuery query, CancellationToken ct = default)

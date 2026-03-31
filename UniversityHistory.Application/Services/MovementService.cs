@@ -38,7 +38,7 @@ public class MovementService : IMovementService
 
         var transferType = Enum.Parse<TransferType>(dto.TransferType, ignoreCase: true);
         var transfer = dto.ToEntity(studentId, transferType);
-        var created = await _unitOfWork.ExternalTransfers.AddAsync(transfer, ct);
+        var created = _unitOfWork.ExternalTransfers.Add(transfer);
         await _unitOfWork.SaveChangesAsync(ct);
         return created.ToDto(institution.InstitutionName);
     }
@@ -69,7 +69,7 @@ public class MovementService : IMovementService
         }
 
         var leave = dto.ToEntity();
-        var created = await _unitOfWork.AcademicLeaves.AddAsync(leave, ct);
+        var created = _unitOfWork.AcademicLeaves.Add(leave);
         await _unitOfWork.SaveChangesAsync(ct);
         return created.ToDto();
     }

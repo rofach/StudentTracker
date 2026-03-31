@@ -44,7 +44,7 @@ public class EnrollmentService : IEnrollmentService
                 : null
         };
 
-        var created = await _unitOfWork.Enrollments.AddAsync(enrollment, ct);
+        var created = _unitOfWork.Enrollments.Add(enrollment);
         await _unitOfWork.SaveChangesAsync(ct);
         return created.EnrollmentId;
     }
@@ -62,7 +62,7 @@ public class EnrollmentService : IEnrollmentService
 
         enrollment.DateTo    = dto.DateTo;
         enrollment.ReasonEnd = dto.ReasonEnd;
-        await _unitOfWork.Enrollments.UpdateAsync(enrollment, ct);
+        _unitOfWork.Enrollments.Update(enrollment);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
@@ -85,7 +85,7 @@ public class EnrollmentService : IEnrollmentService
 
         current.DateTo    = dto.MoveDate;
         current.ReasonEnd = dto.ReasonEnd;
-        await _unitOfWork.Enrollments.UpdateAsync(current, ct);
+        _unitOfWork.Enrollments.Update(current);
 
         var newEnrollment = new StudentGroupEnrollment
         {
@@ -98,7 +98,7 @@ public class EnrollmentService : IEnrollmentService
                 : null
         };
 
-        await _unitOfWork.Enrollments.AddAsync(newEnrollment, ct);
+        _unitOfWork.Enrollments.Add(newEnrollment);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
@@ -114,8 +114,10 @@ public class EnrollmentService : IEnrollmentService
         if (!isValidSubgroup)
             throw new DomainException($"Subgroup {dto.SubgroupId} does not belong to Group {enrollment.GroupId}.");
 
-        await _unitOfWork.SubgroupAssignments.UpsertAsync(
-            new StudentSubgroupAssignment { EnrollmentId = enrollmentId, SubgroupId = dto.SubgroupId }, ct);
+        var existingAssignment = await _unitOfWork.SubgroupAssignments.GetByEnrollmentIdAsync(enrollmentId, ct);
+        _unitOfWork.SubgroupAssignments.Upsert(
+            existingAssignment,
+            new StudentSubgroupAssignment { EnrollmentId = enrollmentId, SubgroupId = dto.SubgroupId });
         await _unitOfWork.SaveChangesAsync(ct);
     }
 }

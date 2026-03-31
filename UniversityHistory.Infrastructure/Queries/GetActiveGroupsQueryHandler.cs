@@ -8,7 +8,10 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetActiveGroupsQueryHandler : IGetActiveGroupsQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetActiveGroupsQueryHandler(UniversityDbContext db) => _db = db;
+    public GetActiveGroupsQueryHandler(UniversityDbContext db)
+    {
+        _db = db;
+    }
 
     public async Task<IEnumerable<ActiveGroupDto>> HandleAsync(
         GetActiveGroupsQuery query, CancellationToken ct = default)

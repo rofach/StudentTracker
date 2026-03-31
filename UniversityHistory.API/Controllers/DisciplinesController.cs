@@ -10,11 +10,16 @@ namespace UniversityHistory.API.Controllers;
 public class DisciplinesController : ControllerBase
 {
     private readonly IDisciplineService _service;
-    public DisciplinesController(IDisciplineService service) => _service = service;
+    public DisciplinesController(IDisciplineService service)
+    {
+        _service = service;
+    }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct) =>
-        Ok(await _service.GetAllAsync(ct));
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        return Ok(await _service.GetAllAsync(ct));
+    }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
