@@ -150,6 +150,12 @@ public class StudentsController : ControllerBase
         return Ok(await _gradeService.GetGradesAsync(id, page, pageSize, ct));
     }
 
+    [HttpGet("{id:int}/disciplines")]
+    public async Task<IActionResult> GetDisciplines(int id, CancellationToken ct)
+    {
+        return Ok(await _gradeService.GetStudentDisciplinesAsync(id, ct));
+    }
+
     [HttpGet("{id:int}/grades/average")]
     public async Task<IActionResult> GetAverageGrade(int id,
         [FromQuery] int? semesterNo, [FromQuery] int? disciplineId,

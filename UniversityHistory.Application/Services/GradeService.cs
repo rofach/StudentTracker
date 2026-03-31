@@ -2,6 +2,7 @@ using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Mappings;
 using UniversityHistory.Application.Queries.GetAverageGrade;
+using UniversityHistory.Application.Queries.GetStudentDisciplines;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Exceptions;
 using UniversityHistory.Domain.Interfaces.Repositories;
@@ -12,13 +13,16 @@ public class GradeService : IGradeService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IGetAverageGradeQueryHandler _avgHandler;
+    private readonly IGetStudentDisciplinesQueryHandler _studentDisciplinesHandler;
 
     public GradeService(
         IUnitOfWork unitOfWork,
-        IGetAverageGradeQueryHandler avgHandler)
+        IGetAverageGradeQueryHandler avgHandler,
+        IGetStudentDisciplinesQueryHandler studentDisciplinesHandler)
     {
         _unitOfWork = unitOfWork;
         _avgHandler = avgHandler;
+        _studentDisciplinesHandler = studentDisciplinesHandler;
     }
 
     public async Task<PagedResult<GradeDto>> GetGradesAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
@@ -44,6 +48,18 @@ public class GradeService : IGradeService
 
         return await _avgHandler.HandleAsync(
             new GetAverageGradeQuery(studentId, semesterNo, disciplineId, academicYearStart), ct);
+    }
+
+    public async Task<IReadOnlyList<StudentDisciplineOptionDto>> GetStudentDisciplinesAsync(
+        int studentId,
+        CancellationToken ct = default)
+    {
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        return await _studentDisciplinesHandler.HandleAsync(
+            new GetStudentDisciplinesQuery(studentId),
+            ct);
     }
 
     private static int ResolveSemesterNo(GradeRecord grade)

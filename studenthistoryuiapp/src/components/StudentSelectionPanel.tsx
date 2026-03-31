@@ -1,61 +1,68 @@
-import type { ReactNode } from 'react'
-import type { StudentDto } from '../types'
+import type { ChangeEvent, ReactNode } from 'react'
+import type { StudentSelectionState } from '../types'
 import { PaginationControls } from './PaginationControls'
 import { Spinner } from './Spinner'
 
+export type StudentSelectionHandlers = {
+  handleStudentChange: (studentId: number) => void
+  handleStudentsPageChange: (page: number) => void
+}
+
 type StudentSelectionPanelProps = {
   title: string
-  students: StudentDto[]
-  studentsPage: number
-  studentsPageSize: number
-  studentsTotalCount: number
-  selectedStudentId: number | null
-  isLoadingStudents: boolean
-  onStudentChange: (studentId: number) => void
-  onStudentsPageChange: (page: number) => void
+  selection: StudentSelectionState
+  handlers: StudentSelectionHandlers
   children?: ReactNode
 }
 
 export function StudentSelectionPanel({
   title,
-  students,
-  studentsPage,
-  studentsPageSize,
-  studentsTotalCount,
-  selectedStudentId,
-  isLoadingStudents,
-  onStudentChange,
-  onStudentsPageChange,
+  selection,
+  handlers,
   children,
 }: StudentSelectionPanelProps) {
+  const { students, pagination, selectedStudentId, isLoading } = selection
+  const { handleStudentChange, handleStudentsPageChange } = handlers
+  const hasStudents = students.length > 0
+  const selectedValue = selectedStudentId ?? ''
+
+  function handleSelectionChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextStudentId = Number(event.target.value)
+
+    if (Number.isNaN(nextStudentId)) {
+      return
+    }
+
+    handleStudentChange(nextStudentId)
+  }
+
   return (
     <section className="card controls">
       <h2>{title}</h2>
 
       <label>
-        {'\u0421\u0442\u0443\u0434\u0435\u043D\u0442'}
+        Студент
         <div className="field-row">
           <select
-            value={selectedStudentId ?? ''}
-            onChange={(event) => onStudentChange(Number(event.target.value))}
-            disabled={isLoadingStudents || students.length === 0}
+            value={selectedValue}
+            onChange={handleSelectionChange}
+            disabled={isLoading || !hasStudents}
           >
+            {!hasStudents && <option value="">Студентів поки немає</option>}
             {students.map((student) => (
               <option key={student.studentId} value={student.studentId}>
                 {student.firstName} {student.lastName} ({student.status})
               </option>
             ))}
           </select>
-          {isLoadingStudents && <Spinner />}
+          {isLoading && <Spinner />}
         </div>
       </label>
 
       <PaginationControls
-        currentPage={studentsPage}
-        pageSize={studentsPageSize}
-        totalCount={studentsTotalCount}
-        disabled={isLoadingStudents}
-        onPageChange={onStudentsPageChange}
+        pagination={pagination}
+        disabled={isLoading}
+        handlePageChange={handleStudentsPageChange}
       />
 
       {children}

@@ -4,6 +4,7 @@ type SpinnerProps = {
 }
 
 export function Spinner({ big = false, label = 'Завантаження' }: SpinnerProps) {
-  const className = big ? 'spinner spinner-big' : 'spinner'
-  return <span className={className} aria-label={label} />
+  const spinnerClassName = big ? 'spinner spinner-big' : 'spinner'
+
+  return <span className={spinnerClassName} aria-label={label} />
 }

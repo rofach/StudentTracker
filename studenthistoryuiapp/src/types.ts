@@ -15,6 +15,12 @@ export type PagedResult<T> = {
   totalCount: number
 }
 
+export type PaginationState = {
+  currentPage: number
+  pageSize: number
+  totalCount: number
+}
+
 export type GradeDto = {
   gradeId: number
   disciplineName: string
@@ -31,10 +37,23 @@ export type AverageGradeDto = {
   academicYearLabel: string | null
 }
 
+export type AverageSummaryState = {
+  data: AverageGradeDto | null
+  hasLoaded: boolean
+  isLoading: boolean
+}
+
 export type AverageGradeFilters = {
   semesterNo: string
   disciplineId: string
   academicYearStart: string
+}
+
+export type StudentDisciplineOptionDto = {
+  disciplineId: number
+  disciplineName: string
+  semesterNo: number
+  hasGrade: boolean
 }
 
 export type TimelineEventDto = {
@@ -42,6 +61,20 @@ export type TimelineEventDto = {
   description: string
   dateFrom: string
   dateTo: string | null
+}
+
+export type AsyncCollectionState<T> = {
+  items: T[]
+  pagination: PaginationState
+  hasLoaded: boolean
+  isLoading: boolean
+}
+
+export type StudentSelectionState = {
+  students: StudentDto[]
+  pagination: PaginationState
+  selectedStudentId: number | null
+  isLoading: boolean
 }
 
 export type AppPage = 'dashboard' | 'timeline'

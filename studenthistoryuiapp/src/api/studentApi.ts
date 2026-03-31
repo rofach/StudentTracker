@@ -4,6 +4,7 @@ import type {
   GradeDto,
   PagedResult,
   StudentDto,
+  StudentDisciplineOptionDto,
   TimelineEventDto,
 } from '../types'
 import { fetchJson } from './http'
@@ -58,4 +59,10 @@ export function getTimeline(
   return fetchJson<PagedResult<TimelineEventDto>>(
     `/api/students/${studentId}/timeline?page=${page}&pageSize=${pageSize}`,
   )
+}
+
+export function getStudentDisciplines(
+  studentId: number,
+): Promise<StudentDisciplineOptionDto[]> {
+  return fetchJson<StudentDisciplineOptionDto[]>(`/api/students/${studentId}/disciplines`)
 }

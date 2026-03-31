@@ -15,3 +15,10 @@ public record AverageGradeDto(
     int GradeCount,
     string? AcademicYearLabel
 );
+
+public record StudentDisciplineOptionDto(
+    int DisciplineId,
+    string DisciplineName,
+    int SemesterNo,
+    bool HasGrade
+);

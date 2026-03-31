@@ -1,105 +1,50 @@
-import type { StudentDto, TimelineEventDto } from '../types'
-import { formatRange, mapEventTypeLabel } from '../utils/formatters'
-import { PaginationControls } from './PaginationControls'
-import { Spinner } from './Spinner'
+import type { AsyncCollectionState, StudentSelectionState, TimelineEventDto } from '../types'
+import type { StudentSelectionHandlers } from './StudentSelectionPanel'
 import { StudentSelectionPanel } from './StudentSelectionPanel'
+import { TimelineEventsCard } from './timeline/TimelineEventsCard'
+
+type TimelineHandlers = {
+  handleTimelineRefresh: () => void
+  handleTimelinePageChange: (page: number) => void
+}
 
 type TimelinePageProps = {
-  students: StudentDto[]
-  studentsPage: number
-  studentsPageSize: number
-  studentsTotalCount: number
-  selectedStudentId: number | null
-  isLoadingStudents: boolean
-  isLoadingTimeline: boolean
-  hasLoadedTimeline: boolean
-  timelineEvents: TimelineEventDto[]
-  timelinePage: number
-  timelinePageSize: number
-  timelineTotalCount: number
-  onStudentChange: (studentId: number) => void
-  onStudentsPageChange: (page: number) => void
-  onRefreshTimeline: () => void
-  onTimelinePageChange: (page: number) => void
+  studentSelection: StudentSelectionState
+  selectionHandlers: StudentSelectionHandlers
+  timelineState: AsyncCollectionState<TimelineEventDto>
+  handlers: TimelineHandlers
 }
 
 export function TimelinePage({
-  students,
-  studentsPage,
-  studentsPageSize,
-  studentsTotalCount,
-  selectedStudentId,
-  isLoadingStudents,
-  isLoadingTimeline,
-  hasLoadedTimeline,
-  timelineEvents,
-  timelinePage,
-  timelinePageSize,
-  timelineTotalCount,
-  onStudentChange,
-  onStudentsPageChange,
-  onRefreshTimeline,
-  onTimelinePageChange,
+  studentSelection,
+  selectionHandlers,
+  timelineState,
+  handlers,
 }: TimelinePageProps) {
+  const refreshButtonLabel = timelineState.isLoading ? 'Оновлення...' : 'Оновити таймлайн'
+  const isRefreshDisabled = studentSelection.selectedStudentId === null || timelineState.isLoading
+
   return (
     <main className="timeline-grid">
       <StudentSelectionPanel
         title="Параметри таймлайна"
-        students={students}
-        studentsPage={studentsPage}
-        studentsPageSize={studentsPageSize}
-        studentsTotalCount={studentsTotalCount}
-        selectedStudentId={selectedStudentId}
-        isLoadingStudents={isLoadingStudents}
-        onStudentChange={onStudentChange}
-        onStudentsPageChange={onStudentsPageChange}
+        selection={studentSelection}
+        handlers={selectionHandlers}
       >
         <button
           className="primary"
           type="button"
-          disabled={selectedStudentId === null || isLoadingTimeline}
-          onClick={onRefreshTimeline}
+          disabled={isRefreshDisabled}
+          onClick={handlers.handleTimelineRefresh}
         >
-          {isLoadingTimeline ? 'Оновлення...' : 'Оновити таймлайн'}
+          {refreshButtonLabel}
         </button>
       </StudentSelectionPanel>
 
-      <section className="card timeline-card">
-        <h2>Таймлайн студента</h2>
-        <div className="timeline-shell">
-          {timelineEvents.map((event, index) => (
-            <article key={`${event.eventType}-${event.dateFrom}-${index}`} className="timeline-item">
-              <div className="timeline-dot" />
-              <div className="timeline-content">
-                <p className="timeline-type">{mapEventTypeLabel(event.eventType)}</p>
-                <p className="timeline-desc">{event.description}</p>
-                <p className="timeline-range">{formatRange(event.dateFrom, event.dateTo)}</p>
-              </div>
-            </article>
-          ))}
-
-          {isLoadingTimeline && (
-            <div className="timeline-overlay">
-              <Spinner big />
-              <p>Завантажуємо події...</p>
-            </div>
-          )}
-        </div>
-
-        {!isLoadingTimeline && hasLoadedTimeline && timelineEvents.length === 0 && (
-          <p>Для цього студента подій таймлайна поки немає.</p>
-        )}
-
-        {timelineTotalCount > 0 && (
-          <PaginationControls
-            currentPage={timelinePage}
-            pageSize={timelinePageSize}
-            totalCount={timelineTotalCount}
-            disabled={isLoadingTimeline}
-            onPageChange={onTimelinePageChange}
-          />
-        )}
-      </section>
+      <TimelineEventsCard
+        timelineState={timelineState}
+        handleTimelinePageChange={handlers.handleTimelinePageChange}
+      />
     </main>
   )
 }

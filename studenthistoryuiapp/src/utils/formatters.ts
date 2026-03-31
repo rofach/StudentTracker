@@ -1,11 +1,18 @@
-export function formatDate(input: string): string {
-  const parts = input.split('-')
+const eventTypeLabels: Record<string, string> = {
+  Enrollment: 'Зарахування до групи',
+  AcademicLeave: 'Академічна відпустка',
+  ExternalTransfer: 'Зовнішній трансфер',
+}
 
-  if (parts.length !== 3) {
+export function formatDate(input: string): string {
+  const [year, month, day] = input.split('-')
+  const hasValidDateParts = Boolean(year && month && day)
+
+  if (!hasValidDateParts) {
     return input
   }
 
-  return `${parts[2]}.${parts[1]}.${parts[0]}`
+  return `${day}.${month}.${year}`
 }
 
 export function formatRange(from: string, to: string | null): string {
@@ -17,17 +24,5 @@ export function formatRange(from: string, to: string | null): string {
 }
 
 export function mapEventTypeLabel(eventType: string): string {
-  if (eventType === 'Enrollment') {
-    return 'Зарахування до групи'
-  }
-
-  if (eventType === 'AcademicLeave') {
-    return 'Академічна відпустка'
-  }
-
-  if (eventType === 'ExternalTransfer') {
-    return 'Зовнішній трансфер'
-  }
-
-  return eventType
+  return eventTypeLabels[eventType] ?? eventType
 }

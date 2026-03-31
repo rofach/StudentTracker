@@ -85,9 +85,7 @@
   box-shadow: 0 18px 35px -30px rgba(26, 67, 94, 0.45);
 }
 
-.controls h2,
-.summary h2,
-.table-card h2 {
+.card h2 {
   margin: 0 0 0.9rem;
   color: #1f3648;
   font-size: 1.05rem;
@@ -106,7 +104,8 @@
 }
 
 .controls select,
-.filters input {
+.filters input,
+.filters select {
   width: 100%;
   margin-top: 0.35rem;
   padding: 0.62rem 0.7rem;
@@ -119,7 +118,8 @@
 }
 
 .controls select:focus,
-.filters input:focus {
+.filters input:focus,
+.filters select:focus {
   outline: 2px solid rgba(36, 132, 190, 0.28);
   border-color: #5d9ec9;
 }
@@ -127,7 +127,7 @@
 .filters {
   margin-top: 0.9rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
 }
 
@@ -164,6 +164,11 @@
   border: 1px solid #f5c8c4;
   border-radius: 10px;
   padding: 0.55rem 0.65rem;
+}
+
+.card-message {
+  margin: 0.9rem 0 0;
+  color: #4a6780;
 }
 
 .pager {
@@ -277,7 +282,7 @@ tbody tr:hover {
   background: #f3f9fe;
 }
 
-.table-overlay {
+.surface-overlay {
   position: absolute;
   inset: 0;
   background: rgba(255, 255, 255, 0.82);
@@ -288,6 +293,10 @@ tbody tr:hover {
   color: #2e627d;
   border-radius: 10px;
   backdrop-filter: blur(1px);
+}
+
+.surface-overlay p {
+  margin: 0;
 }
 
 .timeline-grid {
@@ -361,19 +370,6 @@ tbody tr:hover {
   margin: 0;
   font-size: 0.86rem;
   color: #4a6780;
-}
-
-.timeline-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.82);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  color: #2e627d;
-  border-radius: 10px;
-  backdrop-filter: blur(1px);
 }
 
 .spinner {

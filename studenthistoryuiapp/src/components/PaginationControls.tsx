@@ -1,29 +1,44 @@
+import type { PaginationState } from '../types'
+
 type PaginationControlsProps = {
-  currentPage: number
-  pageSize: number
-  totalCount: number
+  pagination: PaginationState
   disabled?: boolean
-  onPageChange: (page: number) => void
+  handlePageChange: (page: number) => void
 }
 
 export function PaginationControls({
-  currentPage,
-  pageSize,
-  totalCount,
+  pagination,
   disabled = false,
-  onPageChange,
+  handlePageChange,
 }: PaginationControlsProps) {
+  const { currentPage, pageSize, totalCount } = pagination
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
-  const canGoBack = currentPage > 1
-  const canGoForward = currentPage < totalPages
+  const hasPreviousPage = currentPage > 1
+  const hasNextPage = currentPage < totalPages
+
+  function handlePreviousPageClick() {
+    if (!hasPreviousPage) {
+      return
+    }
+
+    handlePageChange(currentPage - 1)
+  }
+
+  function handleNextPageClick() {
+    if (!hasNextPage) {
+      return
+    }
+
+    handlePageChange(currentPage + 1)
+  }
 
   return (
     <div className="pager">
       <button
         className="pager-button"
         type="button"
-        disabled={disabled || !canGoBack}
-        onClick={() => onPageChange(currentPage - 1)}
+        disabled={disabled || !hasPreviousPage}
+        onClick={handlePreviousPageClick}
       >
         Попередня
       </button>
@@ -33,8 +48,8 @@ export function PaginationControls({
       <button
         className="pager-button"
         type="button"
-        disabled={disabled || !canGoForward}
-        onClick={() => onPageChange(currentPage + 1)}
+        disabled={disabled || !hasNextPage}
+        onClick={handleNextPageClick}
       >
         Наступна
       </button>

@@ -1,21 +1,97 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getErrorMessage } from '../api/http'
-import { DEFAULT_PAGE_SIZE, getAverageGrade, getGrades, getStudents, getTimeline } from '../api/studentApi'
+import {
+  DEFAULT_PAGE_SIZE,
+  getAverageGrade,
+  getGrades,
+  getStudentDisciplines,
+  getStudents,
+  getTimeline,
+} from '../api/studentApi'
 import type {
-  AverageGradeDto,
+  AsyncCollectionState,
   AverageGradeFilters,
+  AverageSummaryState,
   GradeDto,
+  PaginationState,
+  StudentDisciplineOptionDto,
   StudentDto,
+  StudentSelectionState,
   TimelineEventDto,
 } from '../types'
 
-const EMPTY_FILTERS: AverageGradeFilters = {
+const emptyAverageFilters: AverageGradeFilters = {
   semesterNo: '',
   disciplineId: '',
   academicYearStart: '',
 }
 
+function buildPaginationState(currentPage: number, totalCount: number): PaginationState {
+  return {
+    currentPage,
+    pageSize: DEFAULT_PAGE_SIZE,
+    totalCount,
+  }
+}
+
+function getNextSelectedStudentId(
+  students: StudentDto[],
+  currentStudentId: number | null,
+): number | null {
+  if (students.length === 0) {
+    return null
+  }
+
+  const hasCurrentStudent =
+    currentStudentId !== null && students.some((student) => student.studentId === currentStudentId)
+
+  if (hasCurrentStudent) {
+    return currentStudentId
+  }
+
+  return students[0].studentId
+}
+
+function getSemesterOptions(disciplineOptions: StudentDisciplineOptionDto[]): number[] {
+  return Array.from(new Set(disciplineOptions.map((discipline) => discipline.semesterNo))).sort(
+    (left, right) => left - right,
+  )
+}
+
+function getVisibleDisciplineOptions(
+  disciplineOptions: StudentDisciplineOptionDto[],
+  semesterNo: string,
+): StudentDisciplineOptionDto[] {
+  const filteredDisciplines = semesterNo
+    ? disciplineOptions.filter((discipline) => discipline.semesterNo === Number(semesterNo))
+    : disciplineOptions
+
+  const disciplineMap = new Map<number, StudentDisciplineOptionDto>()
+
+  filteredDisciplines.forEach((discipline) => {
+    const existingDiscipline = disciplineMap.get(discipline.disciplineId)
+
+    if (!existingDiscipline) {
+      disciplineMap.set(discipline.disciplineId, discipline)
+      return
+    }
+
+    if (!existingDiscipline.hasGrade && discipline.hasGrade) {
+      disciplineMap.set(discipline.disciplineId, {
+        ...existingDiscipline,
+        hasGrade: true,
+      })
+    }
+  })
+
+  return Array.from(disciplineMap.values()).sort((left, right) =>
+    left.disciplineName.localeCompare(right.disciplineName),
+  )
+}
+
 export function useStudentHistoryData() {
+  const previousSelectedStudentIdRef = useRef<number | null>(null)
+
   const [students, setStudents] = useState<StudentDto[]>([])
   const [studentsPage, setStudentsPage] = useState(1)
   const [studentsTotalCount, setStudentsTotalCount] = useState(0)
@@ -27,7 +103,7 @@ export function useStudentHistoryData() {
   const [hasLoadedGrades, setHasLoadedGrades] = useState(false)
   const [isLoadingGrades, setIsLoadingGrades] = useState(false)
 
-  const [average, setAverage] = useState<AverageGradeDto | null>(null)
+  const [averageData, setAverageData] = useState<AverageSummaryState['data']>(null)
   const [hasLoadedAverage, setHasLoadedAverage] = useState(false)
   const [isLoadingAverage, setIsLoadingAverage] = useState(false)
 
@@ -37,52 +113,193 @@ export function useStudentHistoryData() {
   const [hasLoadedTimeline, setHasLoadedTimeline] = useState(false)
   const [isLoadingTimeline, setIsLoadingTimeline] = useState(false)
 
+  const [disciplineOptions, setDisciplineOptions] = useState<StudentDisciplineOptionDto[]>([])
+  const [isLoadingDisciplineOptions, setIsLoadingDisciplineOptions] = useState(false)
+
   const [isLoadingStudents, setIsLoadingStudents] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [filters, setFilters] = useState<AverageGradeFilters>(EMPTY_FILTERS)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [averageFilters, setAverageFilters] = useState<AverageGradeFilters>(emptyAverageFilters)
+
+  function handleRequestError(error: unknown) {
+    setErrorMessage(getErrorMessage(error))
+  }
+
+  function resetStudentDetails() {
+    setGrades([])
+    setGradesTotalCount(0)
+    setHasLoadedGrades(false)
+    setIsLoadingGrades(false)
+    setAverageData(null)
+    setHasLoadedAverage(false)
+    setIsLoadingAverage(false)
+    setTimelineEvents([])
+    setTimelineTotalCount(0)
+    setHasLoadedTimeline(false)
+    setIsLoadingTimeline(false)
+    setDisciplineOptions([])
+    setIsLoadingDisciplineOptions(false)
+    setAverageFilters(emptyAverageFilters)
+  }
+
+  async function loadStudents(shouldApplyUpdates: () => boolean = () => true) {
+    try {
+      setIsLoadingStudents(true)
+      setErrorMessage(null)
+
+      const studentsResult = await getStudents(studentsPage, DEFAULT_PAGE_SIZE)
+
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      setStudents(studentsResult.items)
+      setStudentsTotalCount(studentsResult.totalCount)
+      setSelectedStudentId((currentStudentId) =>
+        getNextSelectedStudentId(studentsResult.items, currentStudentId),
+      )
+    } catch (error) {
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      handleRequestError(error)
+    } finally {
+      if (shouldApplyUpdates()) {
+        setIsLoadingStudents(false)
+      }
+    }
+  }
+
+  async function loadGradesForStudent(
+    studentId: number,
+    page: number,
+    shouldApplyUpdates: () => boolean = () => true,
+  ) {
+    try {
+      setIsLoadingGrades(true)
+      setErrorMessage(null)
+
+      const gradesResult = await getGrades(studentId, page, DEFAULT_PAGE_SIZE)
+
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      setGrades(gradesResult.items)
+      setGradesTotalCount(gradesResult.totalCount)
+      setHasLoadedGrades(true)
+    } catch (error) {
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      handleRequestError(error)
+      setGrades([])
+      setGradesTotalCount(0)
+    } finally {
+      if (shouldApplyUpdates()) {
+        setIsLoadingGrades(false)
+      }
+    }
+  }
+
+  async function loadTimelineForStudent(
+    studentId: number,
+    page: number,
+    shouldApplyUpdates: () => boolean = () => true,
+  ) {
+    try {
+      setIsLoadingTimeline(true)
+      setErrorMessage(null)
+
+      const timelineResult = await getTimeline(studentId, page, DEFAULT_PAGE_SIZE)
+
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      setTimelineEvents(timelineResult.items)
+      setTimelineTotalCount(timelineResult.totalCount)
+      setHasLoadedTimeline(true)
+    } catch (error) {
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      handleRequestError(error)
+      setTimelineEvents([])
+      setTimelineTotalCount(0)
+    } finally {
+      if (shouldApplyUpdates()) {
+        setIsLoadingTimeline(false)
+      }
+    }
+  }
+
+  async function loadAverageForStudent(
+    studentId: number,
+    filters: AverageGradeFilters,
+    shouldApplyUpdates: () => boolean = () => true,
+  ) {
+    try {
+      setIsLoadingAverage(true)
+      setErrorMessage(null)
+
+      const averageResult = await getAverageGrade(studentId, filters)
+
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      setAverageData(averageResult)
+      setHasLoadedAverage(true)
+    } catch (error) {
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      handleRequestError(error)
+      setAverageData(null)
+    } finally {
+      if (shouldApplyUpdates()) {
+        setIsLoadingAverage(false)
+      }
+    }
+  }
+
+  async function loadDisciplineOptionsForStudent(
+    studentId: number,
+    shouldApplyUpdates: () => boolean = () => true,
+  ) {
+    try {
+      setIsLoadingDisciplineOptions(true)
+      setErrorMessage(null)
+
+      const nextDisciplineOptions = await getStudentDisciplines(studentId)
+
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      setDisciplineOptions(nextDisciplineOptions)
+    } catch (error) {
+      if (!shouldApplyUpdates()) {
+        return
+      }
+
+      handleRequestError(error)
+      setDisciplineOptions([])
+    } finally {
+      if (shouldApplyUpdates()) {
+        setIsLoadingDisciplineOptions(false)
+      }
+    }
+  }
 
   useEffect(() => {
     let isActive = true
 
-    async function loadStudents() {
-      try {
-        setIsLoadingStudents(true)
-        setError(null)
-
-        const data = await getStudents(studentsPage, DEFAULT_PAGE_SIZE)
-
-        if (!isActive) {
-          return
-        }
-
-        setStudents(data.items)
-        setStudentsTotalCount(data.totalCount)
-        setSelectedStudentId((currentStudentId) => {
-          if (data.items.length === 0) {
-            return null
-          }
-
-          const hasSelectedStudent = currentStudentId !== null
-            && data.items.some((student) => student.studentId === currentStudentId)
-
-          if (hasSelectedStudent) {
-            return currentStudentId
-          }
-
-          return data.items[0].studentId
-        })
-      } catch (error) {
-        if (isActive) {
-          setError(getErrorMessage(error))
-        }
-      } finally {
-        if (isActive) {
-          setIsLoadingStudents(false)
-        }
-      }
-    }
-
-    void loadStudents()
+    void loadStudents(() => isActive)
 
     return () => {
       isActive = false
@@ -90,41 +307,37 @@ export function useStudentHistoryData() {
   }, [studentsPage])
 
   useEffect(() => {
+    if (selectedStudentId === previousSelectedStudentIdRef.current) {
+      return
+    }
+
+    previousSelectedStudentIdRef.current = selectedStudentId
+    setGradesPage(1)
+    setTimelinePage(1)
+    setHasLoadedGrades(false)
+    setHasLoadedTimeline(false)
+    setHasLoadedAverage(false)
+    setAverageData(null)
+    setAverageFilters(emptyAverageFilters)
+    setDisciplineOptions([])
+  }, [selectedStudentId])
+
+  useEffect(() => {
+    if (selectedStudentId !== null) {
+      return
+    }
+
+    resetStudentDetails()
+  }, [selectedStudentId])
+
+  useEffect(() => {
     if (selectedStudentId === null) {
       return
     }
 
-    const studentId = selectedStudentId
     let isActive = true
 
-    async function loadStudentGrades() {
-      try {
-        setIsLoadingGrades(true)
-        setError(null)
-
-        const data = await getGrades(studentId, gradesPage, DEFAULT_PAGE_SIZE)
-
-        if (!isActive) {
-          return
-        }
-
-        setGrades(data.items)
-        setGradesTotalCount(data.totalCount)
-        setHasLoadedGrades(true)
-      } catch (error) {
-        if (isActive) {
-          setError(getErrorMessage(error))
-          setGrades([])
-          setGradesTotalCount(0)
-        }
-      } finally {
-        if (isActive) {
-          setIsLoadingGrades(false)
-        }
-      }
-    }
-
-    void loadStudentGrades()
+    void loadGradesForStudent(selectedStudentId, gradesPage, () => isActive)
 
     return () => {
       isActive = false
@@ -136,37 +349,9 @@ export function useStudentHistoryData() {
       return
     }
 
-    const studentId = selectedStudentId
     let isActive = true
 
-    async function loadStudentTimeline() {
-      try {
-        setIsLoadingTimeline(true)
-        setError(null)
-
-        const data = await getTimeline(studentId, timelinePage, DEFAULT_PAGE_SIZE)
-
-        if (!isActive) {
-          return
-        }
-
-        setTimelineEvents(data.items)
-        setTimelineTotalCount(data.totalCount)
-        setHasLoadedTimeline(true)
-      } catch (error) {
-        if (isActive) {
-          setError(getErrorMessage(error))
-          setTimelineEvents([])
-          setTimelineTotalCount(0)
-        }
-      } finally {
-        if (isActive) {
-          setIsLoadingTimeline(false)
-        }
-      }
-    }
-
-    void loadStudentTimeline()
+    void loadTimelineForStudent(selectedStudentId, timelinePage, () => isActive)
 
     return () => {
       isActive = false
@@ -178,150 +363,160 @@ export function useStudentHistoryData() {
       return
     }
 
-    const studentId = selectedStudentId
     let isActive = true
 
-    async function loadStudentAverage() {
-      try {
-        setIsLoadingAverage(true)
-        setError(null)
-
-        const data = await getAverageGrade(studentId, filters)
-
-        if (!isActive) {
-          return
-        }
-
-        setAverage(data)
-        setHasLoadedAverage(true)
-      } catch (error) {
-        if (isActive) {
-          setError(getErrorMessage(error))
-          setAverage(null)
-        }
-      } finally {
-        if (isActive) {
-          setIsLoadingAverage(false)
-        }
-      }
-    }
-
-    void loadStudentAverage()
+    void loadAverageForStudent(selectedStudentId, emptyAverageFilters, () => isActive)
 
     return () => {
       isActive = false
     }
   }, [selectedStudentId])
 
+  useEffect(() => {
+    if (selectedStudentId === null) {
+      return
+    }
+
+    let isActive = true
+
+    void loadDisciplineOptionsForStudent(selectedStudentId, () => isActive)
+
+    return () => {
+      isActive = false
+    }
+  }, [selectedStudentId])
+
+  const semesterOptions = useMemo(
+    () => getSemesterOptions(disciplineOptions),
+    [disciplineOptions],
+  )
+
+  const visibleDisciplineOptions = useMemo(
+    () => getVisibleDisciplineOptions(disciplineOptions, averageFilters.semesterNo),
+    [disciplineOptions, averageFilters.semesterNo],
+  )
+
+  useEffect(() => {
+    if (averageFilters.disciplineId === '') {
+      return
+    }
+
+    const hasSelectedDiscipline = visibleDisciplineOptions.some(
+      (discipline) => String(discipline.disciplineId) === averageFilters.disciplineId,
+    )
+
+    if (hasSelectedDiscipline) {
+      return
+    }
+
+    setAverageFilters((currentFilters) => ({
+      ...currentFilters,
+      disciplineId: '',
+    }))
+  }, [averageFilters.disciplineId, visibleDisciplineOptions])
+
   function handleStudentChange(studentId: number) {
     setSelectedStudentId(studentId)
-    setGradesPage(1)
-    setTimelinePage(1)
-    setHasLoadedGrades(false)
-    setHasLoadedTimeline(false)
-    setHasLoadedAverage(false)
-    setAverage(null)
   }
 
-  function updateFilter<K extends keyof AverageGradeFilters>(key: K, value: AverageGradeFilters[K]) {
-    setFilters((currentFilters) => ({
+  function handleStudentsPageChange(page: number) {
+    setStudentsPage(page)
+  }
+
+  function handleGradesPageChange(page: number) {
+    setGradesPage(page)
+  }
+
+  function handleTimelinePageChange(page: number) {
+    setTimelinePage(page)
+  }
+
+  function updateAverageFilter<K extends keyof AverageGradeFilters>(
+    key: K,
+    value: AverageGradeFilters[K],
+  ) {
+    setAverageFilters((currentFilters) => ({
       ...currentFilters,
       [key]: value,
     }))
+    setHasLoadedAverage(false)
+    setAverageData(null)
   }
 
-  function setSemesterNo(value: string) {
-    updateFilter('semesterNo', value)
+  function handleSemesterFilterChange(value: string) {
+    updateAverageFilter('semesterNo', value)
   }
 
-  function setDisciplineId(value: string) {
-    updateFilter('disciplineId', value)
+  function handleDisciplineFilterChange(value: string) {
+    updateAverageFilter('disciplineId', value)
   }
 
-  function setAcademicYearStart(value: string) {
-    updateFilter('academicYearStart', value)
-  }
-
-  function refreshAverage() {
+  function handleAverageRefresh() {
     if (selectedStudentId === null) {
       return
     }
 
-    void (async () => {
-      try {
-        setIsLoadingAverage(true)
-        setError(null)
-
-        const data = await getAverageGrade(selectedStudentId, filters)
-
-        setAverage(data)
-        setHasLoadedAverage(true)
-      } catch (error) {
-        setError(getErrorMessage(error))
-        setAverage(null)
-      } finally {
-        setIsLoadingAverage(false)
-      }
-    })()
+    void loadAverageForStudent(selectedStudentId, averageFilters)
   }
 
-  function refreshTimeline() {
+  function handleTimelineRefresh() {
     if (selectedStudentId === null) {
       return
     }
 
-    void (async () => {
-      try {
-        setIsLoadingTimeline(true)
-        setError(null)
+    void loadTimelineForStudent(selectedStudentId, timelinePage)
+  }
 
-        const data = await getTimeline(selectedStudentId, timelinePage, DEFAULT_PAGE_SIZE)
+  const studentSelection: StudentSelectionState = {
+    students,
+    pagination: buildPaginationState(studentsPage, studentsTotalCount),
+    selectedStudentId,
+    isLoading: isLoadingStudents,
+  }
 
-        setTimelineEvents(data.items)
-        setTimelineTotalCount(data.totalCount)
-        setHasLoadedTimeline(true)
-      } catch (error) {
-        setError(getErrorMessage(error))
-        setTimelineEvents([])
-        setTimelineTotalCount(0)
-      } finally {
-        setIsLoadingTimeline(false)
-      }
-    })()
+  const averageState: AverageSummaryState = {
+    data: averageData,
+    hasLoaded: hasLoadedAverage,
+    isLoading: isLoadingAverage,
+  }
+
+  const gradesState: AsyncCollectionState<GradeDto> = {
+    items: grades,
+    pagination: buildPaginationState(gradesPage, gradesTotalCount),
+    hasLoaded: hasLoadedGrades,
+    isLoading: isLoadingGrades,
+  }
+
+  const timelineState: AsyncCollectionState<TimelineEventDto> = {
+    items: timelineEvents,
+    pagination: buildPaginationState(timelinePage, timelineTotalCount),
+    hasLoaded: hasLoadedTimeline,
+    isLoading: isLoadingTimeline,
   }
 
   return {
-    pageSize: DEFAULT_PAGE_SIZE,
-    students,
-    studentsPage,
-    studentsTotalCount,
-    selectedStudentId,
-    isLoadingStudents,
-    grades,
-    gradesPage,
-    gradesTotalCount,
-    hasLoadedGrades,
-    isLoadingGrades,
-    average,
-    hasLoadedAverage,
-    isLoadingAverage,
-    timelineEvents,
-    timelinePage,
-    timelineTotalCount,
-    hasLoadedTimeline,
-    isLoadingTimeline,
-    error,
-    semesterNo: filters.semesterNo,
-    disciplineId: filters.disciplineId,
-    academicYearStart: filters.academicYearStart,
-    setStudentsPage,
-    setGradesPage,
-    setTimelinePage,
-    handleStudentChange,
-    setSemesterNo,
-    setDisciplineId,
-    setAcademicYearStart,
-    refreshAverage,
-    refreshTimeline,
+    studentSelection,
+    selectionHandlers: {
+      handleStudentChange,
+      handleStudentsPageChange,
+    },
+    averageFilters,
+    averageState,
+    gradesState,
+    timelineState,
+    semesterOptions,
+    visibleDisciplineOptions,
+    isLoadingDisciplineOptions,
+    errorMessage,
+    dashboardHandlers: {
+      handleSemesterFilterChange,
+      handleDisciplineFilterChange,
+      handleAverageRefresh,
+      handleGradesPageChange,
+    },
+    timelineHandlers: {
+      handleTimelineRefresh,
+      handleTimelinePageChange,
+    },
   }
 }
