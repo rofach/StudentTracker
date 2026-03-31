@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using UniversityHistory.API.Middleware;
@@ -10,6 +12,7 @@ using UniversityHistory.Application.Queries.GetStudentsInGroup;
 using UniversityHistory.Application.Queries.GetTimeline;
 using UniversityHistory.Application.Queries.GetAverageGrade;
 using UniversityHistory.Application.Services;
+using UniversityHistory.Application.Validation.Students;
 using UniversityHistory.Domain.Interfaces.Repositories;
 using UniversityHistory.Infrastructure.Data;
 using UniversityHistory.Infrastructure.Queries;
@@ -48,6 +51,8 @@ builder.Services.AddScoped<IDisciplineService, DisciplineService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddValidatorsFromAssemblyContaining<StudentCreateDtoValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddCors(options =>
 {

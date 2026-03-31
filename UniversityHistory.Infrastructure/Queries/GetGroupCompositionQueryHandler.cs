@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Queries.GetGroupComposition;
+using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Exceptions;
 using UniversityHistory.Infrastructure.Data;
 
@@ -49,4 +50,34 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
 
         return new PagedResult<GroupCompositionMemberDto>(items, query.Page, query.PageSize, count);
     }
+
+    //public async Task<PagedResult<StudentGroupEnrollment>> GetGroupCompositionAsync(
+    //int groupId,
+    //DateOnly date,
+    //int page,
+    //int pageSize,
+    //CancellationToken ct = default)
+    //{
+    //    var query = _db.StudentGroupEnrollments
+    //        .AsNoTracking()
+    //        .Include(e => e.Student)
+    //        .Include(e => e.SubgroupAssignment!)
+    //            .ThenInclude(sa => sa.Subgroup)
+    //        .Where(e =>
+    //            e.GroupId == groupId &&
+    //            e.DateFrom <= date &&
+    //            (e.DateTo == null || e.DateTo >= date));
+
+    //    var totalCount = await query.CountAsync(ct);
+
+    //    var items = await query
+    //        .OrderBy(e => e.Student.LastName)
+    //        .ThenBy(e => e.Student.FirstName)
+    //        .Skip((page - 1) * pageSize)
+    //        .Take(pageSize)
+    //        .ToListAsync(ct);
+
+    //    return new PagedResult<StudentGroupEnrollment>(items, page, pageSize, totalCount);
+    //}
+
 }

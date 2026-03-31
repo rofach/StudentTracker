@@ -77,10 +77,7 @@ public class StudentService : IStudentService
         var student = await _studentRepo.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        if (!Enum.TryParse<StudentStatus>(dto.Status, ignoreCase: true, out var newStatus))
-        {
-            throw new DomainException($"Unknown status: '{dto.Status}'. Valid values: Active, OnLeave, Expelled, Graduated.");
-        }
+        var newStatus = Enum.Parse<StudentStatus>(dto.Status, ignoreCase: true);
 
         if (student.Status is StudentStatus.Expelled or StudentStatus.Graduated)
         {

@@ -46,11 +46,7 @@ public class MovementService : IMovementService
         var institution = await _transferRepo.GetInstitutionByIdAsync(dto.InstitutionId, ct)
             ?? throw new NotFoundException(nameof(Institution), dto.InstitutionId);
 
-        if (!Enum.TryParse<TransferType>(dto.TransferType, ignoreCase: true, out var transferType))
-        {
-            throw new DomainException($"Unknown transfer type '{dto.TransferType}'. Valid values: In, Out.");
-        }
-
+        var transferType = Enum.Parse<TransferType>(dto.TransferType, ignoreCase: true);
         var transfer = dto.ToEntity(studentId, transferType);
         var created = await _transferRepo.AddAsync(transfer, ct);
         return created.ToDto(institution.InstitutionName);

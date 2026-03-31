@@ -124,8 +124,7 @@ public class StudyPlanService : IStudyPlanService
             throw new DomainException($"Discipline {dto.DisciplineId} is already in plan {planId}.");
         }
 
-        var controlType = ParseControlType(dto.ControlType);
-        ValidatePlanDisciplineValues(dto.SemesterNo, dto.Hours, dto.Credits);
+        var controlType = Enum.Parse<ControlType>(dto.ControlType, ignoreCase: true);
 
         var planDiscipline = dto.ToEntity(planId, controlType);
         await _planRepo.AddPlanDisciplineAsync(planDiscipline, ct);
@@ -140,8 +139,7 @@ public class StudyPlanService : IStudyPlanService
         var planDiscipline = await _planRepo.GetPlanDisciplineAsync(planId, disciplineId, ct)
             ?? throw new NotFoundException("PlanDiscipline", $"plan={planId}, discipline={disciplineId}");
 
-        var controlType = ParseControlType(dto.ControlType);
-        ValidatePlanDisciplineValues(dto.SemesterNo, dto.Hours, dto.Credits);
+        var controlType = Enum.Parse<ControlType>(dto.ControlType, ignoreCase: true);
 
         planDiscipline.SemesterNo = dto.SemesterNo;
         planDiscipline.ControlType = controlType;
@@ -166,33 +164,5 @@ public class StudyPlanService : IStudyPlanService
         }
 
         await _planRepo.DeletePlanDisciplineAsync(planDiscipline, ct);
-    }
-
-    private static ControlType ParseControlType(string value)
-    {
-        if (!Enum.TryParse<ControlType>(value, ignoreCase: true, out var result))
-        {
-            throw new DomainException($"Unknown control type '{value}'. Valid: Exam, Credit, Coursework.");
-        }
-
-        return result;
-    }
-
-    private static void ValidatePlanDisciplineValues(int semesterNo, int hours, decimal credits)
-    {
-        if (semesterNo <= 0)
-        {
-            throw new DomainException("SemesterNo must be greater than zero.");
-        }
-
-        if (hours <= 0)
-        {
-            throw new DomainException("Hours must be greater than zero.");
-        }
-
-        if (credits <= 0)
-        {
-            throw new DomainException("Credits must be greater than zero.");
-        }
     }
 }
