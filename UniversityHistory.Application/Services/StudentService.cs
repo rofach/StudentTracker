@@ -13,8 +13,7 @@ namespace UniversityHistory.Application.Services;
 
 public class StudentService : IStudentService
 {
-    private readonly IStudentRepository _studentRepo;
-    private readonly IEnrollmentRepository _enrollmentRepo;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMovementService _movementService;
     private readonly IStudyPlanService _planService;
     private readonly IGetTimelineQueryHandler _timelineHandler;
@@ -22,16 +21,14 @@ public class StudentService : IStudentService
     private readonly IGetStudentGroupOnDateQueryHandler _groupOnDateHandler;
 
     public StudentService(
-        IStudentRepository studentRepo,
-        IEnrollmentRepository enrollmentRepo,
+        IUnitOfWork unitOfWork,
         IMovementService movementService,
         IStudyPlanService planService,
         IGetTimelineQueryHandler timelineHandler,
         IGetClassmatesQueryHandler classmatesHandler,
         IGetStudentGroupOnDateQueryHandler groupOnDateHandler)
     {
-        _studentRepo = studentRepo;
-        _enrollmentRepo = enrollmentRepo;
+        _unitOfWork = unitOfWork;
         _movementService = movementService;
         _planService = planService;
         _timelineHandler = timelineHandler;
@@ -41,25 +38,31 @@ public class StudentService : IStudentService
 
     public async Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default)
     {
-        var student = await _studentRepo.GetByIdAsync(studentId, ct);
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct);
         return student is null ? null : student.ToDto();
     }
 
     public async Task<PagedResult<StudentDto>> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
-        var (items, count) = await _studentRepo.GetAllAsync(page, pageSize, ct);
-        return new PagedResult<StudentDto>(items.Select(static student => student.ToDto()), page, pageSize, count);
+        var result = await _unitOfWork.Students.GetAllAsync(page, pageSize, ct);
+        return new PagedResult<StudentDto>(
+            result.Items.Select(static student => student.ToDto()),
+            page,
+            pageSize,
+            result.TotalCount);
     }
 
     public async Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default)
     {
         var student = dto.ToEntity();
-        return (await _studentRepo.AddAsync(student, ct)).ToDto();
+        await _unitOfWork.Students.AddAsync(student, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return student.ToDto();
     }
 
     public async Task<StudentDto> UpdateAsync(int studentId, StudentUpdateDto dto, CancellationToken ct = default)
     {
-        var student = await _studentRepo.GetByIdAsync(studentId, ct)
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         student.FirstName = dto.FirstName;
@@ -68,13 +71,14 @@ public class StudentService : IStudentService
         student.Email = dto.Email;
         student.Phone = dto.Phone;
 
-        await _studentRepo.UpdateAsync(student, ct);
+        await _unitOfWork.Students.UpdateAsync(student, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
         return student.ToDto();
     }
 
     public async Task ChangeStatusAsync(int studentId, ChangeStatusDto dto, CancellationToken ct = default)
     {
-        var student = await _studentRepo.GetByIdAsync(studentId, ct)
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         var newStatus = Enum.Parse<StudentStatus>(dto.Status, ignoreCase: true);
@@ -85,15 +89,16 @@ public class StudentService : IStudentService
         }
 
         student.Status = newStatus;
-        await _studentRepo.UpdateAsync(student, ct);
+        await _unitOfWork.Students.UpdateAsync(student, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 
     public async Task<StudentDetailDto> GetDetailAsync(int studentId, CancellationToken ct = default)
     {
-        var student = await _studentRepo.GetByIdAsync(studentId, ct)
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        var enrollments = await _enrollmentRepo.GetByStudentIdAsync(studentId, ct);
+        var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
         var plans = await _planService.GetPlanAssignmentsAsync(studentId, ct);
         var movements = await _movementService.GetMovementsAsync(studentId, ct);
 

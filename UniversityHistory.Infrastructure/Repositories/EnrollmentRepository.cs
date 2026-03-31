@@ -71,29 +71,25 @@ public class EnrollmentRepository : IEnrollmentRepository
     public async Task<bool> HasOverlapAsync(int studentId, DateOnly dateFrom, DateOnly? dateTo,
         int? excludeId = null, CancellationToken ct = default)
     {
-        var count = await _db.Database
-            .SqlQuery<int>($"""
-            SELECT COUNT(1) FROM Student_Group_Enrollment
-            WHERE student_id         = {studentId}
-            AND (@ExcludeId IS NULL OR enrollment_id <> {excludeId})
-            AND date_from         <= ISNULL({dateTo}, '9999-12-31')
-            AND ISNULL(date_to, '9999-12-31') >= {dateFrom}
-            """)
-            .FirstAsync(ct);
+        var overlapDateTo = dateTo ?? new DateOnly(9999, 12, 31);
 
-        return count > 0;
+        return await _db.StudentGroupEnrollments.AnyAsync(
+            e => e.StudentId == studentId
+                 && (!excludeId.HasValue || e.EnrollmentId != excludeId.Value)
+                 && e.DateFrom <= overlapDateTo
+                 && (e.DateTo == null || e.DateTo >= dateFrom),
+            ct);
     }
 
     public async Task<StudentGroupEnrollment> AddAsync(StudentGroupEnrollment enrollment, CancellationToken ct = default)
     {
         _db.StudentGroupEnrollments.Add(enrollment);
-        await _db.SaveChangesAsync(ct);
-        return enrollment;
+        return await Task.FromResult(enrollment);
     }
 
-    public async Task UpdateAsync(StudentGroupEnrollment enrollment, CancellationToken ct = default)
+    public Task UpdateAsync(StudentGroupEnrollment enrollment, CancellationToken ct = default)
     {
         _db.StudentGroupEnrollments.Update(enrollment);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 }

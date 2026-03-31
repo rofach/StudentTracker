@@ -9,61 +9,65 @@ namespace UniversityHistory.Application.Services;
 
 public class DisciplineService : IDisciplineService
 {
-    private readonly IDisciplineRepository _repo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DisciplineService(IDisciplineRepository repo)
+    public DisciplineService(IUnitOfWork unitOfWork)
     {
-        _repo = repo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<DisciplineDto>> GetAllAsync(CancellationToken ct = default)
     {
-        var all = await _repo.GetAllAsync(ct);
+        var all = await _unitOfWork.Disciplines.GetAllAsync(ct);
         return all.Select(static discipline => discipline.ToDto());
     }
 
     public async Task<DisciplineDto?> GetByIdAsync(int disciplineId, CancellationToken ct = default)
     {
-        var discipline = await _repo.GetByIdAsync(disciplineId, ct);
+        var discipline = await _unitOfWork.Disciplines.GetByIdAsync(disciplineId, ct);
         return discipline is null ? null : discipline.ToDto();
     }
 
     public async Task<DisciplineDto> CreateAsync(CreateDisciplineDto dto, CancellationToken ct = default)
     {
-        if (await _repo.ExistsWithNameAsync(dto.DisciplineName, ct: ct))
+        if (await _unitOfWork.Disciplines.ExistsWithNameAsync(dto.DisciplineName, ct: ct))
         {
             throw new DomainException($"A discipline named '{dto.DisciplineName}' already exists.");
         }
 
         var discipline = dto.ToEntity();
-        return (await _repo.AddAsync(discipline, ct)).ToDto();
+        await _unitOfWork.Disciplines.AddAsync(discipline, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return discipline.ToDto();
     }
 
     public async Task<DisciplineDto> UpdateAsync(int disciplineId, UpdateDisciplineDto dto, CancellationToken ct = default)
     {
-        var discipline = await _repo.GetByIdAsync(disciplineId, ct)
+        var discipline = await _unitOfWork.Disciplines.GetByIdAsync(disciplineId, ct)
             ?? throw new NotFoundException(nameof(Discipline), disciplineId);
 
-        if (await _repo.ExistsWithNameAsync(dto.DisciplineName, excludeId: disciplineId, ct: ct))
+        if (await _unitOfWork.Disciplines.ExistsWithNameAsync(dto.DisciplineName, excludeId: disciplineId, ct: ct))
         {
             throw new DomainException($"A discipline named '{dto.DisciplineName}' already exists.");
         }
 
         discipline.DisciplineName = dto.DisciplineName;
-        await _repo.UpdateAsync(discipline, ct);
+        await _unitOfWork.Disciplines.UpdateAsync(discipline, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
         return discipline.ToDto();
     }
 
     public async Task DeleteAsync(int disciplineId, CancellationToken ct = default)
     {
-        var discipline = await _repo.GetByIdAsync(disciplineId, ct)
+        var discipline = await _unitOfWork.Disciplines.GetByIdAsync(disciplineId, ct)
             ?? throw new NotFoundException(nameof(Discipline), disciplineId);
 
-        if (await _repo.IsUsedInPlanAsync(disciplineId, ct))
+        if (await _unitOfWork.Disciplines.IsUsedInPlanAsync(disciplineId, ct))
         {
             throw new DomainException($"Cannot delete discipline {disciplineId}: it is referenced by one or more study plans.");
         }
 
-        await _repo.DeleteAsync(discipline, ct);
+        await _unitOfWork.Disciplines.DeleteAsync(discipline, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 }

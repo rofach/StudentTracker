@@ -23,22 +23,21 @@ public class DisciplineRepository : IDisciplineRepository
     public async Task<Discipline> AddAsync(Discipline discipline, CancellationToken ct = default)
     {
         _db.Disciplines.Add(discipline);
-        await _db.SaveChangesAsync(ct);
-        return discipline;
+        return await Task.FromResult(discipline);
     }
 
-    public async Task UpdateAsync(Discipline discipline, CancellationToken ct = default)
+    public Task UpdateAsync(Discipline discipline, CancellationToken ct = default)
     {
         _db.Disciplines.Update(discipline);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> IsUsedInPlanAsync(int disciplineId, CancellationToken ct = default) =>
         await _db.PlanDisciplines.AnyAsync(pd => pd.DisciplineId == disciplineId, ct);
 
-    public async Task DeleteAsync(Discipline discipline, CancellationToken ct = default)
+    public Task DeleteAsync(Discipline discipline, CancellationToken ct = default)
     {
         _db.Disciplines.Remove(discipline);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 }

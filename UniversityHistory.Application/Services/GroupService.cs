@@ -3,24 +3,20 @@ using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Queries.GetActiveGroups;
 using UniversityHistory.Application.Queries.GetGroupComposition;
 using UniversityHistory.Application.Queries.GetStudentsInGroup;
-using UniversityHistory.Domain.Interfaces.Repositories;
 
 namespace UniversityHistory.Application.Services;
 
 public class GroupService : IGroupService
 {
-    private readonly IGroupRepository _groupRepo;
     private readonly IGetGroupCompositionQueryHandler _compositionHandler;
     private readonly IGetActiveGroupsQueryHandler _activeGroupsHandler;
     private readonly IGetStudentsInGroupQueryHandler _studentsInGroupHandler;
 
     public GroupService(
-        IGroupRepository groupRepo,
         IGetGroupCompositionQueryHandler compositionHandler,
         IGetActiveGroupsQueryHandler activeGroupsHandler,
         IGetStudentsInGroupQueryHandler studentsInGroupHandler)
     {
-        _groupRepo = groupRepo;
         _compositionHandler = compositionHandler;
         _activeGroupsHandler = activeGroupsHandler;
         _studentsInGroupHandler = studentsInGroupHandler;

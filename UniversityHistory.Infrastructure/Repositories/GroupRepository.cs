@@ -19,7 +19,6 @@ public class GroupRepository : IGroupRepository
     public async Task<StudyGroup> AddAsync(StudyGroup group, CancellationToken ct = default)
     {
         _db.StudyGroups.Add(group);
-        await _db.SaveChangesAsync(ct);
-        return group;
+        return await Task.FromResult(group);
     }
 }

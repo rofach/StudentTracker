@@ -10,29 +10,26 @@ namespace UniversityHistory.Application.Services;
 
 public class GradeService : IGradeService
 {
-    private readonly IStudentRepository _studentRepo;
-    private readonly IGradeRepository _gradeRepo;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IGetAverageGradeQueryHandler _avgHandler;
 
     public GradeService(
-        IStudentRepository studentRepo,
-        IGradeRepository gradeRepo,
+        IUnitOfWork unitOfWork,
         IGetAverageGradeQueryHandler avgHandler)
     {
-        _studentRepo = studentRepo;
-        _gradeRepo = gradeRepo;
+        _unitOfWork = unitOfWork;
         _avgHandler = avgHandler;
     }
 
     public async Task<PagedResult<GradeDto>> GetGradesAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
-        _ = await _studentRepo.GetByIdAsync(studentId, ct)
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        var (grades, count) = await _gradeRepo.GetByStudentIdAsync(studentId, page, pageSize, ct);
-        var dtos = grades.Select(grade => grade.ToDto(ResolveSemesterNo(grade)));
+        var result = await _unitOfWork.Grades.GetByStudentIdAsync(studentId, page, pageSize, ct);
+        var dtos = result.Items.Select(grade => grade.ToDto(ResolveSemesterNo(grade)));
 
-        return new PagedResult<GradeDto>(dtos, page, pageSize, count);
+        return new PagedResult<GradeDto>(dtos, page, pageSize, result.TotalCount);
     }
 
     public async Task<AverageGradeDto> GetAverageGradeAsync(
@@ -42,7 +39,7 @@ public class GradeService : IGradeService
         int? academicYearStart,
         CancellationToken ct = default)
     {
-        _ = await _studentRepo.GetByIdAsync(studentId, ct)
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         return await _avgHandler.HandleAsync(

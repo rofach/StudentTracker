@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using UniversityHistory.Domain.Common;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Interfaces.Repositories;
 using UniversityHistory.Infrastructure.Data;
@@ -10,7 +11,7 @@ public class GradeRepository : IGradeRepository
     private readonly UniversityDbContext _db;
     public GradeRepository(UniversityDbContext db) => _db = db;
 
-    public async Task<(IEnumerable<GradeRecord> Items, int TotalCount)> GetByStudentIdAsync(int studentId, int page, int pageSize, CancellationToken ct = default)
+    public async Task<PagedData<GradeRecord>> GetByStudentIdAsync(int studentId, int page, int pageSize, CancellationToken ct = default)
     {
         var query = _db.GradeRecords.AsNoTracking()
             .Include(g => g.CourseEnrollment)
@@ -26,14 +27,13 @@ public class GradeRepository : IGradeRepository
                                .Skip((page - 1) * pageSize)
                                .Take(pageSize)
                                .ToListAsync(ct);
-        
-        return (items, count);
+
+        return new PagedData<GradeRecord>(items, count);
     }
 
     public async Task<GradeRecord> AddAsync(GradeRecord grade, CancellationToken ct = default)
     {
         _db.GradeRecords.Add(grade);
-        await _db.SaveChangesAsync(ct);
-        return grade;
+        return await Task.FromResult(grade);
     }
 }

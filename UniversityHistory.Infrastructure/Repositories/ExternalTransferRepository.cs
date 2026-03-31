@@ -23,7 +23,6 @@ public class ExternalTransferRepository : IExternalTransferRepository
     public async Task<ExternalTransfer> AddAsync(ExternalTransfer transfer, CancellationToken ct = default)
     {
         _db.ExternalTransfers.Add(transfer);
-        await _db.SaveChangesAsync(ct);
-        return transfer;
+        return await Task.FromResult(transfer);
     }
 }

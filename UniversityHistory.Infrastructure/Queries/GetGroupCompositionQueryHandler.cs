@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Queries.GetGroupComposition;
+using UniversityHistory.Domain.Common;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Exceptions;
 using UniversityHistory.Infrastructure.Data;
@@ -19,7 +20,7 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
         if (!exists) throw new NotFoundException("StudyGroup", query.GroupId);
 
         var groupId = query.GroupId;
-        var date    = query.Date;
+        var date = query.Date;
 
         var rawQuery = _db.Database.SqlQuery<GroupCompositionMemberDto>($"""
             SELECT
@@ -51,13 +52,13 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
         return new PagedResult<GroupCompositionMemberDto>(items, query.Page, query.PageSize, count);
     }
 
-    //public async Task<PagedResult<StudentGroupEnrollment>> GetGroupCompositionAsync(
-    //int groupId,
-    //DateOnly date,
-    //int page,
-    //int pageSize,
-    //CancellationToken ct = default)
-    //{
+    //public async Task<PagedData<StudentGroupEnrollment>> GetGroupCompositionAsync(
+    // int groupId,
+    // DateOnly date,
+    // int page,
+    // int pageSize,
+    // CancellationToken ct = default)
+    // {
     //    var query = _db.StudentGroupEnrollments
     //        .AsNoTracking()
     //        .Include(e => e.Student)
@@ -77,7 +78,38 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
     //        .Take(pageSize)
     //        .ToListAsync(ct);
 
-    //    return new PagedResult<StudentGroupEnrollment>(items, page, pageSize, totalCount);
+    //    return new PagedData<StudentGroupEnrollment>(items, totalCount);
     //}
+
+
+    //public async Task<PagedData<StudentGroupEnrollment>> GetGroupCompositionAsync(
+    //int groupId,
+    //DateOnly date,
+    //int page,
+    //int pageSize,
+    //CancellationToken ct = default)
+    //{
+    //    var query =
+    //        from e in _db.StudentGroupEnrollments.AsNoTracking()
+    //        where e.GroupId == groupId
+    //              && e.DateFrom <= date
+    //              && (e.DateTo == null || e.DateTo >= date)
+    //        select e;
+
+    //    var totalCount = await query.CountAsync(ct);
+
+    //    var items = await query
+    //        .Include(e => e.Student)
+    //        .Include(e => e.SubgroupAssignment!)
+    //            .ThenInclude(sa => sa.Subgroup)
+    //        .OrderBy(e => e.Student.LastName)
+    //        .ThenBy(e => e.Student.FirstName)
+    //        .Skip((page - 1) * pageSize)
+    //        .Take(pageSize)
+    //        .ToListAsync(ct);
+
+    //    return new PagedData<StudentGroupEnrollment>(items, totalCount);
+    //}
+
 
 }

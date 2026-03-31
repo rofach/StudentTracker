@@ -23,7 +23,6 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
     public async Task<AcademicLeave> AddAsync(AcademicLeave leave, CancellationToken ct = default)
     {
         _db.AcademicLeaves.Add(leave);
-        await _db.SaveChangesAsync(ct);
-        return leave;
+        return await Task.FromResult(leave);
     }
 }

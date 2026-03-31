@@ -21,7 +21,5 @@ public class SubgroupAssignmentRepository : ISubgroupAssignmentRepository
             _db.StudentSubgroupAssignments.Add(assignment);
         else
             existing.SubgroupId = assignment.SubgroupId;
-
-        await _db.SaveChangesAsync(ct);
     }
 }

@@ -1,0 +1,16 @@
+namespace UniversityHistory.Domain.Interfaces.Repositories;
+
+public interface IUnitOfWork
+{
+    IStudentRepository Students { get; }
+    IGroupRepository Groups { get; }
+    IEnrollmentRepository Enrollments { get; }
+    IAcademicLeaveRepository AcademicLeaves { get; }
+    IExternalTransferRepository ExternalTransfers { get; }
+    IStudyPlanRepository StudyPlans { get; }
+    IGradeRepository Grades { get; }
+    ISubgroupAssignmentRepository SubgroupAssignments { get; }
+    IDisciplineRepository Disciplines { get; }
+
+    Task<int> SaveChangesAsync(CancellationToken ct = default);
+}

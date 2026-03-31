@@ -8,28 +8,18 @@ namespace UniversityHistory.Application.Services;
 
 public class EnrollmentService : IEnrollmentService
 {
-    private readonly IStudentRepository _studentRepo;
-    private readonly IGroupRepository _groupRepo;
-    private readonly IEnrollmentRepository _enrollmentRepo;
-    private readonly ISubgroupAssignmentRepository _subgroupRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public EnrollmentService(
-        IStudentRepository studentRepo,
-        IGroupRepository groupRepo,
-        IEnrollmentRepository enrollmentRepo,
-        ISubgroupAssignmentRepository subgroupRepo)
+    public EnrollmentService(IUnitOfWork unitOfWork)
     {
-        _studentRepo  = studentRepo;
-        _groupRepo    = groupRepo;
-        _enrollmentRepo = enrollmentRepo;
-        _subgroupRepo = subgroupRepo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<int> EnrollStudentAsync(EnrollStudentDto dto, CancellationToken ct = default)
     {
-        _ = await _studentRepo.GetByIdAsync(dto.StudentId, ct)
+        _ = await _unitOfWork.Students.GetByIdAsync(dto.StudentId, ct)
             ?? throw new NotFoundException(nameof(Student), dto.StudentId);
-        var group = await _groupRepo.GetByIdAsync(dto.GroupId, ct)
+        var group = await _unitOfWork.Groups.GetByIdAsync(dto.GroupId, ct)
             ?? throw new NotFoundException(nameof(StudyGroup), dto.GroupId);
 
         if (dto.SubgroupId.HasValue)
@@ -39,7 +29,7 @@ public class EnrollmentService : IEnrollmentService
                 throw new DomainException($"Validation Failed: Subgroup {dto.SubgroupId.Value} does not belong to Group {dto.GroupId}.");
         }
 
-        var hasOverlap = await _enrollmentRepo.HasOverlapAsync(dto.StudentId, dto.DateFrom, null, null, ct);
+        var hasOverlap = await _unitOfWork.Enrollments.HasOverlapAsync(dto.StudentId, dto.DateFrom, null, null, ct);
         if (hasOverlap)
             throw new EnrollmentOverlapException(dto.StudentId, dto.DateFrom, null);
 
@@ -54,13 +44,14 @@ public class EnrollmentService : IEnrollmentService
                 : null
         };
 
-        var created = await _enrollmentRepo.AddAsync(enrollment, ct);
+        var created = await _unitOfWork.Enrollments.AddAsync(enrollment, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
         return created.EnrollmentId;
     }
 
     public async Task CloseEnrollmentAsync(int enrollmentId, CloseEnrollmentDto dto, CancellationToken ct = default)
     {
-        var enrollment = await _enrollmentRepo.GetByIdAsync(enrollmentId, ct)
+        var enrollment = await _unitOfWork.Enrollments.GetByIdAsync(enrollmentId, ct)
             ?? throw new NotFoundException(nameof(StudentGroupEnrollment), enrollmentId);
 
         if (enrollment.DateTo.HasValue)
@@ -71,21 +62,22 @@ public class EnrollmentService : IEnrollmentService
 
         enrollment.DateTo    = dto.DateTo;
         enrollment.ReasonEnd = dto.ReasonEnd;
-        await _enrollmentRepo.UpdateAsync(enrollment, ct);
+        await _unitOfWork.Enrollments.UpdateAsync(enrollment, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 
     public async Task MoveToGroupAsync(int studentId, MoveStudentDto dto, CancellationToken ct = default)
     {
-        _ = await _studentRepo.GetByIdAsync(studentId, ct)
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        var newGroup = await _groupRepo.GetByIdAsync(dto.NewGroupId, ct)
+        var newGroup = await _unitOfWork.Groups.GetByIdAsync(dto.NewGroupId, ct)
             ?? throw new NotFoundException(nameof(StudyGroup), dto.NewGroupId);
 
         if (dto.NewSubgroupId.HasValue && !newGroup.Subgroups.Any(sg => sg.SubgroupId == dto.NewSubgroupId.Value))
             throw new DomainException($"Subgroup {dto.NewSubgroupId.Value} does not belong to Group {dto.NewGroupId}.");
 
-        var current = await _enrollmentRepo.GetActiveByStudentIdAsync(studentId, ct)
+        var current = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, ct)
             ?? throw new DomainException($"Student {studentId} has no active enrollment to move from.");
 
         if (dto.MoveDate < current.DateFrom)
@@ -93,7 +85,7 @@ public class EnrollmentService : IEnrollmentService
 
         current.DateTo    = dto.MoveDate;
         current.ReasonEnd = dto.ReasonEnd;
-        await _enrollmentRepo.UpdateAsync(current, ct);
+        await _unitOfWork.Enrollments.UpdateAsync(current, ct);
 
         var newEnrollment = new StudentGroupEnrollment
         {
@@ -106,12 +98,13 @@ public class EnrollmentService : IEnrollmentService
                 : null
         };
 
-        await _enrollmentRepo.AddAsync(newEnrollment, ct);
+        await _unitOfWork.Enrollments.AddAsync(newEnrollment, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 
     public async Task AssignSubgroupAsync(int enrollmentId, AssignSubgroupDto dto, CancellationToken ct = default)
     {
-        var enrollment = await _enrollmentRepo.GetByIdAsync(enrollmentId, ct)
+        var enrollment = await _unitOfWork.Enrollments.GetByIdAsync(enrollmentId, ct)
             ?? throw new NotFoundException(nameof(StudentGroupEnrollment), enrollmentId);
 
         if (enrollment.DateTo.HasValue)
@@ -121,7 +114,8 @@ public class EnrollmentService : IEnrollmentService
         if (!isValidSubgroup)
             throw new DomainException($"Subgroup {dto.SubgroupId} does not belong to Group {enrollment.GroupId}.");
 
-        await _subgroupRepo.UpsertAsync(
+        await _unitOfWork.SubgroupAssignments.UpsertAsync(
             new StudentSubgroupAssignment { EnrollmentId = enrollmentId, SubgroupId = dto.SubgroupId }, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 }

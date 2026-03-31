@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using UniversityHistory.Domain.Common;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Interfaces.Repositories;
 using UniversityHistory.Infrastructure.Data;
@@ -13,7 +14,7 @@ public class StudentRepository : IStudentRepository
     public async Task<Student?> GetByIdAsync(int id, CancellationToken ct = default) =>
         await _db.Students.FindAsync(new object[] { id }, ct);
 
-    public async Task<(IEnumerable<Student> Items, int TotalCount)> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default)
+    public async Task<PagedData<Student>> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
         var query = _db.Students.AsNoTracking();
         var count = await query.CountAsync(ct);
@@ -21,20 +22,19 @@ public class StudentRepository : IStudentRepository
                                .Skip((page - 1) * pageSize)
                                .Take(pageSize)
                                .ToListAsync(ct);
-        return (items, count);
+        return new PagedData<Student>(items, count);
     }
 
     public async Task<Student> AddAsync(Student student, CancellationToken ct = default)
     {
         _db.Students.Add(student);
-        await _db.SaveChangesAsync(ct);
-        return student;
+        return await Task.FromResult(student);
     }
 
-    public async Task UpdateAsync(Student student, CancellationToken ct = default)
+    public Task UpdateAsync(Student student, CancellationToken ct = default)
     {
         _db.Students.Update(student);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
@@ -43,7 +43,6 @@ public class StudentRepository : IStudentRepository
         if (student is not null)
         {
             _db.Students.Remove(student);
-            await _db.SaveChangesAsync(ct);
         }
     }
 }

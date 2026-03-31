@@ -32,6 +32,7 @@ builder.Services.AddScoped<IStudyPlanRepository, StudyPlanRepository>();
 builder.Services.AddScoped<IGradeRepository, GradeRepository>();
 builder.Services.AddScoped<ISubgroupAssignmentRepository, SubgroupAssignmentRepository>();
 builder.Services.AddScoped<IDisciplineRepository, DisciplineRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IGetTimelineQueryHandler, GetTimelineQueryHandler>();
 builder.Services.AddScoped<IGetClassmatesQueryHandler, GetClassmatesQueryHandler>();

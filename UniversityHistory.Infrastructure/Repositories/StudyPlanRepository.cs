@@ -25,14 +25,13 @@ public class StudyPlanRepository : IStudyPlanRepository
     public async Task<StudentPlanAssignment> AddAssignmentAsync(StudentPlanAssignment assignment, CancellationToken ct = default)
     {
         _db.StudentPlanAssignments.Add(assignment);
-        await _db.SaveChangesAsync(ct);
-        return assignment;
+        return await Task.FromResult(assignment);
     }
 
-    public async Task UpdateAssignmentAsync(StudentPlanAssignment assignment, CancellationToken ct = default)
+    public Task UpdateAssignmentAsync(StudentPlanAssignment assignment, CancellationToken ct = default)
     {
         _db.StudentPlanAssignments.Update(assignment);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task<IEnumerable<StudyPlan>> GetAllPlansAsync(CancellationToken ct = default) =>
@@ -52,23 +51,22 @@ public class StudyPlanRepository : IStudyPlanRepository
     public async Task<StudyPlan> AddPlanAsync(StudyPlan plan, CancellationToken ct = default)
     {
         _db.StudyPlans.Add(plan);
-        await _db.SaveChangesAsync(ct);
-        return plan;
+        return await Task.FromResult(plan);
     }
 
-    public async Task UpdatePlanAsync(StudyPlan plan, CancellationToken ct = default)
+    public Task UpdatePlanAsync(StudyPlan plan, CancellationToken ct = default)
     {
         _db.StudyPlans.Update(plan);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> PlanHasAssignmentsAsync(int planId, CancellationToken ct = default) =>
         await _db.StudentPlanAssignments.AnyAsync(a => a.PlanId == planId, ct);
 
-    public async Task DeletePlanAsync(StudyPlan plan, CancellationToken ct = default)
+    public Task DeletePlanAsync(StudyPlan plan, CancellationToken ct = default)
     {
         _db.StudyPlans.Remove(plan);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task<PlanDiscipline?> GetPlanDisciplineAsync(int planId, int disciplineId, CancellationToken ct = default) =>
@@ -79,20 +77,19 @@ public class StudyPlanRepository : IStudyPlanRepository
     public async Task<PlanDiscipline> AddPlanDisciplineAsync(PlanDiscipline pd, CancellationToken ct = default)
     {
         _db.PlanDisciplines.Add(pd);
-        await _db.SaveChangesAsync(ct);
-        return pd;
+        return await Task.FromResult(pd);
     }
 
-    public async Task UpdatePlanDisciplineAsync(PlanDiscipline pd, CancellationToken ct = default)
+    public Task UpdatePlanDisciplineAsync(PlanDiscipline pd, CancellationToken ct = default)
     {
         _db.PlanDisciplines.Update(pd);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
-    public async Task DeletePlanDisciplineAsync(PlanDiscipline pd, CancellationToken ct = default)
+    public Task DeletePlanDisciplineAsync(PlanDiscipline pd, CancellationToken ct = default)
     {
         _db.PlanDisciplines.Remove(pd);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> PlanDisciplineIsUsedAsync(int planId, int disciplineId, CancellationToken ct = default) =>
