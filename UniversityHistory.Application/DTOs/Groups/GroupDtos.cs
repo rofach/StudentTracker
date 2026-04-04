@@ -16,13 +16,17 @@ public record CloseEnrollmentDto(
 public record GroupDto(
     int GroupId,
     string GroupCode,
-    string? Faculty
+    string DepartmentName,
+    string AcademicUnitName,
+    string AcademicUnitType
 );
 
 public record ActiveGroupDto(
     int GroupId,
     string GroupCode,
-    string? Faculty,
+    string DepartmentName,
+    string AcademicUnitName,
+    string AcademicUnitType,
     DateOnly DateCreated,
     DateOnly? DateClosed
 );
@@ -41,7 +45,9 @@ public record StudentCurrentGroupDto(
     int EnrollmentId,
     int GroupId,
     string GroupCode,
-    string? Faculty,
+    string DepartmentName,
+    string AcademicUnitName,
+    string AcademicUnitType,
     DateOnly DateFrom,
     DateOnly? DateTo
 );

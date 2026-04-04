@@ -11,6 +11,8 @@ public interface IUnitOfWork
     IGradeRepository Grades { get; }
     ISubgroupAssignmentRepository SubgroupAssignments { get; }
     IDisciplineRepository Disciplines { get; }
+    IAcademicUnitRepository AcademicUnits { get; }
+    IDepartmentRepository Departments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

@@ -9,10 +9,7 @@ namespace UniversityHistory.Infrastructure.Queries;
 public class GetStudentGroupOnDateQueryHandler : IGetStudentGroupOnDateQueryHandler
 {
     private readonly UniversityDbContext _db;
-    public GetStudentGroupOnDateQueryHandler(UniversityDbContext db)
-    {
-        _db = db;
-    }
+    public GetStudentGroupOnDateQueryHandler(UniversityDbContext db) => _db = db;
 
     public async Task<StudentCurrentGroupDto?> HandleAsync(
         GetStudentGroupOnDateQuery query, CancellationToken ct = default)
@@ -25,14 +22,18 @@ public class GetStudentGroupOnDateQueryHandler : IGetStudentGroupOnDateQueryHand
 
         return await _db.Database.SqlQuery<StudentCurrentGroupDto>($"""
             SELECT TOP 1
-                e.enrollment_id AS EnrollmentId,
-                e.group_id      AS GroupId,
-                g.group_code    AS GroupCode,
-                g.faculty       AS Faculty,
-                e.date_from     AS DateFrom,
-                e.date_to       AS DateTo
+                e.enrollment_id     AS EnrollmentId,
+                e.group_id          AS GroupId,
+                g.group_code        AS GroupCode,
+                d.name              AS DepartmentName,
+                au.name             AS AcademicUnitName,
+                au.type             AS AcademicUnitType,
+                e.date_from         AS DateFrom,
+                e.date_to           AS DateTo
             FROM Student_Group_Enrollment e
-            JOIN Study_Group g ON g.group_id = e.group_id
+            JOIN Study_Group g      ON g.group_id       = e.group_id
+            JOIN Department d       ON d.department_id  = g.department_id
+            JOIN Academic_Unit au   ON au.academic_unit_id = d.academic_unit_id
             WHERE e.student_id = {studentId}
               AND e.date_from <= {date}
               AND (e.date_to IS NULL OR e.date_to >= {date})

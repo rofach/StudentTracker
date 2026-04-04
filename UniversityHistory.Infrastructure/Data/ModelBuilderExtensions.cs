@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
@@ -9,208 +10,505 @@ public static class ModelBuilderExtensions
 {
     public static void Seed(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Institution>().HasData(
-            new Institution { InstitutionId = 1, InstitutionName = "MIT", City = "Cambridge", Country = "USA" },
-            new Institution { InstitutionId = 2, InstitutionName = "Stanford University", City = "Stanford", Country = "USA" },
-            new Institution { InstitutionId = 3, InstitutionName = "Kyiv Polytechnic Institute", City = "Kyiv", Country = "Ukraine" },
-            new Institution { InstitutionId = 4, InstitutionName = "Lviv Polytechnic", City = "Lviv", Country = "Ukraine" }
-        );
+        var institutions = new[]
+        {
+            new Institution { InstitutionId = 1, InstitutionName = "Національний технічний університет України \"Київський політехнічний інститут імені Ігоря Сікорського\"", City = "Київ", Country = "Україна" },
+            new Institution { InstitutionId = 2, InstitutionName = "Національний університет \"Львівська політехніка\"", City = "Львів", Country = "Україна" },
+            new Institution { InstitutionId = 3, InstitutionName = "Київський національний університет імені Тараса Шевченка", City = "Київ", Country = "Україна" },
+            new Institution { InstitutionId = 4, InstitutionName = "Харківський національний університет радіоелектроніки", City = "Харків", Country = "Україна" },
+            new Institution { InstitutionId = 5, InstitutionName = "Національний університет \"Одеська політехніка\"", City = "Одеса", Country = "Україна" },
+            new Institution { InstitutionId = 6, InstitutionName = "Національний університет \"Чернігівська політехніка\"", City = "Чернігів", Country = "Україна" }
+        };
 
-        modelBuilder.Entity<Discipline>().HasData(
-            new Discipline { DisciplineId = 1, DisciplineName = "Calculus I" },
-            new Discipline { DisciplineId = 2, DisciplineName = "Introduction to Computer Science" },
-            new Discipline { DisciplineId = 3, DisciplineName = "Data Structures" },
-            new Discipline { DisciplineId = 4, DisciplineName = "Linear Algebra" },
-            new Discipline { DisciplineId = 5, DisciplineName = "Discrete Mathematics" },
-            new Discipline { DisciplineId = 6, DisciplineName = "Databases" },
-            new Discipline { DisciplineId = 7, DisciplineName = "Operating Systems" },
-            new Discipline { DisciplineId = 8, DisciplineName = "Computer Networks" }
-        );
+        var disciplines = new[]
+        {
+            new Discipline { DisciplineId = 1, DisciplineName = "Вища математика" },
+            new Discipline { DisciplineId = 2, DisciplineName = "Основи програмування" },
+            new Discipline { DisciplineId = 3, DisciplineName = "Дискретна математика" },
+            new Discipline { DisciplineId = 4, DisciplineName = "Алгоритми та структури даних" },
+            new Discipline { DisciplineId = 5, DisciplineName = "Лінійна алгебра" },
+            new Discipline { DisciplineId = 6, DisciplineName = "Об'єктно-орієнтоване програмування" },
+            new Discipline { DisciplineId = 7, DisciplineName = "Бази даних" },
+            new Discipline { DisciplineId = 8, DisciplineName = "Операційні системи" },
+            new Discipline { DisciplineId = 9, DisciplineName = "Комп'ютерні мережі" },
+            new Discipline { DisciplineId = 10, DisciplineName = "Вебтехнології" },
+            new Discipline { DisciplineId = 11, DisciplineName = "Архітектура комп'ютерів" },
+            new Discipline { DisciplineId = 12, DisciplineName = "Теорія ймовірностей" }
+        };
 
-        modelBuilder.Entity<StudyPlan>().HasData(
-            new StudyPlan { PlanId = 1, SpecialtyCode = "CS-101", PlanName = "BSc Computer Science v1", ValidFrom = new DateOnly(2021, 9, 1) },
-            new StudyPlan { PlanId = 2, SpecialtyCode = "CS-102", PlanName = "BSc Computer Science v2", ValidFrom = new DateOnly(2023, 9, 1) }
-        );
+        var studyPlans = new[]
+        {
+            new StudyPlan { PlanId = 1, SpecialtyCode = "122", PlanName = "Комп'ютерні науки 2021", ValidFrom = new DateOnly(2021, 9, 1) },
+            new StudyPlan { PlanId = 2, SpecialtyCode = "121", PlanName = "Інженерія програмного забезпечення 2023", ValidFrom = new DateOnly(2023, 9, 1) },
+            new StudyPlan { PlanId = 3, SpecialtyCode = "123", PlanName = "Комп'ютерна інженерія 2024", ValidFrom = new DateOnly(2024, 9, 1) }
+        };
 
-        modelBuilder.Entity<PlanDiscipline>().HasData(
-            new PlanDiscipline { PlanId = 1, DisciplineId = 1, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = 1, DisciplineId = 2, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = 1, DisciplineId = 5, SemesterNo = 1, ControlType = ControlType.Credit, Hours = 90, Credits = 3.0m },
-            new PlanDiscipline { PlanId = 1, DisciplineId = 3, SemesterNo = 2, ControlType = ControlType.Coursework, Hours = 180, Credits = 6.0m },
-            new PlanDiscipline { PlanId = 1, DisciplineId = 4, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = 1, DisciplineId = 6, SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = 1, DisciplineId = 7, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+        var planDisciplines = new[]
+        {
+            new PlanDiscipline { PlanId = 1, DisciplineId = 1, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 2, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 3, SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 5, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 4, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 6, SemesterNo = 3, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 7, SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 12, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 8, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 10, SemesterNo = 5, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 1, DisciplineId = 9, SemesterNo = 5, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
 
-            new PlanDiscipline { PlanId = 2, DisciplineId = 1, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = 2, DisciplineId = 2, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = 2, DisciplineId = 4, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = 2, DisciplineId = 5, SemesterNo = 2, ControlType = ControlType.Credit, Hours = 90, Credits = 3.0m },
-            new PlanDiscipline { PlanId = 2, DisciplineId = 6, SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = 2, DisciplineId = 8, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m }
-        );
+            new PlanDiscipline { PlanId = 2, DisciplineId = 1, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 2, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 3, SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 5, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 6, SemesterNo = 2, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 7, SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 10, SemesterNo = 3, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 8, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 2, DisciplineId = 9, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
 
-        modelBuilder.Entity<StudyGroup>().HasData(
-            new StudyGroup { GroupId = 1, GroupCode = "CS-21", Faculty = "Computer Science", DateCreated = new DateOnly(2021, 9, 1), DateClosed = null },
-            new StudyGroup { GroupId = 2, GroupCode = "CS-22", Faculty = "Computer Science", DateCreated = new DateOnly(2022, 9, 1), DateClosed = null },
-            new StudyGroup { GroupId = 3, GroupCode = "CS-23", Faculty = "Computer Science", DateCreated = new DateOnly(2023, 9, 1), DateClosed = null },
-            new StudyGroup { GroupId = 4, GroupCode = "CS-24", Faculty = "Computer Science", DateCreated = new DateOnly(2024, 9, 1), DateClosed = null },
-            new StudyGroup { GroupId = 5, GroupCode = "CS-25", Faculty = "Computer Science", DateCreated = new DateOnly(2025, 9, 1), DateClosed = null }
-        );
+            new PlanDiscipline { PlanId = 3, DisciplineId = 1, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 2, SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 5, SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 11, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 4, SemesterNo = 2, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 8, SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 9, SemesterNo = 3, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanId = 3, DisciplineId = 7, SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m }
+        };
 
-        modelBuilder.Entity<Subgroup>().HasData(
-            new Subgroup { SubgroupId = 1, GroupId = 1, SubgroupName = "Subgroup A" },
-            new Subgroup { SubgroupId = 2, GroupId = 1, SubgroupName = "Subgroup B" },
-            new Subgroup { SubgroupId = 3, GroupId = 2, SubgroupName = "Subgroup A" },
-            new Subgroup { SubgroupId = 4, GroupId = 3, SubgroupName = "Subgroup A" },
-            new Subgroup { SubgroupId = 5, GroupId = 4, SubgroupName = "Subgroup A" },
-            new Subgroup { SubgroupId = 6, GroupId = 4, SubgroupName = "Subgroup B" },
-            new Subgroup { SubgroupId = 7, GroupId = 5, SubgroupName = "Subgroup A" }
-        );
+        var academicUnits = new[]
+        {
+            new AcademicUnit { AcademicUnitId = 1, Name = "Факультет інформатики та обчислювальної техніки", Type = AcademicUnitType.Faculty },
+            new AcademicUnit { AcademicUnitId = 2, Name = "Факультет прикладної математики", Type = AcademicUnitType.Faculty },
+            new AcademicUnit { AcademicUnitId = 3, Name = "Факультет комп'ютерної інженерії", Type = AcademicUnitType.Faculty }
+        };
 
-        modelBuilder.Entity<Student>().HasData(
-            new Student { StudentId = 1, FirstName = "Alice", LastName = "Smith", BirthDate = new DateOnly(2003, 5, 14), Email = "alice@example.com", Phone = "555-0101", Status = StudentStatus.Active },
-            new Student { StudentId = 2, FirstName = "Bob", LastName = "Johnson", BirthDate = new DateOnly(2002, 11, 2), Email = "bob@example.com", Phone = "555-0102", Status = StudentStatus.Graduated },
-            new Student { StudentId = 3, FirstName = "Charlie", LastName = "Williams", BirthDate = new DateOnly(2004, 8, 22), Email = "charlie@example.com", Phone = "555-0103", Status = StudentStatus.OnLeave },
-            new Student { StudentId = 4, FirstName = "Diana", LastName = "Brown", BirthDate = new DateOnly(2003, 1, 30), Email = "diana@example.com", Phone = "555-0104", Status = StudentStatus.Active },
-            new Student { StudentId = 5, FirstName = "Evan", LastName = "Davis", BirthDate = new DateOnly(2003, 3, 2), Email = "evan@example.com", Phone = "555-0105", Status = StudentStatus.Active },
-            new Student { StudentId = 6, FirstName = "Fiona", LastName = "Miller", BirthDate = new DateOnly(2004, 2, 19), Email = "fiona@example.com", Phone = "555-0106", Status = StudentStatus.Active },
-            new Student { StudentId = 7, FirstName = "George", LastName = "Wilson", BirthDate = new DateOnly(2002, 9, 9), Email = "george@example.com", Phone = "555-0107", Status = StudentStatus.Graduated },
-            new Student { StudentId = 8, FirstName = "Hannah", LastName = "Moore", BirthDate = new DateOnly(2004, 6, 10), Email = "hannah@example.com", Phone = "555-0108", Status = StudentStatus.OnLeave },
-            new Student { StudentId = 9, FirstName = "Ivan", LastName = "Taylor", BirthDate = new DateOnly(2003, 12, 1), Email = "ivan@example.com", Phone = "555-0109", Status = StudentStatus.Expelled },
-            new Student { StudentId = 10, FirstName = "Julia", LastName = "Anderson", BirthDate = new DateOnly(2005, 4, 11), Email = "julia@example.com", Phone = "555-0110", Status = StudentStatus.Active },
-            new Student { StudentId = 11, FirstName = "Kevin", LastName = "Thomas", BirthDate = new DateOnly(2004, 8, 5), Email = "kevin@example.com", Phone = "555-0111", Status = StudentStatus.Active },
-            new Student { StudentId = 12, FirstName = "Laura", LastName = "Jackson", BirthDate = new DateOnly(2002, 5, 23), Email = "laura@example.com", Phone = "555-0112", Status = StudentStatus.Graduated }
-        );
+        var departments = new[]
+        {
+            new Department { DepartmentId = 1, AcademicUnitId = 1, Name = "Кафедра програмування" },
+            new Department { DepartmentId = 2, AcademicUnitId = 1, Name = "Кафедра комп'ютерних наук" },
+            new Department { DepartmentId = 3, AcademicUnitId = 2, Name = "Кафедра прикладної математики" },
+            new Department { DepartmentId = 4, AcademicUnitId = 2, Name = "Кафедра програмного забезпечення" },
+            new Department { DepartmentId = 5, AcademicUnitId = 3, Name = "Кафедра комп'ютерної інженерії" },
+            new Department { DepartmentId = 6, AcademicUnitId = 3, Name = "Кафедра вбудованих систем" }
+        };
 
-        modelBuilder.Entity<StudentGroupEnrollment>().HasData(
-            new StudentGroupEnrollment { EnrollmentId = 1, StudentId = 1, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2022, 6, 30), ReasonStart = "Admission", ReasonEnd = "Transfer to new group" },
-            new StudentGroupEnrollment { EnrollmentId = 2, StudentId = 1, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = null, ReasonStart = "Transfer", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 3, StudentId = 2, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2024, 6, 30), ReasonStart = "Admission", ReasonEnd = "Graduation" },
-            new StudentGroupEnrollment { EnrollmentId = 4, StudentId = 3, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2023, 1, 15), ReasonStart = "Admission", ReasonEnd = "Academic Leave" },
-            new StudentGroupEnrollment { EnrollmentId = 5, StudentId = 4, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Admission", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 6, StudentId = 5, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Transfer", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 7, StudentId = 6, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Admission", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 8, StudentId = 7, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2025, 6, 30), ReasonStart = "Admission", ReasonEnd = "Graduation" },
-            new StudentGroupEnrollment { EnrollmentId = 9, StudentId = 8, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Admission", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 10, StudentId = 9, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = new DateOnly(2024, 12, 20), ReasonStart = "Admission", ReasonEnd = "Expelled" },
-            new StudentGroupEnrollment { EnrollmentId = 11, StudentId = 10, GroupId = 5, DateFrom = new DateOnly(2025, 9, 1), DateTo = null, ReasonStart = "Admission", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 12, StudentId = 11, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Transfer", ReasonEnd = null },
-            new StudentGroupEnrollment { EnrollmentId = 13, StudentId = 12, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2024, 6, 30), ReasonStart = "Admission", ReasonEnd = "Graduation" },
-            new StudentGroupEnrollment { EnrollmentId = 14, StudentId = 5, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2023, 6, 30), ReasonStart = "Admission", ReasonEnd = "Transfer to new group" }
-        );
+        var studyGroups = new[]
+        {
+            new StudyGroup { GroupId = 1, GroupCode = "КН-21", DepartmentId = 1, DateCreated = new DateOnly(2021, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 2, GroupCode = "КН-22", DepartmentId = 2, DateCreated = new DateOnly(2022, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 3, GroupCode = "ПЗ-23", DepartmentId = 4, DateCreated = new DateOnly(2023, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 4, GroupCode = "КІ-24", DepartmentId = 5, DateCreated = new DateOnly(2024, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 5, GroupCode = "ПЗ-24", DepartmentId = 4, DateCreated = new DateOnly(2024, 9, 1), DateClosed = null },
+            new StudyGroup { GroupId = 6, GroupCode = "КІ-25", DepartmentId = 5, DateCreated = new DateOnly(2025, 9, 1), DateClosed = null }
+        };
 
-        modelBuilder.Entity<StudentSubgroupAssignment>().HasData(
+        var subgroups = new[]
+        {
+            new Subgroup { SubgroupId = 1, GroupId = 1, SubgroupName = "Підгрупа 1" },
+            new Subgroup { SubgroupId = 2, GroupId = 1, SubgroupName = "Підгрупа 2" },
+            new Subgroup { SubgroupId = 3, GroupId = 2, SubgroupName = "Підгрупа 1" },
+            new Subgroup { SubgroupId = 4, GroupId = 2, SubgroupName = "Підгрупа 2" },
+            new Subgroup { SubgroupId = 5, GroupId = 3, SubgroupName = "Підгрупа 1" },
+            new Subgroup { SubgroupId = 6, GroupId = 3, SubgroupName = "Підгрупа 2" },
+            new Subgroup { SubgroupId = 7, GroupId = 4, SubgroupName = "Підгрупа 1" },
+            new Subgroup { SubgroupId = 8, GroupId = 4, SubgroupName = "Підгрупа 2" },
+            new Subgroup { SubgroupId = 9, GroupId = 5, SubgroupName = "Підгрупа 1" },
+            new Subgroup { SubgroupId = 10, GroupId = 5, SubgroupName = "Підгрупа 2" },
+            new Subgroup { SubgroupId = 11, GroupId = 6, SubgroupName = "Підгрупа 1" },
+            new Subgroup { SubgroupId = 12, GroupId = 6, SubgroupName = "Підгрупа 2" }
+        };
+
+        var students = new[]
+        {
+            new Student { StudentId = 1, FirstName = "Андрій", LastName = "Мельник", BirthDate = new DateOnly(2003, 4, 15), Email = "andrii.melnyk@campus.ua", Phone = "+380671000001", Status = StudentStatus.Active },
+            new Student { StudentId = 2, FirstName = "Олена", LastName = "Коваль", BirthDate = new DateOnly(2002, 9, 3), Email = "olena.koval@campus.ua", Phone = "+380671000002", Status = StudentStatus.Graduated },
+            new Student { StudentId = 3, FirstName = "Максим", LastName = "Шевченко", BirthDate = new DateOnly(2004, 1, 27), Email = "maksym.shevchenko@campus.ua", Phone = "+380671000003", Status = StudentStatus.Active },
+            new Student { StudentId = 4, FirstName = "Ірина", LastName = "Бойко", BirthDate = new DateOnly(2004, 6, 11), Email = "iryna.boiko@campus.ua", Phone = "+380671000004", Status = StudentStatus.Active },
+            new Student { StudentId = 5, FirstName = "Богдан", LastName = "Ткаченко", BirthDate = new DateOnly(2004, 12, 1), Email = "bohdan.tkachenko@campus.ua", Phone = "+380671000005", Status = StudentStatus.OnLeave },
+            new Student { StudentId = 6, FirstName = "Марія", LastName = "Кравець", BirthDate = new DateOnly(2004, 2, 18), Email = "mariia.kravets@campus.ua", Phone = "+380671000006", Status = StudentStatus.Active },
+            new Student { StudentId = 7, FirstName = "Дмитро", LastName = "Поліщук", BirthDate = new DateOnly(2004, 8, 5), Email = "dmytro.polishchuk@campus.ua", Phone = "+380671000007", Status = StudentStatus.Active },
+            new Student { StudentId = 8, FirstName = "Наталія", LastName = "Савчук", BirthDate = new DateOnly(2004, 11, 22), Email = "nataliia.savchuk@campus.ua", Phone = "+380671000008", Status = StudentStatus.Active },
+            new Student { StudentId = 9, FirstName = "Владислав", LastName = "Романюк", BirthDate = new DateOnly(2003, 7, 14), Email = "vladyslav.romaniuk@campus.ua", Phone = "+380671000009", Status = StudentStatus.Active },
+            new Student { StudentId = 10, FirstName = "Софія", LastName = "Козак", BirthDate = new DateOnly(2005, 3, 8), Email = "sofiia.kozak@campus.ua", Phone = "+380671000010", Status = StudentStatus.Active },
+            new Student { StudentId = 11, FirstName = "Артем", LastName = "Литвин", BirthDate = new DateOnly(2005, 9, 21), Email = "artem.lytvyn@campus.ua", Phone = "+380671000011", Status = StudentStatus.Active },
+            new Student { StudentId = 12, FirstName = "Катерина", LastName = "Павленко", BirthDate = new DateOnly(2005, 5, 12), Email = "kateryna.pavlenko@campus.ua", Phone = "+380671000012", Status = StudentStatus.Active },
+            new Student { StudentId = 13, FirstName = "Юрій", LastName = "Мороз", BirthDate = new DateOnly(2002, 2, 17), Email = "yurii.moroz@campus.ua", Phone = "+380671000013", Status = StudentStatus.Graduated },
+            new Student { StudentId = 14, FirstName = "Анастасія", LastName = "Іванчук", BirthDate = new DateOnly(2005, 1, 30), Email = "anastasiia.ivanchuk@campus.ua", Phone = "+380671000014", Status = StudentStatus.Active },
+            new Student { StudentId = 15, FirstName = "Денис", LastName = "Олійник", BirthDate = new DateOnly(2004, 10, 6), Email = "denys.oliinyk@campus.ua", Phone = "+380671000015", Status = StudentStatus.Expelled },
+            new Student { StudentId = 16, FirstName = "Вероніка", LastName = "Гнатюк", BirthDate = new DateOnly(2005, 7, 19), Email = "veronika.hnatiuk@campus.ua", Phone = "+380671000016", Status = StudentStatus.Active },
+            new Student { StudentId = 17, FirstName = "Тарас", LastName = "Бондар", BirthDate = new DateOnly(2004, 4, 2), Email = "taras.bondar@campus.ua", Phone = "+380671000017", Status = StudentStatus.Active },
+            new Student { StudentId = 18, FirstName = "Христина", LastName = "Федорук", BirthDate = new DateOnly(2005, 8, 9), Email = "khrystyna.fedoruk@campus.ua", Phone = "+380671000018", Status = StudentStatus.OnLeave },
+            new Student { StudentId = 19, FirstName = "Роман", LastName = "Сорока", BirthDate = new DateOnly(2004, 3, 25), Email = "roman.soroka@campus.ua", Phone = "+380671000019", Status = StudentStatus.Active },
+            new Student { StudentId = 20, FirstName = "Дарина", LastName = "Мазур", BirthDate = new DateOnly(2005, 11, 13), Email = "daryna.mazur@campus.ua", Phone = "+380671000020", Status = StudentStatus.Active },
+            new Student { StudentId = 21, FirstName = "Павло", LastName = "Дяченко", BirthDate = new DateOnly(2006, 2, 16), Email = "pavlo.diachenko@campus.ua", Phone = "+380671000021", Status = StudentStatus.Active },
+            new Student { StudentId = 22, FirstName = "Юлія", LastName = "Власенко", BirthDate = new DateOnly(2006, 4, 1), Email = "yuliia.vlasenko@campus.ua", Phone = "+380671000022", Status = StudentStatus.Active },
+            new Student { StudentId = 23, FirstName = "Ілля", LastName = "Ковтун", BirthDate = new DateOnly(2006, 6, 6), Email = "illia.kovtun@campus.ua", Phone = "+380671000023", Status = StudentStatus.Active },
+            new Student { StudentId = 24, FirstName = "Оксана", LastName = "Чумак", BirthDate = new DateOnly(2005, 9, 28), Email = "oksana.chumak@campus.ua", Phone = "+380671000024", Status = StudentStatus.Active }
+        };
+
+        var enrollments = new[]
+        {
+            new StudentGroupEnrollment { EnrollmentId = 1, StudentId = 1, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2022, 8, 31), ReasonStart = "Вступ", ReasonEnd = "Переведення" },
+            new StudentGroupEnrollment { EnrollmentId = 2, StudentId = 1, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = null, ReasonStart = "Переведення", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 3, StudentId = 2, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30), ReasonStart = "Вступ", ReasonEnd = "Випуск" },
+            new StudentGroupEnrollment { EnrollmentId = 4, StudentId = 3, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 5, StudentId = 4, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 6, StudentId = 5, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = new DateOnly(2024, 1, 31), ReasonStart = "Вступ", ReasonEnd = "Академвідпустка" },
+            new StudentGroupEnrollment { EnrollmentId = 7, StudentId = 6, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 8, StudentId = 7, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 9, StudentId = 8, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 10, StudentId = 9, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 11, StudentId = 10, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 12, StudentId = 11, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 13, StudentId = 12, GroupId = 5, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 14, StudentId = 13, GroupId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30), ReasonStart = "Вступ", ReasonEnd = "Випуск" },
+            new StudentGroupEnrollment { EnrollmentId = 15, StudentId = 14, GroupId = 5, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 16, StudentId = 15, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = new DateOnly(2025, 2, 14), ReasonStart = "Вступ", ReasonEnd = "Відрахування" },
+            new StudentGroupEnrollment { EnrollmentId = 17, StudentId = 16, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 18, StudentId = 17, GroupId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2024, 8, 31), ReasonStart = "Вступ", ReasonEnd = "Переведення" },
+            new StudentGroupEnrollment { EnrollmentId = 19, StudentId = 17, GroupId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Переведення", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 20, StudentId = 18, GroupId = 5, DateFrom = new DateOnly(2024, 9, 1), DateTo = new DateOnly(2025, 2, 1), ReasonStart = "Вступ", ReasonEnd = "Академвідпустка" },
+            new StudentGroupEnrollment { EnrollmentId = 21, StudentId = 19, GroupId = 3, DateFrom = new DateOnly(2023, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 22, StudentId = 20, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 23, StudentId = 21, GroupId = 6, DateFrom = new DateOnly(2025, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 24, StudentId = 22, GroupId = 6, DateFrom = new DateOnly(2025, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 25, StudentId = 23, GroupId = 6, DateFrom = new DateOnly(2025, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null },
+            new StudentGroupEnrollment { EnrollmentId = 26, StudentId = 24, GroupId = 4, DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null }
+        };
+
+        var subgroupAssignments = new[]
+        {
             new StudentSubgroupAssignment { EnrollmentId = 1, SubgroupId = 1 },
             new StudentSubgroupAssignment { EnrollmentId = 2, SubgroupId = 3 },
             new StudentSubgroupAssignment { EnrollmentId = 3, SubgroupId = 2 },
-            new StudentSubgroupAssignment { EnrollmentId = 6, SubgroupId = 4 },
-            new StudentSubgroupAssignment { EnrollmentId = 7, SubgroupId = 5 },
-            new StudentSubgroupAssignment { EnrollmentId = 8, SubgroupId = 3 },
+            new StudentSubgroupAssignment { EnrollmentId = 4, SubgroupId = 4 },
+            new StudentSubgroupAssignment { EnrollmentId = 5, SubgroupId = 5 },
+            new StudentSubgroupAssignment { EnrollmentId = 7, SubgroupId = 6 },
+            new StudentSubgroupAssignment { EnrollmentId = 8, SubgroupId = 5 },
             new StudentSubgroupAssignment { EnrollmentId = 9, SubgroupId = 6 },
+            new StudentSubgroupAssignment { EnrollmentId = 10, SubgroupId = 5 },
             new StudentSubgroupAssignment { EnrollmentId = 11, SubgroupId = 7 },
-            new StudentSubgroupAssignment { EnrollmentId = 12, SubgroupId = 5 },
-            new StudentSubgroupAssignment { EnrollmentId = 13, SubgroupId = 2 },
-            new StudentSubgroupAssignment { EnrollmentId = 14, SubgroupId = 3 }
-        );
+            new StudentSubgroupAssignment { EnrollmentId = 12, SubgroupId = 8 },
+            new StudentSubgroupAssignment { EnrollmentId = 13, SubgroupId = 9 },
+            new StudentSubgroupAssignment { EnrollmentId = 14, SubgroupId = 1 },
+            new StudentSubgroupAssignment { EnrollmentId = 15, SubgroupId = 10 },
+            new StudentSubgroupAssignment { EnrollmentId = 17, SubgroupId = 8 },
+            new StudentSubgroupAssignment { EnrollmentId = 18, SubgroupId = 3 },
+            new StudentSubgroupAssignment { EnrollmentId = 19, SubgroupId = 6 },
+            new StudentSubgroupAssignment { EnrollmentId = 20, SubgroupId = 9 },
+            new StudentSubgroupAssignment { EnrollmentId = 21, SubgroupId = 6 },
+            new StudentSubgroupAssignment { EnrollmentId = 22, SubgroupId = 7 },
+            new StudentSubgroupAssignment { EnrollmentId = 23, SubgroupId = 11 },
+            new StudentSubgroupAssignment { EnrollmentId = 24, SubgroupId = 12 },
+            new StudentSubgroupAssignment { EnrollmentId = 25, SubgroupId = 11 },
+            new StudentSubgroupAssignment { EnrollmentId = 26, SubgroupId = 8 }
+        };
 
-        modelBuilder.Entity<AcademicLeave>().HasData(
-            new AcademicLeave { LeaveId = 1, EnrollmentId = 4, StartDate = new DateOnly(2023, 1, 16), EndDate = null, Reason = "Medical leave" },
-            new AcademicLeave { LeaveId = 2, EnrollmentId = 8, StartDate = new DateOnly(2023, 11, 10), EndDate = new DateOnly(2024, 2, 10), Reason = "Internship pause" },
-            new AcademicLeave { LeaveId = 3, EnrollmentId = 9, StartDate = new DateOnly(2025, 2, 1), EndDate = null, Reason = "Family circumstances" }
-        );
+        var academicLeaves = new[]
+        {
+            new AcademicLeave { LeaveId = 1, EnrollmentId = 6, StartDate = new DateOnly(2024, 2, 1), EndDate = null, Reason = "Стан здоров'я" },
+            new AcademicLeave { LeaveId = 2, EnrollmentId = 20, StartDate = new DateOnly(2025, 2, 2), EndDate = null, Reason = "Сімейні обставини" },
+            new AcademicLeave { LeaveId = 3, EnrollmentId = 9, StartDate = new DateOnly(2024, 11, 4), EndDate = new DateOnly(2025, 1, 20), Reason = "Програма академічної мобільності" }
+        };
 
-        modelBuilder.Entity<ExternalTransfer>().HasData(
-            new ExternalTransfer { TransferId = 1, StudentId = 4, InstitutionId = 2, TransferType = TransferType.In, TransferDate = new DateOnly(2023, 8, 25), Notes = "Completed first year at Stanford" },
-            new ExternalTransfer { TransferId = 2, StudentId = 11, InstitutionId = 3, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 20), Notes = "Transferred after first semester" },
-            new ExternalTransfer { TransferId = 3, StudentId = 12, InstitutionId = 4, TransferType = TransferType.Out, TransferDate = new DateOnly(2024, 7, 1), Notes = "Started master's program" }
-        );
+        var externalTransfers = new[]
+        {
+            new ExternalTransfer { TransferId = 1, StudentId = 4, InstitutionId = 4, TransferType = TransferType.In, TransferDate = new DateOnly(2023, 8, 25), Notes = "Переведення після другого семестру" },
+            new ExternalTransfer { TransferId = 2, StudentId = 11, InstitutionId = 3, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 28), Notes = "Продовження навчання після переїзду" },
+            new ExternalTransfer { TransferId = 3, StudentId = 13, InstitutionId = 2, TransferType = TransferType.Out, TransferDate = new DateOnly(2025, 7, 2), Notes = "Подальше навчання в магістратурі" },
+            new ExternalTransfer { TransferId = 4, StudentId = 24, InstitutionId = 6, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 26), Notes = "Переведення з іншого закладу" }
+        };
 
-        modelBuilder.Entity<StudentPlanAssignment>().HasData(
+        var planAssignments = new[]
+        {
             new StudentPlanAssignment { AssignmentId = 1, StudentId = 1, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 2, StudentId = 2, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2024, 6, 30) },
-            new StudentPlanAssignment { AssignmentId = 3, StudentId = 3, PlanId = 2, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 2, StudentId = 2, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30) },
+            new StudentPlanAssignment { AssignmentId = 3, StudentId = 3, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
             new StudentPlanAssignment { AssignmentId = 4, StudentId = 4, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 5, StudentId = 5, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 6, StudentId = 6, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 7, StudentId = 7, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2025, 6, 30) },
-            new StudentPlanAssignment { AssignmentId = 8, StudentId = 8, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 9, StudentId = 10, PlanId = 2, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 10, StudentId = 11, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 11, StudentId = 12, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2024, 6, 30) },
-            new StudentPlanAssignment { AssignmentId = 12, StudentId = 9, PlanId = 1, DateFrom = new DateOnly(2023, 9, 1), DateTo = new DateOnly(2024, 12, 20) }
-        );
+            new StudentPlanAssignment { AssignmentId = 5, StudentId = 5, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 6, StudentId = 6, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 7, StudentId = 7, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 8, StudentId = 8, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 9, StudentId = 9, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 10, StudentId = 10, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 11, StudentId = 11, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 12, StudentId = 12, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 13, StudentId = 13, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30) },
+            new StudentPlanAssignment { AssignmentId = 14, StudentId = 14, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 15, StudentId = 15, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = new DateOnly(2025, 2, 14) },
+            new StudentPlanAssignment { AssignmentId = 16, StudentId = 16, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 17, StudentId = 17, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 18, StudentId = 18, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 19, StudentId = 19, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 20, StudentId = 20, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 21, StudentId = 21, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 22, StudentId = 22, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 23, StudentId = 23, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
+            new StudentPlanAssignment { AssignmentId = 24, StudentId = 24, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null }
+        };
 
-        modelBuilder.Entity<StudentCourseEnrollment>().HasData(
-            new StudentCourseEnrollment { CourseEnrollmentId = 1, AssignmentId = 1, DisciplineId = 1, AcademicYearStart = 2021, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 2, AssignmentId = 1, DisciplineId = 2, AcademicYearStart = 2021, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 3, AssignmentId = 2, DisciplineId = 1, AcademicYearStart = 2021, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 4, AssignmentId = 1, DisciplineId = 3, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 5, AssignmentId = 1, DisciplineId = 4, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 6, AssignmentId = 1, DisciplineId = 6, AcademicYearStart = 2023, Status = CourseStatus.InProgress },
-            new StudentCourseEnrollment { CourseEnrollmentId = 7, AssignmentId = 2, DisciplineId = 2, AcademicYearStart = 2021, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 8, AssignmentId = 2, DisciplineId = 3, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 9, AssignmentId = 2, DisciplineId = 4, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 10, AssignmentId = 4, DisciplineId = 1, AcademicYearStart = 2023, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 11, AssignmentId = 4, DisciplineId = 2, AcademicYearStart = 2023, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 12, AssignmentId = 4, DisciplineId = 4, AcademicYearStart = 2024, Status = CourseStatus.InProgress },
-            new StudentCourseEnrollment { CourseEnrollmentId = 13, AssignmentId = 5, DisciplineId = 1, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 14, AssignmentId = 5, DisciplineId = 2, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 15, AssignmentId = 5, DisciplineId = 3, AcademicYearStart = 2023, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 16, AssignmentId = 5, DisciplineId = 6, AcademicYearStart = 2024, Status = CourseStatus.Planned },
-            new StudentCourseEnrollment { CourseEnrollmentId = 17, AssignmentId = 6, DisciplineId = 1, AcademicYearStart = 2024, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 18, AssignmentId = 6, DisciplineId = 2, AcademicYearStart = 2024, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 19, AssignmentId = 6, DisciplineId = 4, AcademicYearStart = 2025, Status = CourseStatus.InProgress },
-            new StudentCourseEnrollment { CourseEnrollmentId = 20, AssignmentId = 7, DisciplineId = 1, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 21, AssignmentId = 7, DisciplineId = 2, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 22, AssignmentId = 7, DisciplineId = 3, AcademicYearStart = 2023, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 23, AssignmentId = 7, DisciplineId = 4, AcademicYearStart = 2023, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 24, AssignmentId = 7, DisciplineId = 6, AcademicYearStart = 2024, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 25, AssignmentId = 8, DisciplineId = 1, AcademicYearStart = 2024, Status = CourseStatus.Retake },
-            new StudentCourseEnrollment { CourseEnrollmentId = 26, AssignmentId = 8, DisciplineId = 2, AcademicYearStart = 2024, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 27, AssignmentId = 9, DisciplineId = 1, AcademicYearStart = 2025, Status = CourseStatus.InProgress },
-            new StudentCourseEnrollment { CourseEnrollmentId = 28, AssignmentId = 9, DisciplineId = 5, AcademicYearStart = 2025, Status = CourseStatus.Planned },
-            new StudentCourseEnrollment { CourseEnrollmentId = 29, AssignmentId = 10, DisciplineId = 1, AcademicYearStart = 2024, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 30, AssignmentId = 10, DisciplineId = 2, AcademicYearStart = 2024, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 31, AssignmentId = 10, DisciplineId = 8, AcademicYearStart = 2025, Status = CourseStatus.InProgress },
-            new StudentCourseEnrollment { CourseEnrollmentId = 32, AssignmentId = 11, DisciplineId = 1, AcademicYearStart = 2021, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 33, AssignmentId = 11, DisciplineId = 2, AcademicYearStart = 2021, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 34, AssignmentId = 11, DisciplineId = 3, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 35, AssignmentId = 11, DisciplineId = 4, AcademicYearStart = 2022, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 36, AssignmentId = 12, DisciplineId = 1, AcademicYearStart = 2023, Status = CourseStatus.Completed },
-            new StudentCourseEnrollment { CourseEnrollmentId = 37, AssignmentId = 12, DisciplineId = 2, AcademicYearStart = 2023, Status = CourseStatus.Retake }
-        );
+        var courseEnrollments = new List<StudentCourseEnrollment>();
+        var gradeRecords = new List<GradeRecord>();
+        var nextCourseEnrollmentId = 1;
+        var nextGradeId = 1;
 
-        modelBuilder.Entity<GradeRecord>().HasData(
-            new GradeRecord { GradeId = 1, CourseEnrollmentId = 1, GradeValue = "95", AssessmentDate = new DateOnly(2022, 1, 15) },
-            new GradeRecord { GradeId = 2, CourseEnrollmentId = 2, GradeValue = "88", AssessmentDate = new DateOnly(2022, 1, 18) },
-            new GradeRecord { GradeId = 3, CourseEnrollmentId = 3, GradeValue = "91", AssessmentDate = new DateOnly(2022, 1, 15) },
-            new GradeRecord { GradeId = 4, CourseEnrollmentId = 4, GradeValue = "89", AssessmentDate = new DateOnly(2022, 6, 10) },
-            new GradeRecord { GradeId = 5, CourseEnrollmentId = 5, GradeValue = "84", AssessmentDate = new DateOnly(2022, 6, 14) },
-            new GradeRecord { GradeId = 6, CourseEnrollmentId = 7, GradeValue = "90", AssessmentDate = new DateOnly(2022, 1, 16) },
-            new GradeRecord { GradeId = 7, CourseEnrollmentId = 8, GradeValue = "86", AssessmentDate = new DateOnly(2022, 6, 12) },
-            new GradeRecord { GradeId = 8, CourseEnrollmentId = 9, GradeValue = "79", AssessmentDate = new DateOnly(2022, 6, 15) },
-            new GradeRecord { GradeId = 9, CourseEnrollmentId = 10, GradeValue = "92", AssessmentDate = new DateOnly(2024, 1, 20) },
-            new GradeRecord { GradeId = 10, CourseEnrollmentId = 11, GradeValue = "87", AssessmentDate = new DateOnly(2024, 1, 22) },
-            new GradeRecord { GradeId = 11, CourseEnrollmentId = 13, GradeValue = "81", AssessmentDate = new DateOnly(2023, 1, 18) },
-            new GradeRecord { GradeId = 12, CourseEnrollmentId = 14, GradeValue = "85", AssessmentDate = new DateOnly(2023, 1, 20) },
-            new GradeRecord { GradeId = 13, CourseEnrollmentId = 15, GradeValue = "88", AssessmentDate = new DateOnly(2023, 6, 19) },
-            new GradeRecord { GradeId = 14, CourseEnrollmentId = 17, GradeValue = "93", AssessmentDate = new DateOnly(2025, 1, 21) },
-            new GradeRecord { GradeId = 15, CourseEnrollmentId = 18, GradeValue = "89", AssessmentDate = new DateOnly(2025, 1, 23) },
-            new GradeRecord { GradeId = 16, CourseEnrollmentId = 20, GradeValue = "76", AssessmentDate = new DateOnly(2023, 1, 19) },
-            new GradeRecord { GradeId = 17, CourseEnrollmentId = 21, GradeValue = "82", AssessmentDate = new DateOnly(2023, 1, 22) },
-            new GradeRecord { GradeId = 18, CourseEnrollmentId = 22, GradeValue = "80", AssessmentDate = new DateOnly(2023, 6, 15) },
-            new GradeRecord { GradeId = 19, CourseEnrollmentId = 23, GradeValue = "78", AssessmentDate = new DateOnly(2023, 6, 20) },
-            new GradeRecord { GradeId = 20, CourseEnrollmentId = 24, GradeValue = "84", AssessmentDate = new DateOnly(2024, 12, 18) },
-            new GradeRecord { GradeId = 21, CourseEnrollmentId = 25, GradeValue = "74", AssessmentDate = new DateOnly(2025, 1, 28) },
-            new GradeRecord { GradeId = 22, CourseEnrollmentId = 26, GradeValue = "83", AssessmentDate = new DateOnly(2025, 1, 25) },
-            new GradeRecord { GradeId = 23, CourseEnrollmentId = 29, GradeValue = "91", AssessmentDate = new DateOnly(2025, 1, 24) },
-            new GradeRecord { GradeId = 24, CourseEnrollmentId = 30, GradeValue = "88", AssessmentDate = new DateOnly(2025, 1, 26) },
-            new GradeRecord { GradeId = 25, CourseEnrollmentId = 32, GradeValue = "94", AssessmentDate = new DateOnly(2022, 1, 18) },
-            new GradeRecord { GradeId = 26, CourseEnrollmentId = 33, GradeValue = "90", AssessmentDate = new DateOnly(2022, 1, 21) },
-            new GradeRecord { GradeId = 27, CourseEnrollmentId = 34, GradeValue = "87", AssessmentDate = new DateOnly(2022, 6, 16) },
-            new GradeRecord { GradeId = 28, CourseEnrollmentId = 35, GradeValue = "85", AssessmentDate = new DateOnly(2022, 6, 18) },
-            new GradeRecord { GradeId = 29, CourseEnrollmentId = 36, GradeValue = "69", AssessmentDate = new DateOnly(2024, 1, 15) },
-            new GradeRecord { GradeId = 30, CourseEnrollmentId = 37, GradeValue = "72", AssessmentDate = new DateOnly(2024, 1, 19) }
-        );
+        DateOnly BuildAssessmentDate(int academicYearStart, int disciplineId)
+        {
+            return new DateOnly(academicYearStart + 1, (disciplineId % 12) + 1, Math.Min(10 + disciplineId, 28));
+        }
+
+        void AddCourse(
+            int assignmentId,
+            int disciplineId,
+            int academicYearStart,
+            CourseStatus status,
+            string? gradeValue = null)
+        {
+            var courseEnrollmentId = nextCourseEnrollmentId++;
+
+            courseEnrollments.Add(new StudentCourseEnrollment
+            {
+                CourseEnrollmentId = courseEnrollmentId,
+                AssignmentId = assignmentId,
+                DisciplineId = disciplineId,
+                AcademicYearStart = academicYearStart,
+                Status = status
+            });
+
+            if (!string.IsNullOrWhiteSpace(gradeValue))
+            {
+                gradeRecords.Add(new GradeRecord
+                {
+                    GradeId = nextGradeId++,
+                    CourseEnrollmentId = courseEnrollmentId,
+                    GradeValue = gradeValue,
+                    AssessmentDate = BuildAssessmentDate(academicYearStart, disciplineId)
+                });
+            }
+        }
+
+        void AddCourses(
+            int assignmentId,
+            int academicYearStart,
+            params (int DisciplineId, CourseStatus Status, string? GradeValue)[] courses)
+        {
+            foreach (var course in courses)
+            {
+                AddCourse(assignmentId, course.DisciplineId, academicYearStart, course.Status, course.GradeValue);
+            }
+        }
+
+        AddCourses(1, 2021,
+            (1, CourseStatus.Completed, "96"),
+            (2, CourseStatus.Completed, "94"),
+            (3, CourseStatus.Completed, "90"));
+        AddCourses(1, 2022,
+            (5, CourseStatus.Completed, "91"),
+            (4, CourseStatus.Completed, "93"));
+        AddCourses(1, 2023,
+            (6, CourseStatus.Completed, "95"));
+        AddCourses(1, 2024,
+            (7, CourseStatus.InProgress, null),
+            (12, CourseStatus.Planned, null));
+
+        AddCourses(2, 2021,
+            (1, CourseStatus.Completed, "98"),
+            (2, CourseStatus.Completed, "95"),
+            (3, CourseStatus.Completed, "92"));
+        AddCourses(2, 2022,
+            (5, CourseStatus.Completed, "94"),
+            (4, CourseStatus.Completed, "96"));
+        AddCourses(2, 2023,
+            (6, CourseStatus.Completed, "93"),
+            (7, CourseStatus.Completed, "91"));
+        AddCourses(2, 2024,
+            (12, CourseStatus.Completed, "90"),
+            (8, CourseStatus.Completed, "89"));
+        AddCourses(2, 2025,
+            (10, CourseStatus.Completed, "92"),
+            (9, CourseStatus.Completed, "88"));
+
+        AddCourses(3, 2022,
+            (1, CourseStatus.Completed, "87"),
+            (2, CourseStatus.Completed, "89"),
+            (3, CourseStatus.Completed, "84"));
+        AddCourses(3, 2023,
+            (5, CourseStatus.Completed, "86"),
+            (4, CourseStatus.Completed, "88"));
+        AddCourses(3, 2024,
+            (6, CourseStatus.InProgress, null));
+
+        AddCourses(4, 2023,
+            (1, CourseStatus.Completed, "90"),
+            (2, CourseStatus.Completed, "92"),
+            (3, CourseStatus.Completed, "88"));
+        AddCourses(4, 2024,
+            (5, CourseStatus.Completed, "91"),
+            (6, CourseStatus.InProgress, null));
+
+        AddCourses(5, 2023,
+            (1, CourseStatus.Completed, "83"),
+            (2, CourseStatus.Completed, "85"),
+            (3, CourseStatus.Completed, "81"));
+        AddCourses(5, 2024,
+            (5, CourseStatus.Completed, "84"));
+
+        AddCourses(6, 2023,
+            (1, CourseStatus.Completed, "88"),
+            (2, CourseStatus.Completed, "87"),
+            (3, CourseStatus.Completed, "86"));
+        AddCourses(6, 2024,
+            (5, CourseStatus.Completed, "89"),
+            (6, CourseStatus.InProgress, null));
+
+        AddCourses(7, 2023,
+            (1, CourseStatus.Completed, "82"),
+            (2, CourseStatus.Completed, "84"),
+            (3, CourseStatus.Completed, "80"));
+        AddCourses(7, 2024,
+            (5, CourseStatus.Completed, "83"),
+            (6, CourseStatus.Completed, "85"));
+        AddCourses(7, 2025,
+            (7, CourseStatus.InProgress, null));
+
+        AddCourses(8, 2023,
+            (1, CourseStatus.Completed, "86"),
+            (2, CourseStatus.Completed, "88"),
+            (3, CourseStatus.Completed, "85"));
+        AddCourses(8, 2024,
+            (5, CourseStatus.Completed, "87"),
+            (10, CourseStatus.Retake, null));
+
+        AddCourses(9, 2023,
+            (1, CourseStatus.Completed, "79"),
+            (2, CourseStatus.Completed, "82"),
+            (3, CourseStatus.Completed, "78"));
+        AddCourses(9, 2024,
+            (5, CourseStatus.Completed, "81"),
+            (6, CourseStatus.InProgress, null));
+
+        AddCourses(10, 2024,
+            (1, CourseStatus.Completed, "93"),
+            (2, CourseStatus.Completed, "95"),
+            (5, CourseStatus.Completed, "90"));
+        AddCourses(10, 2025,
+            (11, CourseStatus.InProgress, null));
+
+        AddCourses(11, 2024,
+            (1, CourseStatus.Completed, "91"),
+            (2, CourseStatus.Completed, "92"),
+            (5, CourseStatus.Completed, "89"));
+        AddCourses(11, 2025,
+            (11, CourseStatus.InProgress, null));
+
+        AddCourses(12, 2024,
+            (1, CourseStatus.Completed, "94"),
+            (2, CourseStatus.Completed, "90"),
+            (5, CourseStatus.Completed, "88"));
+        AddCourses(12, 2025,
+            (11, CourseStatus.InProgress, null));
+
+        AddCourses(13, 2021,
+            (1, CourseStatus.Completed, "97"),
+            (2, CourseStatus.Completed, "96"),
+            (3, CourseStatus.Completed, "93"));
+        AddCourses(13, 2022,
+            (5, CourseStatus.Completed, "95"),
+            (4, CourseStatus.Completed, "94"));
+        AddCourses(13, 2023,
+            (6, CourseStatus.Completed, "92"),
+            (7, CourseStatus.Completed, "91"));
+        AddCourses(13, 2024,
+            (12, CourseStatus.Completed, "90"),
+            (8, CourseStatus.Completed, "89"));
+
+        AddCourses(14, 2024,
+            (1, CourseStatus.Completed, "90"),
+            (2, CourseStatus.Completed, "91"),
+            (3, CourseStatus.InProgress, null));
+
+        AddCourses(15, 2023,
+            (1, CourseStatus.Completed, "73"),
+            (2, CourseStatus.Completed, "76"),
+            (3, CourseStatus.Completed, "71"));
+        AddCourses(15, 2024,
+            (5, CourseStatus.Completed, "74"));
+
+        AddCourses(16, 2024,
+            (1, CourseStatus.Completed, "89"),
+            (2, CourseStatus.Completed, "91"),
+            (5, CourseStatus.Completed, "87"));
+        AddCourses(16, 2025,
+            (11, CourseStatus.InProgress, null));
+
+        AddCourses(17, 2022,
+            (1, CourseStatus.Completed, "88"),
+            (2, CourseStatus.Completed, "86"),
+            (3, CourseStatus.Completed, "84"));
+        AddCourses(17, 2023,
+            (5, CourseStatus.Completed, "87"),
+            (4, CourseStatus.Completed, "85"));
+        AddCourses(17, 2024,
+            (6, CourseStatus.Completed, "89"));
+        AddCourses(17, 2025,
+            (7, CourseStatus.InProgress, null));
+
+        AddCourses(18, 2024,
+            (1, CourseStatus.Completed, "85"),
+            (2, CourseStatus.Completed, "84"));
+        AddCourses(18, 2025,
+            (3, CourseStatus.Planned, null));
+
+        AddCourses(19, 2023,
+            (1, CourseStatus.Completed, "84"),
+            (2, CourseStatus.Completed, "86"));
+        AddCourses(19, 2024,
+            (3, CourseStatus.Completed, "82"),
+            (5, CourseStatus.Completed, "85"));
+        AddCourses(19, 2025,
+            (6, CourseStatus.InProgress, null));
+
+        AddCourses(20, 2024,
+            (1, CourseStatus.Completed, "92"),
+            (2, CourseStatus.Completed, "90"),
+            (5, CourseStatus.Completed, "88"));
+
+        AddCourses(21, 2025,
+            (1, CourseStatus.InProgress, null),
+            (2, CourseStatus.InProgress, null));
+
+        AddCourses(22, 2025,
+            (1, CourseStatus.InProgress, null),
+            (2, CourseStatus.InProgress, null));
+
+        AddCourses(23, 2025,
+            (1, CourseStatus.InProgress, null),
+            (2, CourseStatus.InProgress, null));
+
+        AddCourses(24, 2024,
+            (1, CourseStatus.Completed, "90"),
+            (2, CourseStatus.Completed, "89"),
+            (5, CourseStatus.Completed, "87"));
+        AddCourses(24, 2025,
+            (11, CourseStatus.InProgress, null));
+
+        modelBuilder.Entity<Institution>().HasData(institutions);
+        modelBuilder.Entity<AcademicUnit>().HasData(academicUnits);
+        modelBuilder.Entity<Department>().HasData(departments);
+        modelBuilder.Entity<Discipline>().HasData(disciplines);
+        modelBuilder.Entity<StudyPlan>().HasData(studyPlans);
+        modelBuilder.Entity<PlanDiscipline>().HasData(planDisciplines);
+        modelBuilder.Entity<StudyGroup>().HasData(studyGroups);
+        modelBuilder.Entity<Subgroup>().HasData(subgroups);
+        modelBuilder.Entity<Student>().HasData(students);
+        modelBuilder.Entity<StudentGroupEnrollment>().HasData(enrollments);
+        modelBuilder.Entity<StudentSubgroupAssignment>().HasData(subgroupAssignments);
+        modelBuilder.Entity<AcademicLeave>().HasData(academicLeaves);
+        modelBuilder.Entity<ExternalTransfer>().HasData(externalTransfers);
+        modelBuilder.Entity<StudentPlanAssignment>().HasData(planAssignments);
+        modelBuilder.Entity<StudentCourseEnrollment>().HasData(courseEnrollments.ToArray());
+        modelBuilder.Entity<GradeRecord>().HasData(gradeRecords.ToArray());
     }
 }

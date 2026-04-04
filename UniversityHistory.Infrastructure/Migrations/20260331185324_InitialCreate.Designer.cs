@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UniversityHistory.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using UniversityHistory.Infrastructure.Data;
 namespace UniversityHistory.Infrastructure.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    partial class UniversityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260331185324_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,123 +79,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                             EnrollmentId = 9,
                             Reason = "Програма академічної мобільності",
                             StartDate = new DateOnly(2024, 11, 4)
-                        });
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.AcademicUnit", b =>
-                {
-                    b.Property<int>("AcademicUnitId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("academic_unit_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AcademicUnitId"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("type");
-
-                    b.HasKey("AcademicUnitId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Academic_Unit", null, t =>
-                        {
-                            t.HasCheckConstraint("chk_academic_unit_type", "type IN ('Faculty','Institute')");
-                        });
-
-                    b.HasData(
-                        new
-                        {
-                            AcademicUnitId = 1,
-                            Name = "Факультет інформатики та обчислювальної техніки",
-                            Type = "Faculty"
-                        },
-                        new
-                        {
-                            AcademicUnitId = 2,
-                            Name = "Факультет прикладної математики",
-                            Type = "Faculty"
-                        },
-                        new
-                        {
-                            AcademicUnitId = 3,
-                            Name = "Факультет комп'ютерної інженерії",
-                            Type = "Faculty"
-                        });
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.Department", b =>
-                {
-                    b.Property<int>("DepartmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("department_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DepartmentId"));
-
-                    b.Property<int>("AcademicUnitId")
-                        .HasColumnType("int")
-                        .HasColumnName("academic_unit_id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
-
-                    b.HasKey("DepartmentId");
-
-                    b.HasIndex("AcademicUnitId", "Name")
-                        .IsUnique();
-
-                    b.ToTable("Department", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            DepartmentId = 1,
-                            AcademicUnitId = 1,
-                            Name = "Кафедра програмування"
-                        },
-                        new
-                        {
-                            DepartmentId = 2,
-                            AcademicUnitId = 1,
-                            Name = "Кафедра комп'ютерних наук"
-                        },
-                        new
-                        {
-                            DepartmentId = 3,
-                            AcademicUnitId = 2,
-                            Name = "Кафедра прикладної математики"
-                        },
-                        new
-                        {
-                            DepartmentId = 4,
-                            AcademicUnitId = 2,
-                            Name = "Кафедра програмного забезпечення"
-                        },
-                        new
-                        {
-                            DepartmentId = 5,
-                            AcademicUnitId = 3,
-                            Name = "Кафедра комп'ютерної інженерії"
-                        },
-                        new
-                        {
-                            DepartmentId = 6,
-                            AcademicUnitId = 3,
-                            Name = "Кафедра вбудованих систем"
                         });
                 });
 
@@ -3293,9 +3179,10 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("date_created");
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int")
-                        .HasColumnName("department_id");
+                    b.Property<string>("Faculty")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("faculty");
 
                     b.Property<string>("GroupCode")
                         .IsRequired()
@@ -3304,8 +3191,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnName("group_code");
 
                     b.HasKey("GroupId");
-
-                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("GroupCode")
                         .IsUnique();
@@ -3317,42 +3202,42 @@ namespace UniversityHistory.Infrastructure.Migrations
                         {
                             GroupId = 1,
                             DateCreated = new DateOnly(2021, 9, 1),
-                            DepartmentId = 1,
+                            Faculty = "Факультет інформатики та обчислювальної техніки",
                             GroupCode = "КН-21"
                         },
                         new
                         {
                             GroupId = 2,
                             DateCreated = new DateOnly(2022, 9, 1),
-                            DepartmentId = 2,
+                            Faculty = "Факультет інформатики та обчислювальної техніки",
                             GroupCode = "КН-22"
                         },
                         new
                         {
                             GroupId = 3,
                             DateCreated = new DateOnly(2023, 9, 1),
-                            DepartmentId = 4,
+                            Faculty = "Факультет прикладної математики",
                             GroupCode = "ПЗ-23"
                         },
                         new
                         {
                             GroupId = 4,
                             DateCreated = new DateOnly(2024, 9, 1),
-                            DepartmentId = 5,
+                            Faculty = "Факультет комп'ютерної інженерії",
                             GroupCode = "КІ-24"
                         },
                         new
                         {
                             GroupId = 5,
                             DateCreated = new DateOnly(2024, 9, 1),
-                            DepartmentId = 4,
+                            Faculty = "Факультет прикладної математики",
                             GroupCode = "ПЗ-24"
                         },
                         new
                         {
                             GroupId = 6,
                             DateCreated = new DateOnly(2025, 9, 1),
-                            DepartmentId = 5,
+                            Faculty = "Факультет комп'ютерної інженерії",
                             GroupCode = "КІ-25"
                         });
                 });
@@ -3520,17 +3405,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Navigation("Enrollment");
                 });
 
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.Department", b =>
-                {
-                    b.HasOne("UniversityHistory.Domain.Entities.AcademicUnit", "AcademicUnit")
-                        .WithMany("Departments")
-                        .HasForeignKey("AcademicUnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("AcademicUnit");
-                });
-
             modelBuilder.Entity("UniversityHistory.Domain.Entities.ExternalTransfer", b =>
                 {
                     b.HasOne("UniversityHistory.Domain.Entities.Institution", "Institution")
@@ -3656,17 +3530,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Navigation("Subgroup");
                 });
 
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudyGroup", b =>
-                {
-                    b.HasOne("UniversityHistory.Domain.Entities.Department", "Department")
-                        .WithMany("Groups")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Department");
-                });
-
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Subgroup", b =>
                 {
                     b.HasOne("UniversityHistory.Domain.Entities.StudyGroup", "Group")
@@ -3676,16 +3539,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.AcademicUnit", b =>
-                {
-                    b.Navigation("Departments");
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.Department", b =>
-                {
-                    b.Navigation("Groups");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Discipline", b =>

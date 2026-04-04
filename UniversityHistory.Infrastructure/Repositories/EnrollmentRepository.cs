@@ -40,6 +40,8 @@ public class EnrollmentRepository : IEnrollmentRepository
         return await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Group)
+                .ThenInclude(g => g.Department)
+                    .ThenInclude(d => d.AcademicUnit)
             .Include(e => e.SubgroupAssignment!)
                 .ThenInclude(sa => sa.Subgroup)
             .Where(e => e.StudentId == studentId)

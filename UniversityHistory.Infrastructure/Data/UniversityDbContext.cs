@@ -22,6 +22,8 @@ public class UniversityDbContext : DbContext
     public DbSet<StudentCourseEnrollment> StudentCourseEnrollments => Set<StudentCourseEnrollment>();
     public DbSet<GradeRecord> GradeRecords => Set<GradeRecord>();
     public DbSet<StudentSubgroupAssignment> StudentSubgroupAssignments => Set<StudentSubgroupAssignment>();
+    public DbSet<AcademicUnit> AcademicUnits => Set<AcademicUnit>();
+    public DbSet<Department> Departments => Set<Department>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +47,33 @@ public class UniversityDbContext : DbContext
                 "status IN ('Active','OnLeave','Expelled','Graduated')"));
         });
 
+        modelBuilder.Entity<AcademicUnit>(e =>
+        {
+            e.ToTable("Academic_Unit");
+            e.HasKey(u => u.AcademicUnitId);
+            e.Property(u => u.AcademicUnitId).HasColumnName("academic_unit_id").UseIdentityColumn();
+            e.Property(u => u.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+            e.HasIndex(u => u.Name).IsUnique();
+            e.Property(u => u.Type)
+                .HasColumnName("type")
+                .HasMaxLength(20)
+                .HasConversion<string>()
+                .IsRequired();
+            e.ToTable(t => t.HasCheckConstraint("chk_academic_unit_type", "type IN ('Faculty','Institute')"));
+        });
+
+        modelBuilder.Entity<Department>(e =>
+        {
+            e.ToTable("Department");
+            e.HasKey(d => d.DepartmentId);
+            e.Property(d => d.DepartmentId).HasColumnName("department_id").UseIdentityColumn();
+            e.Property(d => d.AcademicUnitId).HasColumnName("academic_unit_id");
+            e.Property(d => d.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+            e.HasIndex(d => new { d.AcademicUnitId, d.Name }).IsUnique();
+            e.HasOne(d => d.AcademicUnit).WithMany(u => u.Departments)
+                .HasForeignKey(d => d.AcademicUnitId).OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<StudyGroup>(e =>
         {
             e.ToTable("Study_Group");
@@ -52,9 +81,11 @@ public class UniversityDbContext : DbContext
             e.Property(g => g.GroupId).HasColumnName("group_id").UseIdentityColumn();
             e.Property(g => g.GroupCode).HasColumnName("group_code").HasMaxLength(20).IsRequired();
             e.HasIndex(g => g.GroupCode).IsUnique();
-            e.Property(g => g.Faculty).HasColumnName("faculty").HasMaxLength(100);
+            e.Property(g => g.DepartmentId).HasColumnName("department_id");
             e.Property(g => g.DateCreated).HasColumnName("date_created").IsRequired();
             e.Property(g => g.DateClosed).HasColumnName("date_closed");
+            e.HasOne(g => g.Department).WithMany(d => d.Groups)
+                .HasForeignKey(g => g.DepartmentId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Subgroup>(e =>
