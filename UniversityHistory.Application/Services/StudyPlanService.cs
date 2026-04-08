@@ -31,7 +31,7 @@ public class StudyPlanService : IStudyPlanService
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        var plan = await _unitOfWork.StudyPlans.GetPlanByIdAsync(dto.PlanId, ct)
+        var plan = await _unitOfWork.StudyPlans.GetPlanWithDisciplinesAsync(dto.PlanId, ct)
             ?? throw new NotFoundException(nameof(StudyPlan), dto.PlanId);
 
         var open = await _unitOfWork.StudyPlans.GetOpenAssignmentByStudentIdAsync(studentId, ct);
@@ -49,8 +49,31 @@ public class StudyPlanService : IStudyPlanService
 
         var assignment = dto.ToEntity(studentId);
         _unitOfWork.StudyPlans.AddAssignment(assignment);
+
+        var courseEnrollments = plan.PlanDisciplines
+            .OrderBy(planDiscipline => planDiscipline.SemesterNo)
+            .ThenBy(planDiscipline => planDiscipline.DisciplineId)
+            .Select(planDiscipline => new StudentCourseEnrollment
+            {
+                Assignment = assignment,
+                DisciplineId = planDiscipline.DisciplineId,
+                AcademicYearStart = CalculateAcademicYearStart(dto.DateFrom, planDiscipline.SemesterNo),
+                Status = CourseStatus.Planned
+            })
+            .ToList();
+
+        if (courseEnrollments.Count > 0)
+        {
+            _unitOfWork.StudyPlans.AddCourseEnrollments(courseEnrollments);
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
         return assignment.ToDto(plan.SpecialtyCode, plan.PlanName);
+    }
+
+    private static int CalculateAcademicYearStart(DateOnly assignmentStartDate, int semesterNo)
+    {
+        return assignmentStartDate.Year + Math.Max(semesterNo - 1, 0);
     }
 
     public async Task<IEnumerable<StudyPlanDto>> GetAllPlansAsync(CancellationToken ct = default)

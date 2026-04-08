@@ -20,5 +20,7 @@ public record StudentDisciplineOptionDto(
     int DisciplineId,
     string DisciplineName,
     int SemesterNo,
+    int AcademicYearStart,
+    string AcademicYearLabel,
     bool HasGrade
 );

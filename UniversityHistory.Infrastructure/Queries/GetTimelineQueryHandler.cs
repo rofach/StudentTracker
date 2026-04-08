@@ -10,43 +10,43 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
 {
     private readonly UniversityDbContext _db;
 
-    public GetTimelineQueryHandler(UniversityDbContext db)
-    {
-        _db = db;
-    }
+    public GetTimelineQueryHandler(UniversityDbContext db) => _db = db;
 
     public async Task<PagedResult<TimelineEventDto>> HandleAsync(
         GetTimelineQuery query,
         CancellationToken ct = default)
     {
         var exists = await _db.Students.AnyAsync(s => s.StudentId == query.StudentId, ct);
-
         if (!exists)
-        {
             throw new NotFoundException("Student", query.StudentId);
-        }
 
         var studentId = query.StudentId;
 
         var rawQuery = _db.Database.SqlQuery<TimelineEventDto>($"""
             SELECT
-                'Enrollment'                                    AS EventType,
+                'Enrollment'                                        AS EventType,
                 CONCAT('Enrolled in group ', g.group_code,
-                       ' (', e.reason_start, ')')               AS Description,
-                e.date_from                                     AS DateFrom,
-                e.date_to                                       AS DateTo
+                       ' — ', d.name, ' (', e.reason_start, ')')   AS Description,
+                e.date_from                                         AS DateFrom,
+                e.date_to                                           AS DateTo,
+                g.group_code                                        AS GroupCode,
+                d.name                                              AS DepartmentName,
+                au.name                                             AS AcademicUnitName,
+                au.type                                             AS AcademicUnitType
             FROM Student_Group_Enrollment e
-            JOIN Study_Group g ON g.group_id = e.group_id
+            JOIN Study_Group  g  ON g.group_id        = e.group_id
+            JOIN Department   d  ON d.department_id   = g.department_id
+            JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id
             WHERE e.student_id = {studentId}
 
             UNION ALL
 
             SELECT
                 'AcademicLeave',
-                CONCAT('Academic leave: ',
-                       ISNULL(al.reason, 'No reason provided')),
+                CONCAT('Academic leave: ', ISNULL(al.reason, 'No reason provided')),
                 al.start_date,
-                al.end_date
+                al.end_date,
+                NULL, NULL, NULL, NULL
             FROM Academic_Leave al
             JOIN Student_Group_Enrollment e_al ON e_al.enrollment_id = al.enrollment_id
             WHERE e_al.student_id = {studentId}
@@ -59,7 +59,8 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
                        CASE WHEN et.notes IS NOT NULL
                             THEN CONCAT('. Notes: ', et.notes) ELSE '' END),
                 et.transfer_date,
-                NULL
+                NULL,
+                NULL, NULL, NULL, NULL
             FROM External_Transfers et
             JOIN Institution i ON i.institution_id = et.institution_id
             WHERE et.student_id = {studentId}

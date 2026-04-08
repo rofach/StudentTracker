@@ -4,7 +4,11 @@ public record TimelineEventDto(
     string EventType,
     string Description,
     DateOnly DateFrom,
-    DateOnly? DateTo
+    DateOnly? DateTo,
+    string? GroupCode,
+    string? DepartmentName,
+    string? AcademicUnitName,
+    string? AcademicUnitType
 );
 
 public record AcademicLeaveDto(

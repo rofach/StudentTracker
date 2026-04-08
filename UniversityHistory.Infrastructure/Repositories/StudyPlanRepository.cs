@@ -109,4 +109,9 @@ public class StudyPlanRepository : IStudyPlanRepository
         return await _db.StudentCourseEnrollments
             .AnyAsync(ce => ce.Assignment.PlanId == planId && ce.DisciplineId == disciplineId, ct);
     }
+
+    public void AddCourseEnrollments(IEnumerable<StudentCourseEnrollment> enrollments)
+    {
+        _db.StudentCourseEnrollments.AddRange(enrollments);
+    }
 }

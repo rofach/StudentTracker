@@ -22,4 +22,5 @@ public interface IStudyPlanRepository
     void UpdatePlanDiscipline(PlanDiscipline pd);
     void DeletePlanDiscipline(PlanDiscipline pd);
     Task<bool> PlanDisciplineIsUsedAsync(int planId, int disciplineId, CancellationToken ct = default);
+    void AddCourseEnrollments(IEnumerable<StudentCourseEnrollment> enrollments);
 }

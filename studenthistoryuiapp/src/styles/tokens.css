@@ -1,0 +1,13 @@
+:root {
+  --bg: #f3f5f8;
+  --panel: #ffffff;
+  --panel-soft: #f9fbfd;
+  --border: #d7dde5;
+  --muted: #576779;
+  --text: #112033;
+  --primary: #1f4f82;
+  --primary-soft: #e8f1fb;
+  --error-bg: #fdeaea;
+  --error-text: #932626;
+  --ok: #1e8a45;
+}

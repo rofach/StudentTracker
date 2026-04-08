@@ -1,7 +1,5 @@
 namespace UniversityHistory.Application.DTOs;
 
-// ── Read DTOs ────────────────────────────────────────────────────────────────
-
 public record AcademicUnitDto(
     int AcademicUnitId,
     string Name,
@@ -21,8 +19,6 @@ public record DepartmentDto(
     string AcademicUnitName,
     string AcademicUnitType
 );
-
-// ── Write DTOs ───────────────────────────────────────────────────────────────
 
 public record CreateAcademicUnitDto(string Name, string Type);
 

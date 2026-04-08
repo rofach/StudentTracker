@@ -33,6 +33,10 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
                 ce.discipline_id AS DisciplineId,
                 d.discipline_name AS DisciplineName,
                 pd.semester_no AS SemesterNo,
+                ce.academic_year_start AS AcademicYearStart,
+                CAST(ce.academic_year_start AS nvarchar(4))
+                    + N'/'
+                    + CAST(ce.academic_year_start + 1 AS nvarchar(4)) AS AcademicYearLabel,
                 CAST(CASE
                     WHEN EXISTS (
                         SELECT 1
@@ -64,6 +68,8 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
                 item.DisciplineId,
                 item.DisciplineName,
                 item.SemesterNo,
+                item.AcademicYearStart,
+                item.AcademicYearLabel,
                 item.HasGrade))
             .ToList();
     }
@@ -73,6 +79,8 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
         public int DisciplineId { get; set; }
         public string DisciplineName { get; set; } = string.Empty;
         public int SemesterNo { get; set; }
+        public int AcademicYearStart { get; set; }
+        public string AcademicYearLabel { get; set; } = string.Empty;
         public bool HasGrade { get; set; }
     }
 }
