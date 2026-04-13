@@ -11,20 +11,17 @@ public class StudentsController : ControllerBase
 {
     private readonly IStudentService _studentService;
     private readonly IMovementService _movementService;
-    private readonly IStudyPlanService _planService;
     private readonly IGradeService _gradeService;
     private readonly IEnrollmentService _enrollmentService;
 
     public StudentsController(
         IStudentService studentService,
         IMovementService movementService,
-        IStudyPlanService planService,
         IGradeService gradeService,
         IEnrollmentService enrollmentService)
     {
         _studentService = studentService;
         _movementService = movementService;
-        _planService = planService;
         _gradeService = gradeService;
         _enrollmentService = enrollmentService;
     }
@@ -121,18 +118,6 @@ public class StudentsController : ControllerBase
         return CreatedAtAction(nameof(GetMovements), new { id }, result);
     }
 
-    [HttpGet("{id:int}/plans")]
-    public async Task<IActionResult> GetPlans(int id, CancellationToken ct)
-    {
-        return Ok(await _planService.GetPlanAssignmentsAsync(id, ct));
-    }
-
-    [HttpPost("{id:int}/plans")]
-    public async Task<IActionResult> AssignPlan(int id, [FromBody] AssignPlanDto dto, CancellationToken ct)
-    {
-        var result = await _planService.AssignPlanAsync(id, dto, ct);
-        return CreatedAtAction(nameof(GetPlans), new { id }, result);
-    }
 
     [HttpPost("{id:int}/move")]
     public async Task<IActionResult> MoveToGroup(int id, [FromBody] MoveStudentDto dto, CancellationToken ct)

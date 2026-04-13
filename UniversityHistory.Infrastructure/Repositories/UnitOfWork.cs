@@ -19,7 +19,8 @@ public class UnitOfWork : IUnitOfWork
         ISubgroupAssignmentRepository subgroupAssignments,
         IDisciplineRepository disciplines,
         IAcademicUnitRepository academicUnits,
-        IDepartmentRepository departments)
+        IDepartmentRepository departments,
+        IGroupPlanAssignmentRepository groupPlanAssignments)
     {
         _db = db;
         Students = students;
@@ -33,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
         Disciplines = disciplines;
         AcademicUnits = academicUnits;
         Departments = departments;
+        GroupPlanAssignments = groupPlanAssignments;
     }
 
     public IStudentRepository Students { get; }
@@ -46,6 +48,7 @@ public class UnitOfWork : IUnitOfWork
     public IDisciplineRepository Disciplines { get; }
     public IAcademicUnitRepository AcademicUnits { get; }
     public IDepartmentRepository Departments { get; }
+    public IGroupPlanAssignmentRepository GroupPlanAssignments { get; }
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default) =>
         _db.SaveChangesAsync(ct);

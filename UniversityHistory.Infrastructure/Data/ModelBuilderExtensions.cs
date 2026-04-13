@@ -221,34 +221,19 @@ public static class ModelBuilderExtensions
             new ExternalTransfer { TransferId = 4, StudentId = 24, InstitutionId = 6, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 26), Notes = "Переведення з іншого закладу" }
         };
 
-        var planAssignments = new[]
+        // ── Group plan assignments (one per group, matching historical plan data) ─
+        var groupPlanAssignments = new[]
         {
-            new StudentPlanAssignment { AssignmentId = 1, StudentId = 1, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 2, StudentId = 2, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30) },
-            new StudentPlanAssignment { AssignmentId = 3, StudentId = 3, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 4, StudentId = 4, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 5, StudentId = 5, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 6, StudentId = 6, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 7, StudentId = 7, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 8, StudentId = 8, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 9, StudentId = 9, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 10, StudentId = 10, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 11, StudentId = 11, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 12, StudentId = 12, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 13, StudentId = 13, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30) },
-            new StudentPlanAssignment { AssignmentId = 14, StudentId = 14, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 15, StudentId = 15, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = new DateOnly(2025, 2, 14) },
-            new StudentPlanAssignment { AssignmentId = 16, StudentId = 16, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 17, StudentId = 17, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 18, StudentId = 18, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 19, StudentId = 19, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 20, StudentId = 20, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 21, StudentId = 21, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 22, StudentId = 22, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 23, StudentId = 23, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
-            new StudentPlanAssignment { AssignmentId = 24, StudentId = 24, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null }
+            new GroupPlanAssignment { GroupPlanAssignmentId = 1, GroupId = 1, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = null },
+            new GroupPlanAssignment { GroupPlanAssignmentId = 2, GroupId = 2, PlanId = 1, DateFrom = new DateOnly(2022, 9, 1), DateTo = null },
+            new GroupPlanAssignment { GroupPlanAssignmentId = 3, GroupId = 3, PlanId = 2, DateFrom = new DateOnly(2023, 9, 1), DateTo = null },
+            new GroupPlanAssignment { GroupPlanAssignmentId = 4, GroupId = 4, PlanId = 3, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new GroupPlanAssignment { GroupPlanAssignmentId = 5, GroupId = 5, PlanId = 2, DateFrom = new DateOnly(2024, 9, 1), DateTo = null },
+            new GroupPlanAssignment { GroupPlanAssignmentId = 6, GroupId = 6, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
         };
 
+        // ── Student course enrollments ─────────────────────────────────────────
+        // AddCourse(enrollmentId, gpaId, disciplineId, academicYearStart, status, gradeValue?)
         var courseEnrollments = new List<StudentCourseEnrollment>();
         var gradeRecords = new List<GradeRecord>();
         var nextCourseEnrollmentId = 1;
@@ -259,239 +244,253 @@ public static class ModelBuilderExtensions
             return new DateOnly(academicYearStart + 1, (disciplineId % 12) + 1, Math.Min(10 + disciplineId, 28));
         }
 
-        void AddCourse(
-            int assignmentId,
-            int disciplineId,
-            int academicYearStart,
-            CourseStatus status,
-            string? gradeValue = null)
+        void AddCourse(int enrollmentId, int gpaId, int disciplineId, int academicYearStart, CourseStatus status, string? gradeValue = null)
         {
-            var courseEnrollmentId = nextCourseEnrollmentId++;
-
+            var ceId = nextCourseEnrollmentId++;
             courseEnrollments.Add(new StudentCourseEnrollment
             {
-                CourseEnrollmentId = courseEnrollmentId,
-                AssignmentId = assignmentId,
+                CourseEnrollmentId = ceId,
+                EnrollmentId = enrollmentId,
+                GroupPlanAssignmentId = gpaId,
                 DisciplineId = disciplineId,
                 AcademicYearStart = academicYearStart,
                 Status = status
             });
-
             if (!string.IsNullOrWhiteSpace(gradeValue))
             {
                 gradeRecords.Add(new GradeRecord
                 {
                     GradeId = nextGradeId++,
-                    CourseEnrollmentId = courseEnrollmentId,
+                    CourseEnrollmentId = ceId,
                     GradeValue = gradeValue,
                     AssessmentDate = BuildAssessmentDate(academicYearStart, disciplineId)
                 });
             }
         }
 
-        void AddCourses(
-            int assignmentId,
-            int academicYearStart,
+        void AddCourses(int enrollmentId, int gpaId, int academicYearStart,
             params (int DisciplineId, CourseStatus Status, string? GradeValue)[] courses)
         {
-            foreach (var course in courses)
-            {
-                AddCourse(assignmentId, course.DisciplineId, academicYearStart, course.Status, course.GradeValue);
-            }
+            foreach (var c in courses)
+                AddCourse(enrollmentId, gpaId, c.DisciplineId, academicYearStart, c.Status, c.GradeValue);
         }
 
-        AddCourses(1, 2021,
+        // ── Assignment 1: Student 1, Enrollment 2 (Gr2→GPA2), Plan 1 ──────────
+        AddCourses(2, 2, 2021,
             (1, CourseStatus.Completed, "96"),
             (2, CourseStatus.Completed, "94"),
             (3, CourseStatus.Completed, "90"));
-        AddCourses(1, 2022,
+        AddCourses(2, 2, 2022,
             (5, CourseStatus.Completed, "91"),
             (4, CourseStatus.Completed, "93"));
-        AddCourses(1, 2023,
+        AddCourses(2, 2, 2023,
             (6, CourseStatus.Completed, "95"));
-        AddCourses(1, 2024,
+        AddCourses(2, 2, 2024,
             (7, CourseStatus.InProgress, null),
             (12, CourseStatus.Planned, null));
 
-        AddCourses(2, 2021,
+        // ── Assignment 2: Student 2, Enrollment 3 (Gr1→GPA1), Plan 1 ──────────
+        AddCourses(3, 1, 2021,
             (1, CourseStatus.Completed, "98"),
             (2, CourseStatus.Completed, "95"),
             (3, CourseStatus.Completed, "92"));
-        AddCourses(2, 2022,
+        AddCourses(3, 1, 2022,
             (5, CourseStatus.Completed, "94"),
             (4, CourseStatus.Completed, "96"));
-        AddCourses(2, 2023,
+        AddCourses(3, 1, 2023,
             (6, CourseStatus.Completed, "93"),
             (7, CourseStatus.Completed, "91"));
-        AddCourses(2, 2024,
+        AddCourses(3, 1, 2024,
             (12, CourseStatus.Completed, "90"),
             (8, CourseStatus.Completed, "89"));
-        AddCourses(2, 2025,
+        AddCourses(3, 1, 2025,
             (10, CourseStatus.Completed, "92"),
             (9, CourseStatus.Completed, "88"));
 
-        AddCourses(3, 2022,
+        // ── Assignment 3: Student 3, Enrollment 4 (Gr2→GPA2), Plan 1 ──────────
+        AddCourses(4, 2, 2022,
             (1, CourseStatus.Completed, "87"),
             (2, CourseStatus.Completed, "89"),
             (3, CourseStatus.Completed, "84"));
-        AddCourses(3, 2023,
+        AddCourses(4, 2, 2023,
             (5, CourseStatus.Completed, "86"),
             (4, CourseStatus.Completed, "88"));
-        AddCourses(3, 2024,
+        AddCourses(4, 2, 2024,
             (6, CourseStatus.InProgress, null));
 
-        AddCourses(4, 2023,
+        // ── Assignment 4: Student 4, Enrollment 5 (Gr3→GPA3), Plan 2 ──────────
+        AddCourses(5, 3, 2023,
             (1, CourseStatus.Completed, "90"),
             (2, CourseStatus.Completed, "92"),
             (3, CourseStatus.Completed, "88"));
-        AddCourses(4, 2024,
+        AddCourses(5, 3, 2024,
             (5, CourseStatus.Completed, "91"),
             (6, CourseStatus.InProgress, null));
 
-        AddCourses(5, 2023,
+        // ── Assignment 5: Student 5, Enrollment 6 (Gr3→GPA3), Plan 2 ──────────
+        AddCourses(6, 3, 2023,
             (1, CourseStatus.Completed, "83"),
             (2, CourseStatus.Completed, "85"),
             (3, CourseStatus.Completed, "81"));
-        AddCourses(5, 2024,
+        AddCourses(6, 3, 2024,
             (5, CourseStatus.Completed, "84"));
 
-        AddCourses(6, 2023,
+        // ── Assignment 6: Student 6, Enrollment 7 (Gr3→GPA3), Plan 2 ──────────
+        AddCourses(7, 3, 2023,
             (1, CourseStatus.Completed, "88"),
             (2, CourseStatus.Completed, "87"),
             (3, CourseStatus.Completed, "86"));
-        AddCourses(6, 2024,
+        AddCourses(7, 3, 2024,
             (5, CourseStatus.Completed, "89"),
             (6, CourseStatus.InProgress, null));
 
-        AddCourses(7, 2023,
+        // ── Assignment 7: Student 7, Enrollment 8 (Gr3→GPA3), Plan 2 ──────────
+        AddCourses(8, 3, 2023,
             (1, CourseStatus.Completed, "82"),
             (2, CourseStatus.Completed, "84"),
             (3, CourseStatus.Completed, "80"));
-        AddCourses(7, 2024,
+        AddCourses(8, 3, 2024,
             (5, CourseStatus.Completed, "83"),
             (6, CourseStatus.Completed, "85"));
-        AddCourses(7, 2025,
+        AddCourses(8, 3, 2025,
             (7, CourseStatus.InProgress, null));
 
-        AddCourses(8, 2023,
+        // ── Assignment 8: Student 8, Enrollment 9 (Gr3→GPA3), Plan 2 ──────────
+        AddCourses(9, 3, 2023,
             (1, CourseStatus.Completed, "86"),
             (2, CourseStatus.Completed, "88"),
             (3, CourseStatus.Completed, "85"));
-        AddCourses(8, 2024,
+        AddCourses(9, 3, 2024,
             (5, CourseStatus.Completed, "87"),
             (10, CourseStatus.Retake, null));
 
-        AddCourses(9, 2023,
+        // ── Assignment 9: Student 9, Enrollment 10 (Gr3→GPA3), Plan 2 ─────────
+        AddCourses(10, 3, 2023,
             (1, CourseStatus.Completed, "79"),
             (2, CourseStatus.Completed, "82"),
             (3, CourseStatus.Completed, "78"));
-        AddCourses(9, 2024,
+        AddCourses(10, 3, 2024,
             (5, CourseStatus.Completed, "81"),
             (6, CourseStatus.InProgress, null));
 
-        AddCourses(10, 2024,
+        // ── Assignment 10: Student 10, Enrollment 11 (Gr4→GPA4), Plan 3 ────────
+        AddCourses(11, 4, 2024,
             (1, CourseStatus.Completed, "93"),
             (2, CourseStatus.Completed, "95"),
             (5, CourseStatus.Completed, "90"));
-        AddCourses(10, 2025,
+        AddCourses(11, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
-        AddCourses(11, 2024,
+        // ── Assignment 11: Student 11, Enrollment 12 (Gr4→GPA4), Plan 3 ────────
+        AddCourses(12, 4, 2024,
             (1, CourseStatus.Completed, "91"),
             (2, CourseStatus.Completed, "92"),
             (5, CourseStatus.Completed, "89"));
-        AddCourses(11, 2025,
+        AddCourses(12, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
-        AddCourses(12, 2024,
+        // ── Assignment 12: Student 12, Enrollment 13 (Gr5→GPA5), Plan 2 ────────
+        AddCourses(13, 5, 2024,
             (1, CourseStatus.Completed, "94"),
             (2, CourseStatus.Completed, "90"),
             (5, CourseStatus.Completed, "88"));
-        AddCourses(12, 2025,
+        AddCourses(13, 5, 2025,
             (11, CourseStatus.InProgress, null));
 
-        AddCourses(13, 2021,
+        // ── Assignment 13: Student 13, Enrollment 14 (Gr1→GPA1), Plan 1 ────────
+        AddCourses(14, 1, 2021,
             (1, CourseStatus.Completed, "97"),
             (2, CourseStatus.Completed, "96"),
             (3, CourseStatus.Completed, "93"));
-        AddCourses(13, 2022,
+        AddCourses(14, 1, 2022,
             (5, CourseStatus.Completed, "95"),
             (4, CourseStatus.Completed, "94"));
-        AddCourses(13, 2023,
+        AddCourses(14, 1, 2023,
             (6, CourseStatus.Completed, "92"),
             (7, CourseStatus.Completed, "91"));
-        AddCourses(13, 2024,
+        AddCourses(14, 1, 2024,
             (12, CourseStatus.Completed, "90"),
             (8, CourseStatus.Completed, "89"));
 
-        AddCourses(14, 2024,
+        // ── Assignment 14: Student 14, Enrollment 15 (Gr5→GPA5), Plan 2 ────────
+        AddCourses(15, 5, 2024,
             (1, CourseStatus.Completed, "90"),
             (2, CourseStatus.Completed, "91"),
             (3, CourseStatus.InProgress, null));
 
-        AddCourses(15, 2023,
+        // ── Assignment 15: Student 15, Enrollment 16 (Gr3→GPA3), Plan 2 ────────
+        AddCourses(16, 3, 2023,
             (1, CourseStatus.Completed, "73"),
             (2, CourseStatus.Completed, "76"),
             (3, CourseStatus.Completed, "71"));
-        AddCourses(15, 2024,
+        AddCourses(16, 3, 2024,
             (5, CourseStatus.Completed, "74"));
 
-        AddCourses(16, 2024,
+        // ── Assignment 16: Student 16, Enrollment 17 (Gr4→GPA4), Plan 3 ────────
+        AddCourses(17, 4, 2024,
             (1, CourseStatus.Completed, "89"),
             (2, CourseStatus.Completed, "91"),
             (5, CourseStatus.Completed, "87"));
-        AddCourses(16, 2025,
+        AddCourses(17, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
-        AddCourses(17, 2022,
+        // ── Assignment 17: Student 17, Enrollment 18 (Gr2→GPA2), Plan 1 ────────
+        AddCourses(18, 2, 2022,
             (1, CourseStatus.Completed, "88"),
             (2, CourseStatus.Completed, "86"),
             (3, CourseStatus.Completed, "84"));
-        AddCourses(17, 2023,
+        AddCourses(18, 2, 2023,
             (5, CourseStatus.Completed, "87"),
             (4, CourseStatus.Completed, "85"));
-        AddCourses(17, 2024,
+        AddCourses(18, 2, 2024,
             (6, CourseStatus.Completed, "89"));
-        AddCourses(17, 2025,
+        AddCourses(18, 2, 2025,
             (7, CourseStatus.InProgress, null));
 
-        AddCourses(18, 2024,
+        // ── Assignment 18: Student 18, Enrollment 20 (Gr5→GPA5), Plan 2 ────────
+        AddCourses(20, 5, 2024,
             (1, CourseStatus.Completed, "85"),
             (2, CourseStatus.Completed, "84"));
-        AddCourses(18, 2025,
+        AddCourses(20, 5, 2025,
             (3, CourseStatus.Planned, null));
 
-        AddCourses(19, 2023,
+        // ── Assignment 19: Student 19, Enrollment 21 (Gr3→GPA3), Plan 2 ────────
+        AddCourses(21, 3, 2023,
             (1, CourseStatus.Completed, "84"),
             (2, CourseStatus.Completed, "86"));
-        AddCourses(19, 2024,
+        AddCourses(21, 3, 2024,
             (3, CourseStatus.Completed, "82"),
             (5, CourseStatus.Completed, "85"));
-        AddCourses(19, 2025,
+        AddCourses(21, 3, 2025,
             (6, CourseStatus.InProgress, null));
 
-        AddCourses(20, 2024,
+        // ── Assignment 20: Student 20, Enrollment 22 (Gr4→GPA4), Plan 3 ────────
+        AddCourses(22, 4, 2024,
             (1, CourseStatus.Completed, "92"),
             (2, CourseStatus.Completed, "90"),
             (5, CourseStatus.Completed, "88"));
 
-        AddCourses(21, 2025,
+        // ── Assignment 21: Student 21, Enrollment 23 (Gr6→GPA6), Plan 3 ────────
+        AddCourses(23, 6, 2025,
             (1, CourseStatus.InProgress, null),
             (2, CourseStatus.InProgress, null));
 
-        AddCourses(22, 2025,
+        // ── Assignment 22: Student 22, Enrollment 24 (Gr6→GPA6), Plan 3 ────────
+        AddCourses(24, 6, 2025,
             (1, CourseStatus.InProgress, null),
             (2, CourseStatus.InProgress, null));
 
-        AddCourses(23, 2025,
+        // ── Assignment 23: Student 23, Enrollment 25 (Gr6→GPA6), Plan 3 ────────
+        AddCourses(25, 6, 2025,
             (1, CourseStatus.InProgress, null),
             (2, CourseStatus.InProgress, null));
 
-        AddCourses(24, 2024,
+        // ── Assignment 24: Student 24, Enrollment 26 (Gr4→GPA4), Plan 3 ────────
+        AddCourses(26, 4, 2024,
             (1, CourseStatus.Completed, "90"),
             (2, CourseStatus.Completed, "89"),
             (5, CourseStatus.Completed, "87"));
-        AddCourses(24, 2025,
+        AddCourses(26, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
         modelBuilder.Entity<Institution>().HasData(institutions);
@@ -507,7 +506,7 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<StudentSubgroupAssignment>().HasData(subgroupAssignments);
         modelBuilder.Entity<AcademicLeave>().HasData(academicLeaves);
         modelBuilder.Entity<ExternalTransfer>().HasData(externalTransfers);
-        modelBuilder.Entity<StudentPlanAssignment>().HasData(planAssignments);
+        modelBuilder.Entity<GroupPlanAssignment>().HasData(groupPlanAssignments);
         modelBuilder.Entity<StudentCourseEnrollment>().HasData(courseEnrollments.ToArray());
         modelBuilder.Entity<GradeRecord>().HasData(gradeRecords.ToArray());
     }

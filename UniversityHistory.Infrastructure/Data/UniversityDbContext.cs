@@ -18,7 +18,7 @@ public class UniversityDbContext : DbContext
     public DbSet<StudentGroupEnrollment> StudentGroupEnrollments => Set<StudentGroupEnrollment>();
     public DbSet<AcademicLeave> AcademicLeaves => Set<AcademicLeave>();
     public DbSet<ExternalTransfer> ExternalTransfers => Set<ExternalTransfer>();
-    public DbSet<StudentPlanAssignment> StudentPlanAssignments => Set<StudentPlanAssignment>();
+    public DbSet<GroupPlanAssignment> GroupPlanAssignments => Set<GroupPlanAssignment>();
     public DbSet<StudentCourseEnrollment> StudentCourseEnrollments => Set<StudentCourseEnrollment>();
     public DbSet<GradeRecord> GradeRecords => Set<GradeRecord>();
     public DbSet<StudentSubgroupAssignment> StudentSubgroupAssignments => Set<StudentSubgroupAssignment>();
@@ -219,19 +219,21 @@ public class UniversityDbContext : DbContext
                 .HasForeignKey(t => t.InstitutionId).OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<StudentPlanAssignment>(e =>
+        modelBuilder.Entity<GroupPlanAssignment>(e =>
         {
-            e.ToTable("Student_Plan_Assignment");
-            e.HasKey(a => a.AssignmentId);
-            e.Property(a => a.AssignmentId).HasColumnName("assignment_id").UseIdentityColumn();
-            e.Property(a => a.StudentId).HasColumnName("student_id");
+            e.ToTable("Group_Plan_Assignment");
+            e.HasKey(a => a.GroupPlanAssignmentId);
+            e.Property(a => a.GroupPlanAssignmentId).HasColumnName("group_plan_assignment_id").UseIdentityColumn();
+            e.Property(a => a.GroupId).HasColumnName("group_id");
             e.Property(a => a.PlanId).HasColumnName("plan_id");
             e.Property(a => a.DateFrom).HasColumnName("date_from").IsRequired();
             e.Property(a => a.DateTo).HasColumnName("date_to");
-            e.HasOne(a => a.Student).WithMany(s => s.PlanAssignments)
-                .HasForeignKey(a => a.StudentId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(a => a.Plan).WithMany(p => p.PlanAssignments)
+            e.HasOne(a => a.Group).WithMany(g => g.PlanAssignments)
+                .HasForeignKey(a => a.GroupId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(a => a.Plan).WithMany(p => p.GroupPlanAssignments)
                 .HasForeignKey(a => a.PlanId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(a => new { a.GroupId, a.DateFrom }).IsUnique()
+                .HasDatabaseName("IX_GroupPlanAssignment_GroupId_DateFrom");
         });
 
         modelBuilder.Entity<StudentCourseEnrollment>(e =>
@@ -239,7 +241,8 @@ public class UniversityDbContext : DbContext
             e.ToTable("Student_Course_Enrollment");
             e.HasKey(ce => ce.CourseEnrollmentId);
             e.Property(ce => ce.CourseEnrollmentId).HasColumnName("course_enrollment_id").UseIdentityColumn();
-            e.Property(ce => ce.AssignmentId).HasColumnName("assignment_id");
+            e.Property(ce => ce.EnrollmentId).HasColumnName("enrollment_id");
+            e.Property(ce => ce.GroupPlanAssignmentId).HasColumnName("group_plan_assignment_id");
             e.Property(ce => ce.DisciplineId).HasColumnName("discipline_id");
             e.Property(ce => ce.AcademicYearStart).HasColumnName("academic_year_start").IsRequired();
             e.Property(ce => ce.Status)
@@ -250,8 +253,10 @@ public class UniversityDbContext : DbContext
             e.ToTable(t => t.HasCheckConstraint(
                 "chk_course_status",
                 "status IN ('Planned','InProgress','Completed','Retake')"));
-            e.HasOne(ce => ce.Assignment).WithMany(a => a.CourseEnrollments)
-                .HasForeignKey(ce => ce.AssignmentId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(ce => ce.Enrollment).WithMany(en => en.CourseEnrollments)
+                .HasForeignKey(ce => ce.EnrollmentId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(ce => ce.GroupPlanAssignment).WithMany(a => a.StudentCourseEnrollments)
+                .HasForeignKey(ce => ce.GroupPlanAssignmentId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(ce => ce.Discipline).WithMany(d => d.CourseEnrollments)
                 .HasForeignKey(ce => ce.DisciplineId).OnDelete(DeleteBehavior.Restrict);
         });

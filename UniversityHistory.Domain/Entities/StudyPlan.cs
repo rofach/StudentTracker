@@ -8,5 +8,5 @@ public class StudyPlan
     public DateOnly ValidFrom { get; set; }
 
     public ICollection<PlanDiscipline> PlanDisciplines { get; set; } = new List<PlanDiscipline>();
-    public ICollection<StudentPlanAssignment> PlanAssignments { get; set; } = new List<StudentPlanAssignment>();
+    public ICollection<GroupPlanAssignment> GroupPlanAssignments { get; set; } = new List<GroupPlanAssignment>();
 }

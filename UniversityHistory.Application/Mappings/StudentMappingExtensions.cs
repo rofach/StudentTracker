@@ -47,7 +47,7 @@ public static class StudentMappingExtensions
     public static StudentDetailDto ToDto(
         this Student student,
         IEnumerable<EnrollmentSummaryDto> enrollments,
-        IEnumerable<StudyPlanAssignmentDto> plans,
+        IEnumerable<GroupPlanAssignmentDto> plans,
         IEnumerable<AcademicLeaveDto> leaves,
         IEnumerable<ExternalTransferDto> transfers)
     {

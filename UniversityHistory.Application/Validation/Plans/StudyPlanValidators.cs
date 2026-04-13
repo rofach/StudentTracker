@@ -5,14 +5,26 @@ using UniversityHistory.Domain.Enums;
 
 namespace UniversityHistory.Application.Validation.Plans;
 
-public class AssignPlanDtoValidator : AppValidator<AssignPlanDto>
+public class AssignGroupPlanDtoValidator : AppValidator<AssignGroupPlanDto>
 {
-    public AssignPlanDtoValidator()
+    public AssignGroupPlanDtoValidator()
     {
         RuleFor(x => x.PlanId)
             .GreaterThan(0);
 
         RuleFor(x => x.DateFrom)
+            .NotDefaultDate();
+    }
+}
+
+public class ChangeGroupPlanDtoValidator : AppValidator<ChangeGroupPlanDto>
+{
+    public ChangeGroupPlanDtoValidator()
+    {
+        RuleFor(x => x.NewPlanId)
+            .GreaterThan(0);
+
+        RuleFor(x => x.EffectiveFrom)
             .NotDefaultDate();
     }
 }

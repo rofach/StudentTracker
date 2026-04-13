@@ -14,6 +14,21 @@ namespace UniversityHistory.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Academic_Unit",
+                columns: table => new
+                {
+                    academic_unit_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Academic_Unit", x => x.academic_unit_id);
+                    table.CheckConstraint("chk_academic_unit_type", "type IN ('Faculty','Institute')");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Discipline",
                 columns: table => new
                 {
@@ -61,22 +76,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Study_Group",
-                columns: table => new
-                {
-                    group_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    group_code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    faculty = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    date_created = table.Column<DateOnly>(type: "date", nullable: false),
-                    date_closed = table.Column<DateOnly>(type: "date", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Study_Group", x => x.group_id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Study_Plan",
                 columns: table => new
                 {
@@ -89,6 +88,26 @@ namespace UniversityHistory.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Study_Plan", x => x.plan_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Department",
+                columns: table => new
+                {
+                    department_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    academic_unit_id = table.Column<int>(type: "int", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Department", x => x.department_id);
+                    table.ForeignKey(
+                        name: "FK_Department_Academic_Unit_academic_unit_id",
+                        column: x => x.academic_unit_id,
+                        principalTable: "Academic_Unit",
+                        principalColumn: "academic_unit_id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -118,6 +137,85 @@ namespace UniversityHistory.Infrastructure.Migrations
                         column: x => x.student_id,
                         principalTable: "Student",
                         principalColumn: "student_id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Plan_Disciplines",
+                columns: table => new
+                {
+                    plan_id = table.Column<int>(type: "int", nullable: false),
+                    discipline_id = table.Column<int>(type: "int", nullable: false),
+                    semester_no = table.Column<int>(type: "int", nullable: false),
+                    control_type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    hours = table.Column<int>(type: "int", nullable: false),
+                    credits = table.Column<decimal>(type: "decimal(4,2)", precision: 4, scale: 2, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Plan_Disciplines", x => new { x.plan_id, x.discipline_id });
+                    table.CheckConstraint("chk_control_type", "control_type IN ('Exam','Credit','Coursework')");
+                    table.ForeignKey(
+                        name: "FK_Plan_Disciplines_Discipline_discipline_id",
+                        column: x => x.discipline_id,
+                        principalTable: "Discipline",
+                        principalColumn: "discipline_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Plan_Disciplines_Study_Plan_plan_id",
+                        column: x => x.plan_id,
+                        principalTable: "Study_Plan",
+                        principalColumn: "plan_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Study_Group",
+                columns: table => new
+                {
+                    group_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    group_code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    department_id = table.Column<int>(type: "int", nullable: false),
+                    date_created = table.Column<DateOnly>(type: "date", nullable: false),
+                    date_closed = table.Column<DateOnly>(type: "date", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Study_Group", x => x.group_id);
+                    table.ForeignKey(
+                        name: "FK_Study_Group_Department_department_id",
+                        column: x => x.department_id,
+                        principalTable: "Department",
+                        principalColumn: "department_id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Group_Plan_Assignment",
+                columns: table => new
+                {
+                    group_plan_assignment_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    group_id = table.Column<int>(type: "int", nullable: false),
+                    plan_id = table.Column<int>(type: "int", nullable: false),
+                    date_from = table.Column<DateOnly>(type: "date", nullable: false),
+                    date_to = table.Column<DateOnly>(type: "date", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Group_Plan_Assignment", x => x.group_plan_assignment_id);
+                    table.ForeignKey(
+                        name: "FK_Group_Plan_Assignment_Study_Group_group_id",
+                        column: x => x.group_id,
+                        principalTable: "Study_Group",
+                        principalColumn: "group_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Group_Plan_Assignment_Study_Plan_plan_id",
+                        column: x => x.plan_id,
+                        principalTable: "Study_Plan",
+                        principalColumn: "plan_id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,63 +269,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Plan_Disciplines",
-                columns: table => new
-                {
-                    plan_id = table.Column<int>(type: "int", nullable: false),
-                    discipline_id = table.Column<int>(type: "int", nullable: false),
-                    semester_no = table.Column<int>(type: "int", nullable: false),
-                    control_type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    hours = table.Column<int>(type: "int", nullable: false),
-                    credits = table.Column<decimal>(type: "decimal(4,2)", precision: 4, scale: 2, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Plan_Disciplines", x => new { x.plan_id, x.discipline_id });
-                    table.CheckConstraint("chk_control_type", "control_type IN ('Exam','Credit','Coursework')");
-                    table.ForeignKey(
-                        name: "FK_Plan_Disciplines_Discipline_discipline_id",
-                        column: x => x.discipline_id,
-                        principalTable: "Discipline",
-                        principalColumn: "discipline_id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Plan_Disciplines_Study_Plan_plan_id",
-                        column: x => x.plan_id,
-                        principalTable: "Study_Plan",
-                        principalColumn: "plan_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Student_Plan_Assignment",
-                columns: table => new
-                {
-                    assignment_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    student_id = table.Column<int>(type: "int", nullable: false),
-                    plan_id = table.Column<int>(type: "int", nullable: false),
-                    date_from = table.Column<DateOnly>(type: "date", nullable: false),
-                    date_to = table.Column<DateOnly>(type: "date", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Student_Plan_Assignment", x => x.assignment_id);
-                    table.ForeignKey(
-                        name: "FK_Student_Plan_Assignment_Student_student_id",
-                        column: x => x.student_id,
-                        principalTable: "Student",
-                        principalColumn: "student_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Student_Plan_Assignment_Study_Plan_plan_id",
-                        column: x => x.plan_id,
-                        principalTable: "Study_Plan",
-                        principalColumn: "plan_id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Academic_Leave",
                 columns: table => new
                 {
@@ -247,6 +288,42 @@ namespace UniversityHistory.Infrastructure.Migrations
                         principalTable: "Student_Group_Enrollment",
                         principalColumn: "enrollment_id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Student_Course_Enrollment",
+                columns: table => new
+                {
+                    course_enrollment_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    enrollment_id = table.Column<int>(type: "int", nullable: false),
+                    group_plan_assignment_id = table.Column<int>(type: "int", nullable: false),
+                    discipline_id = table.Column<int>(type: "int", nullable: false),
+                    academic_year_start = table.Column<int>(type: "int", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValueSql: "'Planned'")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Student_Course_Enrollment", x => x.course_enrollment_id);
+                    table.CheckConstraint("chk_course_status", "status IN ('Planned','InProgress','Completed','Retake')");
+                    table.ForeignKey(
+                        name: "FK_Student_Course_Enrollment_Discipline_discipline_id",
+                        column: x => x.discipline_id,
+                        principalTable: "Discipline",
+                        principalColumn: "discipline_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Student_Course_Enrollment_Group_Plan_Assignment_group_plan_assignment_id",
+                        column: x => x.group_plan_assignment_id,
+                        principalTable: "Group_Plan_Assignment",
+                        principalColumn: "group_plan_assignment_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Student_Course_Enrollment_Student_Group_Enrollment_enrollment_id",
+                        column: x => x.enrollment_id,
+                        principalTable: "Student_Group_Enrollment",
+                        principalColumn: "enrollment_id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -274,35 +351,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student_Course_Enrollment",
-                columns: table => new
-                {
-                    course_enrollment_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    assignment_id = table.Column<int>(type: "int", nullable: false),
-                    discipline_id = table.Column<int>(type: "int", nullable: false),
-                    academic_year_start = table.Column<int>(type: "int", nullable: false),
-                    status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValueSql: "'Planned'")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Student_Course_Enrollment", x => x.course_enrollment_id);
-                    table.CheckConstraint("chk_course_status", "status IN ('Planned','InProgress','Completed','Retake')");
-                    table.ForeignKey(
-                        name: "FK_Student_Course_Enrollment_Discipline_discipline_id",
-                        column: x => x.discipline_id,
-                        principalTable: "Discipline",
-                        principalColumn: "discipline_id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Student_Course_Enrollment_Student_Plan_Assignment_assignment_id",
-                        column: x => x.assignment_id,
-                        principalTable: "Student_Plan_Assignment",
-                        principalColumn: "assignment_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Grade_Record",
                 columns: table => new
                 {
@@ -321,6 +369,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                         principalTable: "Student_Course_Enrollment",
                         principalColumn: "course_enrollment_id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Academic_Unit",
+                columns: new[] { "academic_unit_id", "name", "type" },
+                values: new object[,]
+                {
+                    { 1, "Факультет інформатики та обчислювальної техніки", "Faculty" },
+                    { 2, "Факультет прикладної математики", "Faculty" },
+                    { 3, "Факультет комп'ютерної інженерії", "Faculty" }
                 });
 
             migrationBuilder.InsertData(
@@ -436,19 +494,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Study_Group",
-                columns: new[] { "group_id", "date_closed", "date_created", "faculty", "group_code" },
-                values: new object[,]
-                {
-                    { 1, null, new DateOnly(2021, 9, 1), "Факультет інформатики та обчислювальної техніки", "КН-21" },
-                    { 2, null, new DateOnly(2022, 9, 1), "Факультет інформатики та обчислювальної техніки", "КН-22" },
-                    { 3, null, new DateOnly(2023, 9, 1), "Факультет прикладної математики", "ПЗ-23" },
-                    { 4, null, new DateOnly(2024, 9, 1), "Факультет комп'ютерної інженерії", "КІ-24" },
-                    { 5, null, new DateOnly(2024, 9, 1), "Факультет прикладної математики", "ПЗ-24" },
-                    { 6, null, new DateOnly(2025, 9, 1), "Факультет комп'ютерної інженерії", "КІ-25" }
-                });
-
-            migrationBuilder.InsertData(
                 table: "Study_Plan",
                 columns: new[] { "plan_id", "plan_name", "specialty_code", "valid_from" },
                 values: new object[,]
@@ -456,6 +501,19 @@ namespace UniversityHistory.Infrastructure.Migrations
                     { 1, "Комп'ютерні науки 2021", "122", new DateOnly(2021, 9, 1) },
                     { 2, "Інженерія програмного забезпечення 2023", "121", new DateOnly(2023, 9, 1) },
                     { 3, "Комп'ютерна інженерія 2024", "123", new DateOnly(2024, 9, 1) }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Department",
+                columns: new[] { "department_id", "academic_unit_id", "name" },
+                values: new object[,]
+                {
+                    { 1, 1, "Кафедра програмування" },
+                    { 2, 1, "Кафедра комп'ютерних наук" },
+                    { 3, 2, "Кафедра прикладної математики" },
+                    { 4, 2, "Кафедра програмного забезпечення" },
+                    { 5, 3, "Кафедра комп'ютерної інженерії" },
+                    { 6, 3, "Кафедра вбудованих систем" }
                 });
 
             migrationBuilder.InsertData(
@@ -505,6 +563,32 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Study_Group",
+                columns: new[] { "group_id", "date_closed", "date_created", "department_id", "group_code" },
+                values: new object[,]
+                {
+                    { 1, null, new DateOnly(2021, 9, 1), 1, "КН-21" },
+                    { 2, null, new DateOnly(2022, 9, 1), 2, "КН-22" },
+                    { 3, null, new DateOnly(2023, 9, 1), 4, "ПЗ-23" },
+                    { 4, null, new DateOnly(2024, 9, 1), 5, "КІ-24" },
+                    { 5, null, new DateOnly(2024, 9, 1), 4, "ПЗ-24" },
+                    { 6, null, new DateOnly(2025, 9, 1), 5, "КІ-25" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Group_Plan_Assignment",
+                columns: new[] { "group_plan_assignment_id", "date_from", "date_to", "group_id", "plan_id" },
+                values: new object[,]
+                {
+                    { 1, new DateOnly(2021, 9, 1), null, 1, 1 },
+                    { 2, new DateOnly(2022, 9, 1), null, 2, 1 },
+                    { 3, new DateOnly(2023, 9, 1), null, 3, 2 },
+                    { 4, new DateOnly(2024, 9, 1), null, 4, 3 },
+                    { 5, new DateOnly(2024, 9, 1), null, 5, 2 },
+                    { 6, new DateOnly(2025, 9, 1), null, 6, 3 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Student_Group_Enrollment",
                 columns: new[] { "enrollment_id", "date_from", "date_to", "group_id", "reason_end", "reason_start", "student_id" },
                 values: new object[,]
@@ -538,37 +622,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Plan_Assignment",
-                columns: new[] { "assignment_id", "date_from", "date_to", "plan_id", "student_id" },
-                values: new object[,]
-                {
-                    { 1, new DateOnly(2021, 9, 1), null, 1, 1 },
-                    { 2, new DateOnly(2021, 9, 1), new DateOnly(2025, 6, 30), 1, 2 },
-                    { 3, new DateOnly(2022, 9, 1), null, 1, 3 },
-                    { 4, new DateOnly(2023, 9, 1), null, 2, 4 },
-                    { 5, new DateOnly(2023, 9, 1), null, 2, 5 },
-                    { 6, new DateOnly(2023, 9, 1), null, 2, 6 },
-                    { 7, new DateOnly(2023, 9, 1), null, 2, 7 },
-                    { 8, new DateOnly(2023, 9, 1), null, 2, 8 },
-                    { 9, new DateOnly(2023, 9, 1), null, 2, 9 },
-                    { 10, new DateOnly(2024, 9, 1), null, 3, 10 },
-                    { 11, new DateOnly(2024, 9, 1), null, 3, 11 },
-                    { 12, new DateOnly(2024, 9, 1), null, 3, 12 },
-                    { 13, new DateOnly(2021, 9, 1), new DateOnly(2025, 6, 30), 1, 13 },
-                    { 14, new DateOnly(2024, 9, 1), null, 2, 14 },
-                    { 15, new DateOnly(2023, 9, 1), new DateOnly(2025, 2, 14), 2, 15 },
-                    { 16, new DateOnly(2024, 9, 1), null, 3, 16 },
-                    { 17, new DateOnly(2022, 9, 1), null, 1, 17 },
-                    { 18, new DateOnly(2024, 9, 1), null, 2, 18 },
-                    { 19, new DateOnly(2023, 9, 1), null, 2, 19 },
-                    { 20, new DateOnly(2024, 9, 1), null, 3, 20 },
-                    { 21, new DateOnly(2025, 9, 1), null, 3, 21 },
-                    { 22, new DateOnly(2025, 9, 1), null, 3, 22 },
-                    { 23, new DateOnly(2025, 9, 1), null, 3, 23 },
-                    { 24, new DateOnly(2024, 9, 1), null, 3, 24 }
-                });
-
-            migrationBuilder.InsertData(
                 table: "Subgroup",
                 columns: new[] { "subgroup_id", "group_id", "subgroup_name" },
                 values: new object[,]
@@ -599,146 +652,146 @@ namespace UniversityHistory.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Student_Course_Enrollment",
-                columns: new[] { "course_enrollment_id", "academic_year_start", "assignment_id", "discipline_id", "status" },
+                columns: new[] { "course_enrollment_id", "academic_year_start", "discipline_id", "enrollment_id", "group_plan_assignment_id", "status" },
                 values: new object[,]
                 {
-                    { 1, 2021, 1, 1, "Completed" },
-                    { 2, 2021, 1, 2, "Completed" },
-                    { 3, 2021, 1, 3, "Completed" },
-                    { 4, 2022, 1, 5, "Completed" },
-                    { 5, 2022, 1, 4, "Completed" },
-                    { 6, 2023, 1, 6, "Completed" },
-                    { 7, 2024, 1, 7, "InProgress" }
+                    { 1, 2021, 1, 2, 2, "Completed" },
+                    { 2, 2021, 2, 2, 2, "Completed" },
+                    { 3, 2021, 3, 2, 2, "Completed" },
+                    { 4, 2022, 5, 2, 2, "Completed" },
+                    { 5, 2022, 4, 2, 2, "Completed" },
+                    { 6, 2023, 6, 2, 2, "Completed" },
+                    { 7, 2024, 7, 2, 2, "InProgress" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Student_Course_Enrollment",
-                columns: new[] { "course_enrollment_id", "academic_year_start", "assignment_id", "discipline_id" },
-                values: new object[] { 8, 2024, 1, 12 });
+                columns: new[] { "course_enrollment_id", "academic_year_start", "discipline_id", "enrollment_id", "group_plan_assignment_id" },
+                values: new object[] { 8, 2024, 12, 2, 2 });
 
             migrationBuilder.InsertData(
                 table: "Student_Course_Enrollment",
-                columns: new[] { "course_enrollment_id", "academic_year_start", "assignment_id", "discipline_id", "status" },
+                columns: new[] { "course_enrollment_id", "academic_year_start", "discipline_id", "enrollment_id", "group_plan_assignment_id", "status" },
                 values: new object[,]
                 {
-                    { 9, 2021, 2, 1, "Completed" },
-                    { 10, 2021, 2, 2, "Completed" },
-                    { 11, 2021, 2, 3, "Completed" },
-                    { 12, 2022, 2, 5, "Completed" },
-                    { 13, 2022, 2, 4, "Completed" },
-                    { 14, 2023, 2, 6, "Completed" },
-                    { 15, 2023, 2, 7, "Completed" },
-                    { 16, 2024, 2, 12, "Completed" },
-                    { 17, 2024, 2, 8, "Completed" },
-                    { 18, 2025, 2, 10, "Completed" },
-                    { 19, 2025, 2, 9, "Completed" },
-                    { 20, 2022, 3, 1, "Completed" },
-                    { 21, 2022, 3, 2, "Completed" },
-                    { 22, 2022, 3, 3, "Completed" },
-                    { 23, 2023, 3, 5, "Completed" },
-                    { 24, 2023, 3, 4, "Completed" },
-                    { 25, 2024, 3, 6, "InProgress" },
-                    { 26, 2023, 4, 1, "Completed" },
-                    { 27, 2023, 4, 2, "Completed" },
-                    { 28, 2023, 4, 3, "Completed" },
-                    { 29, 2024, 4, 5, "Completed" },
-                    { 30, 2024, 4, 6, "InProgress" },
-                    { 31, 2023, 5, 1, "Completed" },
-                    { 32, 2023, 5, 2, "Completed" },
-                    { 33, 2023, 5, 3, "Completed" },
-                    { 34, 2024, 5, 5, "Completed" },
-                    { 35, 2023, 6, 1, "Completed" },
-                    { 36, 2023, 6, 2, "Completed" },
-                    { 37, 2023, 6, 3, "Completed" },
-                    { 38, 2024, 6, 5, "Completed" },
-                    { 39, 2024, 6, 6, "InProgress" },
-                    { 40, 2023, 7, 1, "Completed" },
-                    { 41, 2023, 7, 2, "Completed" },
-                    { 42, 2023, 7, 3, "Completed" },
-                    { 43, 2024, 7, 5, "Completed" },
-                    { 44, 2024, 7, 6, "Completed" },
-                    { 45, 2025, 7, 7, "InProgress" },
-                    { 46, 2023, 8, 1, "Completed" },
-                    { 47, 2023, 8, 2, "Completed" },
-                    { 48, 2023, 8, 3, "Completed" },
-                    { 49, 2024, 8, 5, "Completed" },
-                    { 50, 2024, 8, 10, "Retake" },
-                    { 51, 2023, 9, 1, "Completed" },
-                    { 52, 2023, 9, 2, "Completed" },
-                    { 53, 2023, 9, 3, "Completed" },
-                    { 54, 2024, 9, 5, "Completed" },
-                    { 55, 2024, 9, 6, "InProgress" },
-                    { 56, 2024, 10, 1, "Completed" },
-                    { 57, 2024, 10, 2, "Completed" },
-                    { 58, 2024, 10, 5, "Completed" },
-                    { 59, 2025, 10, 11, "InProgress" },
-                    { 60, 2024, 11, 1, "Completed" },
-                    { 61, 2024, 11, 2, "Completed" },
-                    { 62, 2024, 11, 5, "Completed" },
-                    { 63, 2025, 11, 11, "InProgress" },
-                    { 64, 2024, 12, 1, "Completed" },
-                    { 65, 2024, 12, 2, "Completed" },
-                    { 66, 2024, 12, 5, "Completed" },
-                    { 67, 2025, 12, 11, "InProgress" },
-                    { 68, 2021, 13, 1, "Completed" },
-                    { 69, 2021, 13, 2, "Completed" },
-                    { 70, 2021, 13, 3, "Completed" },
-                    { 71, 2022, 13, 5, "Completed" },
-                    { 72, 2022, 13, 4, "Completed" },
-                    { 73, 2023, 13, 6, "Completed" },
-                    { 74, 2023, 13, 7, "Completed" },
-                    { 75, 2024, 13, 12, "Completed" },
-                    { 76, 2024, 13, 8, "Completed" },
-                    { 77, 2024, 14, 1, "Completed" },
-                    { 78, 2024, 14, 2, "Completed" },
-                    { 79, 2024, 14, 3, "InProgress" },
-                    { 80, 2023, 15, 1, "Completed" },
-                    { 81, 2023, 15, 2, "Completed" },
-                    { 82, 2023, 15, 3, "Completed" },
-                    { 83, 2024, 15, 5, "Completed" },
-                    { 84, 2024, 16, 1, "Completed" },
-                    { 85, 2024, 16, 2, "Completed" },
-                    { 86, 2024, 16, 5, "Completed" },
-                    { 87, 2025, 16, 11, "InProgress" },
-                    { 88, 2022, 17, 1, "Completed" },
-                    { 89, 2022, 17, 2, "Completed" },
-                    { 90, 2022, 17, 3, "Completed" },
-                    { 91, 2023, 17, 5, "Completed" },
-                    { 92, 2023, 17, 4, "Completed" },
-                    { 93, 2024, 17, 6, "Completed" },
-                    { 94, 2025, 17, 7, "InProgress" },
-                    { 95, 2024, 18, 1, "Completed" },
-                    { 96, 2024, 18, 2, "Completed" }
+                    { 9, 2021, 1, 3, 1, "Completed" },
+                    { 10, 2021, 2, 3, 1, "Completed" },
+                    { 11, 2021, 3, 3, 1, "Completed" },
+                    { 12, 2022, 5, 3, 1, "Completed" },
+                    { 13, 2022, 4, 3, 1, "Completed" },
+                    { 14, 2023, 6, 3, 1, "Completed" },
+                    { 15, 2023, 7, 3, 1, "Completed" },
+                    { 16, 2024, 12, 3, 1, "Completed" },
+                    { 17, 2024, 8, 3, 1, "Completed" },
+                    { 18, 2025, 10, 3, 1, "Completed" },
+                    { 19, 2025, 9, 3, 1, "Completed" },
+                    { 20, 2022, 1, 4, 2, "Completed" },
+                    { 21, 2022, 2, 4, 2, "Completed" },
+                    { 22, 2022, 3, 4, 2, "Completed" },
+                    { 23, 2023, 5, 4, 2, "Completed" },
+                    { 24, 2023, 4, 4, 2, "Completed" },
+                    { 25, 2024, 6, 4, 2, "InProgress" },
+                    { 26, 2023, 1, 5, 3, "Completed" },
+                    { 27, 2023, 2, 5, 3, "Completed" },
+                    { 28, 2023, 3, 5, 3, "Completed" },
+                    { 29, 2024, 5, 5, 3, "Completed" },
+                    { 30, 2024, 6, 5, 3, "InProgress" },
+                    { 31, 2023, 1, 6, 3, "Completed" },
+                    { 32, 2023, 2, 6, 3, "Completed" },
+                    { 33, 2023, 3, 6, 3, "Completed" },
+                    { 34, 2024, 5, 6, 3, "Completed" },
+                    { 35, 2023, 1, 7, 3, "Completed" },
+                    { 36, 2023, 2, 7, 3, "Completed" },
+                    { 37, 2023, 3, 7, 3, "Completed" },
+                    { 38, 2024, 5, 7, 3, "Completed" },
+                    { 39, 2024, 6, 7, 3, "InProgress" },
+                    { 40, 2023, 1, 8, 3, "Completed" },
+                    { 41, 2023, 2, 8, 3, "Completed" },
+                    { 42, 2023, 3, 8, 3, "Completed" },
+                    { 43, 2024, 5, 8, 3, "Completed" },
+                    { 44, 2024, 6, 8, 3, "Completed" },
+                    { 45, 2025, 7, 8, 3, "InProgress" },
+                    { 46, 2023, 1, 9, 3, "Completed" },
+                    { 47, 2023, 2, 9, 3, "Completed" },
+                    { 48, 2023, 3, 9, 3, "Completed" },
+                    { 49, 2024, 5, 9, 3, "Completed" },
+                    { 50, 2024, 10, 9, 3, "Retake" },
+                    { 51, 2023, 1, 10, 3, "Completed" },
+                    { 52, 2023, 2, 10, 3, "Completed" },
+                    { 53, 2023, 3, 10, 3, "Completed" },
+                    { 54, 2024, 5, 10, 3, "Completed" },
+                    { 55, 2024, 6, 10, 3, "InProgress" },
+                    { 56, 2024, 1, 11, 4, "Completed" },
+                    { 57, 2024, 2, 11, 4, "Completed" },
+                    { 58, 2024, 5, 11, 4, "Completed" },
+                    { 59, 2025, 11, 11, 4, "InProgress" },
+                    { 60, 2024, 1, 12, 4, "Completed" },
+                    { 61, 2024, 2, 12, 4, "Completed" },
+                    { 62, 2024, 5, 12, 4, "Completed" },
+                    { 63, 2025, 11, 12, 4, "InProgress" },
+                    { 64, 2024, 1, 13, 5, "Completed" },
+                    { 65, 2024, 2, 13, 5, "Completed" },
+                    { 66, 2024, 5, 13, 5, "Completed" },
+                    { 67, 2025, 11, 13, 5, "InProgress" },
+                    { 68, 2021, 1, 14, 1, "Completed" },
+                    { 69, 2021, 2, 14, 1, "Completed" },
+                    { 70, 2021, 3, 14, 1, "Completed" },
+                    { 71, 2022, 5, 14, 1, "Completed" },
+                    { 72, 2022, 4, 14, 1, "Completed" },
+                    { 73, 2023, 6, 14, 1, "Completed" },
+                    { 74, 2023, 7, 14, 1, "Completed" },
+                    { 75, 2024, 12, 14, 1, "Completed" },
+                    { 76, 2024, 8, 14, 1, "Completed" },
+                    { 77, 2024, 1, 15, 5, "Completed" },
+                    { 78, 2024, 2, 15, 5, "Completed" },
+                    { 79, 2024, 3, 15, 5, "InProgress" },
+                    { 80, 2023, 1, 16, 3, "Completed" },
+                    { 81, 2023, 2, 16, 3, "Completed" },
+                    { 82, 2023, 3, 16, 3, "Completed" },
+                    { 83, 2024, 5, 16, 3, "Completed" },
+                    { 84, 2024, 1, 17, 4, "Completed" },
+                    { 85, 2024, 2, 17, 4, "Completed" },
+                    { 86, 2024, 5, 17, 4, "Completed" },
+                    { 87, 2025, 11, 17, 4, "InProgress" },
+                    { 88, 2022, 1, 18, 2, "Completed" },
+                    { 89, 2022, 2, 18, 2, "Completed" },
+                    { 90, 2022, 3, 18, 2, "Completed" },
+                    { 91, 2023, 5, 18, 2, "Completed" },
+                    { 92, 2023, 4, 18, 2, "Completed" },
+                    { 93, 2024, 6, 18, 2, "Completed" },
+                    { 94, 2025, 7, 18, 2, "InProgress" },
+                    { 95, 2024, 1, 20, 5, "Completed" },
+                    { 96, 2024, 2, 20, 5, "Completed" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Student_Course_Enrollment",
-                columns: new[] { "course_enrollment_id", "academic_year_start", "assignment_id", "discipline_id" },
-                values: new object[] { 97, 2025, 18, 3 });
+                columns: new[] { "course_enrollment_id", "academic_year_start", "discipline_id", "enrollment_id", "group_plan_assignment_id" },
+                values: new object[] { 97, 2025, 3, 20, 5 });
 
             migrationBuilder.InsertData(
                 table: "Student_Course_Enrollment",
-                columns: new[] { "course_enrollment_id", "academic_year_start", "assignment_id", "discipline_id", "status" },
+                columns: new[] { "course_enrollment_id", "academic_year_start", "discipline_id", "enrollment_id", "group_plan_assignment_id", "status" },
                 values: new object[,]
                 {
-                    { 98, 2023, 19, 1, "Completed" },
-                    { 99, 2023, 19, 2, "Completed" },
-                    { 100, 2024, 19, 3, "Completed" },
-                    { 101, 2024, 19, 5, "Completed" },
-                    { 102, 2025, 19, 6, "InProgress" },
-                    { 103, 2024, 20, 1, "Completed" },
-                    { 104, 2024, 20, 2, "Completed" },
-                    { 105, 2024, 20, 5, "Completed" },
-                    { 106, 2025, 21, 1, "InProgress" },
-                    { 107, 2025, 21, 2, "InProgress" },
-                    { 108, 2025, 22, 1, "InProgress" },
-                    { 109, 2025, 22, 2, "InProgress" },
-                    { 110, 2025, 23, 1, "InProgress" },
-                    { 111, 2025, 23, 2, "InProgress" },
-                    { 112, 2024, 24, 1, "Completed" },
-                    { 113, 2024, 24, 2, "Completed" },
-                    { 114, 2024, 24, 5, "Completed" },
-                    { 115, 2025, 24, 11, "InProgress" }
+                    { 98, 2023, 1, 21, 3, "Completed" },
+                    { 99, 2023, 2, 21, 3, "Completed" },
+                    { 100, 2024, 3, 21, 3, "Completed" },
+                    { 101, 2024, 5, 21, 3, "Completed" },
+                    { 102, 2025, 6, 21, 3, "InProgress" },
+                    { 103, 2024, 1, 22, 4, "Completed" },
+                    { 104, 2024, 2, 22, 4, "Completed" },
+                    { 105, 2024, 5, 22, 4, "Completed" },
+                    { 106, 2025, 1, 23, 6, "InProgress" },
+                    { 107, 2025, 2, 23, 6, "InProgress" },
+                    { 108, 2025, 1, 24, 6, "InProgress" },
+                    { 109, 2025, 2, 24, 6, "InProgress" },
+                    { 110, 2025, 1, 25, 6, "InProgress" },
+                    { 111, 2025, 2, 25, 6, "InProgress" },
+                    { 112, 2024, 1, 26, 4, "Completed" },
+                    { 113, 2024, 2, 26, 4, "Completed" },
+                    { 114, 2024, 5, 26, 4, "Completed" },
+                    { 115, 2025, 11, 26, 4, "InProgress" }
                 });
 
             migrationBuilder.InsertData(
@@ -877,6 +930,18 @@ namespace UniversityHistory.Infrastructure.Migrations
                 column: "enrollment_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Academic_Unit_name",
+                table: "Academic_Unit",
+                column: "name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Department_academic_unit_id_name",
+                table: "Department",
+                columns: new[] { "academic_unit_id", "name" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_External_Transfers_institution_id",
                 table: "External_Transfers",
                 column: "institution_id");
@@ -893,19 +958,35 @@ namespace UniversityHistory.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Group_Plan_Assignment_plan_id",
+                table: "Group_Plan_Assignment",
+                column: "plan_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GroupPlanAssignment_GroupId_DateFrom",
+                table: "Group_Plan_Assignment",
+                columns: new[] { "group_id", "date_from" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Plan_Disciplines_discipline_id",
                 table: "Plan_Disciplines",
                 column: "discipline_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Student_Course_Enrollment_assignment_id",
-                table: "Student_Course_Enrollment",
-                column: "assignment_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Student_Course_Enrollment_discipline_id",
                 table: "Student_Course_Enrollment",
                 column: "discipline_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Student_Course_Enrollment_enrollment_id",
+                table: "Student_Course_Enrollment",
+                column: "enrollment_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Student_Course_Enrollment_group_plan_assignment_id",
+                table: "Student_Course_Enrollment",
+                column: "group_plan_assignment_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Enrollment_GroupId_DateFrom",
@@ -918,19 +999,14 @@ namespace UniversityHistory.Infrastructure.Migrations
                 column: "student_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Student_Plan_Assignment_plan_id",
-                table: "Student_Plan_Assignment",
-                column: "plan_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Student_Plan_Assignment_student_id",
-                table: "Student_Plan_Assignment",
-                column: "student_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Student_Subgroup_Assignment_subgroup_id",
                 table: "Student_Subgroup_Assignment",
                 column: "subgroup_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Study_Group_department_id",
+                table: "Study_Group",
+                column: "department_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Study_Group_group_code",
@@ -969,25 +1045,31 @@ namespace UniversityHistory.Infrastructure.Migrations
                 name: "Student_Course_Enrollment");
 
             migrationBuilder.DropTable(
-                name: "Student_Group_Enrollment");
-
-            migrationBuilder.DropTable(
                 name: "Subgroup");
 
             migrationBuilder.DropTable(
                 name: "Discipline");
 
             migrationBuilder.DropTable(
-                name: "Student_Plan_Assignment");
+                name: "Group_Plan_Assignment");
 
             migrationBuilder.DropTable(
-                name: "Study_Group");
+                name: "Student_Group_Enrollment");
+
+            migrationBuilder.DropTable(
+                name: "Study_Plan");
 
             migrationBuilder.DropTable(
                 name: "Student");
 
             migrationBuilder.DropTable(
-                name: "Study_Plan");
+                name: "Study_Group");
+
+            migrationBuilder.DropTable(
+                name: "Department");
+
+            migrationBuilder.DropTable(
+                name: "Academic_Unit");
         }
     }
 }

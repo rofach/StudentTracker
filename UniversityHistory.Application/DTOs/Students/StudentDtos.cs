@@ -49,7 +49,7 @@ public record StudentDetailDto(
     string? Phone,
     string Status,
     IEnumerable<EnrollmentSummaryDto> Enrollments,
-    IEnumerable<StudyPlanAssignmentDto> Plans,
+    IEnumerable<GroupPlanAssignmentDto> Plans,
     IEnumerable<AcademicLeaveDto> Leaves,
     IEnumerable<ExternalTransferDto> Transfers
 );

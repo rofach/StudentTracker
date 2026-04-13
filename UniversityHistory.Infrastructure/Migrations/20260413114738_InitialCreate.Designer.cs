@@ -12,8 +12,8 @@ using UniversityHistory.Infrastructure.Data;
 namespace UniversityHistory.Infrastructure.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    [Migration("20260404223319_AddOrganizationalStructure")]
-    partial class AddOrganizationalStructure
+    [Migration("20260413114738_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1040,6 +1040,86 @@ namespace UniversityHistory.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("UniversityHistory.Domain.Entities.GroupPlanAssignment", b =>
+                {
+                    b.Property<int>("GroupPlanAssignmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("group_plan_assignment_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GroupPlanAssignmentId"));
+
+                    b.Property<DateOnly>("DateFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("date_from");
+
+                    b.Property<DateOnly?>("DateTo")
+                        .HasColumnType("date")
+                        .HasColumnName("date_to");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("PlanId")
+                        .HasColumnType("int")
+                        .HasColumnName("plan_id");
+
+                    b.HasKey("GroupPlanAssignmentId");
+
+                    b.HasIndex("PlanId");
+
+                    b.HasIndex("GroupId", "DateFrom")
+                        .IsUnique()
+                        .HasDatabaseName("IX_GroupPlanAssignment_GroupId_DateFrom");
+
+                    b.ToTable("Group_Plan_Assignment", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            GroupPlanAssignmentId = 1,
+                            DateFrom = new DateOnly(2021, 9, 1),
+                            GroupId = 1,
+                            PlanId = 1
+                        },
+                        new
+                        {
+                            GroupPlanAssignmentId = 2,
+                            DateFrom = new DateOnly(2022, 9, 1),
+                            GroupId = 2,
+                            PlanId = 1
+                        },
+                        new
+                        {
+                            GroupPlanAssignmentId = 3,
+                            DateFrom = new DateOnly(2023, 9, 1),
+                            GroupId = 3,
+                            PlanId = 2
+                        },
+                        new
+                        {
+                            GroupPlanAssignmentId = 4,
+                            DateFrom = new DateOnly(2024, 9, 1),
+                            GroupId = 4,
+                            PlanId = 3
+                        },
+                        new
+                        {
+                            GroupPlanAssignmentId = 5,
+                            DateFrom = new DateOnly(2024, 9, 1),
+                            GroupId = 5,
+                            PlanId = 2
+                        },
+                        new
+                        {
+                            GroupPlanAssignmentId = 6,
+                            DateFrom = new DateOnly(2025, 9, 1),
+                            GroupId = 6,
+                            PlanId = 3
+                        });
+                });
+
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Institution", b =>
                 {
                     b.Property<int>("InstitutionId")
@@ -1713,13 +1793,17 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("academic_year_start");
 
-                    b.Property<int>("AssignmentId")
-                        .HasColumnType("int")
-                        .HasColumnName("assignment_id");
-
                     b.Property<int>("DisciplineId")
                         .HasColumnType("int")
                         .HasColumnName("discipline_id");
+
+                    b.Property<int>("EnrollmentId")
+                        .HasColumnType("int")
+                        .HasColumnName("enrollment_id");
+
+                    b.Property<int>("GroupPlanAssignmentId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_plan_assignment_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1731,9 +1815,11 @@ namespace UniversityHistory.Infrastructure.Migrations
 
                     b.HasKey("CourseEnrollmentId");
 
-                    b.HasIndex("AssignmentId");
-
                     b.HasIndex("DisciplineId");
+
+                    b.HasIndex("EnrollmentId");
+
+                    b.HasIndex("GroupPlanAssignmentId");
 
                     b.ToTable("Student_Course_Enrollment", null, t =>
                         {
@@ -1745,920 +1831,1035 @@ namespace UniversityHistory.Infrastructure.Migrations
                         {
                             CourseEnrollmentId = 1,
                             AcademicYearStart = 2021,
-                            AssignmentId = 1,
                             DisciplineId = 1,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 2,
                             AcademicYearStart = 2021,
-                            AssignmentId = 1,
                             DisciplineId = 2,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 3,
                             AcademicYearStart = 2021,
-                            AssignmentId = 1,
                             DisciplineId = 3,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 4,
                             AcademicYearStart = 2022,
-                            AssignmentId = 1,
                             DisciplineId = 5,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 5,
                             AcademicYearStart = 2022,
-                            AssignmentId = 1,
                             DisciplineId = 4,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 6,
                             AcademicYearStart = 2023,
-                            AssignmentId = 1,
                             DisciplineId = 6,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 7,
                             AcademicYearStart = 2024,
-                            AssignmentId = 1,
                             DisciplineId = 7,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 8,
                             AcademicYearStart = 2024,
-                            AssignmentId = 1,
                             DisciplineId = 12,
+                            EnrollmentId = 2,
+                            GroupPlanAssignmentId = 2,
                             Status = "Planned"
                         },
                         new
                         {
                             CourseEnrollmentId = 9,
                             AcademicYearStart = 2021,
-                            AssignmentId = 2,
                             DisciplineId = 1,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 10,
                             AcademicYearStart = 2021,
-                            AssignmentId = 2,
                             DisciplineId = 2,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 11,
                             AcademicYearStart = 2021,
-                            AssignmentId = 2,
                             DisciplineId = 3,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 12,
                             AcademicYearStart = 2022,
-                            AssignmentId = 2,
                             DisciplineId = 5,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 13,
                             AcademicYearStart = 2022,
-                            AssignmentId = 2,
                             DisciplineId = 4,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 14,
                             AcademicYearStart = 2023,
-                            AssignmentId = 2,
                             DisciplineId = 6,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 15,
                             AcademicYearStart = 2023,
-                            AssignmentId = 2,
                             DisciplineId = 7,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 16,
                             AcademicYearStart = 2024,
-                            AssignmentId = 2,
                             DisciplineId = 12,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 17,
                             AcademicYearStart = 2024,
-                            AssignmentId = 2,
                             DisciplineId = 8,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 18,
                             AcademicYearStart = 2025,
-                            AssignmentId = 2,
                             DisciplineId = 10,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 19,
                             AcademicYearStart = 2025,
-                            AssignmentId = 2,
                             DisciplineId = 9,
+                            EnrollmentId = 3,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 20,
                             AcademicYearStart = 2022,
-                            AssignmentId = 3,
                             DisciplineId = 1,
+                            EnrollmentId = 4,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 21,
                             AcademicYearStart = 2022,
-                            AssignmentId = 3,
                             DisciplineId = 2,
+                            EnrollmentId = 4,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 22,
                             AcademicYearStart = 2022,
-                            AssignmentId = 3,
                             DisciplineId = 3,
+                            EnrollmentId = 4,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 23,
                             AcademicYearStart = 2023,
-                            AssignmentId = 3,
                             DisciplineId = 5,
+                            EnrollmentId = 4,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 24,
                             AcademicYearStart = 2023,
-                            AssignmentId = 3,
                             DisciplineId = 4,
+                            EnrollmentId = 4,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 25,
                             AcademicYearStart = 2024,
-                            AssignmentId = 3,
                             DisciplineId = 6,
+                            EnrollmentId = 4,
+                            GroupPlanAssignmentId = 2,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 26,
                             AcademicYearStart = 2023,
-                            AssignmentId = 4,
                             DisciplineId = 1,
+                            EnrollmentId = 5,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 27,
                             AcademicYearStart = 2023,
-                            AssignmentId = 4,
                             DisciplineId = 2,
+                            EnrollmentId = 5,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 28,
                             AcademicYearStart = 2023,
-                            AssignmentId = 4,
                             DisciplineId = 3,
+                            EnrollmentId = 5,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 29,
                             AcademicYearStart = 2024,
-                            AssignmentId = 4,
                             DisciplineId = 5,
+                            EnrollmentId = 5,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 30,
                             AcademicYearStart = 2024,
-                            AssignmentId = 4,
                             DisciplineId = 6,
+                            EnrollmentId = 5,
+                            GroupPlanAssignmentId = 3,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 31,
                             AcademicYearStart = 2023,
-                            AssignmentId = 5,
                             DisciplineId = 1,
+                            EnrollmentId = 6,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 32,
                             AcademicYearStart = 2023,
-                            AssignmentId = 5,
                             DisciplineId = 2,
+                            EnrollmentId = 6,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 33,
                             AcademicYearStart = 2023,
-                            AssignmentId = 5,
                             DisciplineId = 3,
+                            EnrollmentId = 6,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 34,
                             AcademicYearStart = 2024,
-                            AssignmentId = 5,
                             DisciplineId = 5,
+                            EnrollmentId = 6,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 35,
                             AcademicYearStart = 2023,
-                            AssignmentId = 6,
                             DisciplineId = 1,
+                            EnrollmentId = 7,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 36,
                             AcademicYearStart = 2023,
-                            AssignmentId = 6,
                             DisciplineId = 2,
+                            EnrollmentId = 7,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 37,
                             AcademicYearStart = 2023,
-                            AssignmentId = 6,
                             DisciplineId = 3,
+                            EnrollmentId = 7,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 38,
                             AcademicYearStart = 2024,
-                            AssignmentId = 6,
                             DisciplineId = 5,
+                            EnrollmentId = 7,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 39,
                             AcademicYearStart = 2024,
-                            AssignmentId = 6,
                             DisciplineId = 6,
+                            EnrollmentId = 7,
+                            GroupPlanAssignmentId = 3,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 40,
                             AcademicYearStart = 2023,
-                            AssignmentId = 7,
                             DisciplineId = 1,
+                            EnrollmentId = 8,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 41,
                             AcademicYearStart = 2023,
-                            AssignmentId = 7,
                             DisciplineId = 2,
+                            EnrollmentId = 8,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 42,
                             AcademicYearStart = 2023,
-                            AssignmentId = 7,
                             DisciplineId = 3,
+                            EnrollmentId = 8,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 43,
                             AcademicYearStart = 2024,
-                            AssignmentId = 7,
                             DisciplineId = 5,
+                            EnrollmentId = 8,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 44,
                             AcademicYearStart = 2024,
-                            AssignmentId = 7,
                             DisciplineId = 6,
+                            EnrollmentId = 8,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 45,
                             AcademicYearStart = 2025,
-                            AssignmentId = 7,
                             DisciplineId = 7,
+                            EnrollmentId = 8,
+                            GroupPlanAssignmentId = 3,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 46,
                             AcademicYearStart = 2023,
-                            AssignmentId = 8,
                             DisciplineId = 1,
+                            EnrollmentId = 9,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 47,
                             AcademicYearStart = 2023,
-                            AssignmentId = 8,
                             DisciplineId = 2,
+                            EnrollmentId = 9,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 48,
                             AcademicYearStart = 2023,
-                            AssignmentId = 8,
                             DisciplineId = 3,
+                            EnrollmentId = 9,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 49,
                             AcademicYearStart = 2024,
-                            AssignmentId = 8,
                             DisciplineId = 5,
+                            EnrollmentId = 9,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 50,
                             AcademicYearStart = 2024,
-                            AssignmentId = 8,
                             DisciplineId = 10,
+                            EnrollmentId = 9,
+                            GroupPlanAssignmentId = 3,
                             Status = "Retake"
                         },
                         new
                         {
                             CourseEnrollmentId = 51,
                             AcademicYearStart = 2023,
-                            AssignmentId = 9,
                             DisciplineId = 1,
+                            EnrollmentId = 10,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 52,
                             AcademicYearStart = 2023,
-                            AssignmentId = 9,
                             DisciplineId = 2,
+                            EnrollmentId = 10,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 53,
                             AcademicYearStart = 2023,
-                            AssignmentId = 9,
                             DisciplineId = 3,
+                            EnrollmentId = 10,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 54,
                             AcademicYearStart = 2024,
-                            AssignmentId = 9,
                             DisciplineId = 5,
+                            EnrollmentId = 10,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 55,
                             AcademicYearStart = 2024,
-                            AssignmentId = 9,
                             DisciplineId = 6,
+                            EnrollmentId = 10,
+                            GroupPlanAssignmentId = 3,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 56,
                             AcademicYearStart = 2024,
-                            AssignmentId = 10,
                             DisciplineId = 1,
+                            EnrollmentId = 11,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 57,
                             AcademicYearStart = 2024,
-                            AssignmentId = 10,
                             DisciplineId = 2,
+                            EnrollmentId = 11,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 58,
                             AcademicYearStart = 2024,
-                            AssignmentId = 10,
                             DisciplineId = 5,
+                            EnrollmentId = 11,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 59,
                             AcademicYearStart = 2025,
-                            AssignmentId = 10,
                             DisciplineId = 11,
+                            EnrollmentId = 11,
+                            GroupPlanAssignmentId = 4,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 60,
                             AcademicYearStart = 2024,
-                            AssignmentId = 11,
                             DisciplineId = 1,
+                            EnrollmentId = 12,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 61,
                             AcademicYearStart = 2024,
-                            AssignmentId = 11,
                             DisciplineId = 2,
+                            EnrollmentId = 12,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 62,
                             AcademicYearStart = 2024,
-                            AssignmentId = 11,
                             DisciplineId = 5,
+                            EnrollmentId = 12,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 63,
                             AcademicYearStart = 2025,
-                            AssignmentId = 11,
                             DisciplineId = 11,
+                            EnrollmentId = 12,
+                            GroupPlanAssignmentId = 4,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 64,
                             AcademicYearStart = 2024,
-                            AssignmentId = 12,
                             DisciplineId = 1,
+                            EnrollmentId = 13,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 65,
                             AcademicYearStart = 2024,
-                            AssignmentId = 12,
                             DisciplineId = 2,
+                            EnrollmentId = 13,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 66,
                             AcademicYearStart = 2024,
-                            AssignmentId = 12,
                             DisciplineId = 5,
+                            EnrollmentId = 13,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 67,
                             AcademicYearStart = 2025,
-                            AssignmentId = 12,
                             DisciplineId = 11,
+                            EnrollmentId = 13,
+                            GroupPlanAssignmentId = 5,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 68,
                             AcademicYearStart = 2021,
-                            AssignmentId = 13,
                             DisciplineId = 1,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 69,
                             AcademicYearStart = 2021,
-                            AssignmentId = 13,
                             DisciplineId = 2,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 70,
                             AcademicYearStart = 2021,
-                            AssignmentId = 13,
                             DisciplineId = 3,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 71,
                             AcademicYearStart = 2022,
-                            AssignmentId = 13,
                             DisciplineId = 5,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 72,
                             AcademicYearStart = 2022,
-                            AssignmentId = 13,
                             DisciplineId = 4,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 73,
                             AcademicYearStart = 2023,
-                            AssignmentId = 13,
                             DisciplineId = 6,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 74,
                             AcademicYearStart = 2023,
-                            AssignmentId = 13,
                             DisciplineId = 7,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 75,
                             AcademicYearStart = 2024,
-                            AssignmentId = 13,
                             DisciplineId = 12,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 76,
                             AcademicYearStart = 2024,
-                            AssignmentId = 13,
                             DisciplineId = 8,
+                            EnrollmentId = 14,
+                            GroupPlanAssignmentId = 1,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 77,
                             AcademicYearStart = 2024,
-                            AssignmentId = 14,
                             DisciplineId = 1,
+                            EnrollmentId = 15,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 78,
                             AcademicYearStart = 2024,
-                            AssignmentId = 14,
                             DisciplineId = 2,
+                            EnrollmentId = 15,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 79,
                             AcademicYearStart = 2024,
-                            AssignmentId = 14,
                             DisciplineId = 3,
+                            EnrollmentId = 15,
+                            GroupPlanAssignmentId = 5,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 80,
                             AcademicYearStart = 2023,
-                            AssignmentId = 15,
                             DisciplineId = 1,
+                            EnrollmentId = 16,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 81,
                             AcademicYearStart = 2023,
-                            AssignmentId = 15,
                             DisciplineId = 2,
+                            EnrollmentId = 16,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 82,
                             AcademicYearStart = 2023,
-                            AssignmentId = 15,
                             DisciplineId = 3,
+                            EnrollmentId = 16,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 83,
                             AcademicYearStart = 2024,
-                            AssignmentId = 15,
                             DisciplineId = 5,
+                            EnrollmentId = 16,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 84,
                             AcademicYearStart = 2024,
-                            AssignmentId = 16,
                             DisciplineId = 1,
+                            EnrollmentId = 17,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 85,
                             AcademicYearStart = 2024,
-                            AssignmentId = 16,
                             DisciplineId = 2,
+                            EnrollmentId = 17,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 86,
                             AcademicYearStart = 2024,
-                            AssignmentId = 16,
                             DisciplineId = 5,
+                            EnrollmentId = 17,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 87,
                             AcademicYearStart = 2025,
-                            AssignmentId = 16,
                             DisciplineId = 11,
+                            EnrollmentId = 17,
+                            GroupPlanAssignmentId = 4,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 88,
                             AcademicYearStart = 2022,
-                            AssignmentId = 17,
                             DisciplineId = 1,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 89,
                             AcademicYearStart = 2022,
-                            AssignmentId = 17,
                             DisciplineId = 2,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 90,
                             AcademicYearStart = 2022,
-                            AssignmentId = 17,
                             DisciplineId = 3,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 91,
                             AcademicYearStart = 2023,
-                            AssignmentId = 17,
                             DisciplineId = 5,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 92,
                             AcademicYearStart = 2023,
-                            AssignmentId = 17,
                             DisciplineId = 4,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 93,
                             AcademicYearStart = 2024,
-                            AssignmentId = 17,
                             DisciplineId = 6,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 94,
                             AcademicYearStart = 2025,
-                            AssignmentId = 17,
                             DisciplineId = 7,
+                            EnrollmentId = 18,
+                            GroupPlanAssignmentId = 2,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 95,
                             AcademicYearStart = 2024,
-                            AssignmentId = 18,
                             DisciplineId = 1,
+                            EnrollmentId = 20,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 96,
                             AcademicYearStart = 2024,
-                            AssignmentId = 18,
                             DisciplineId = 2,
+                            EnrollmentId = 20,
+                            GroupPlanAssignmentId = 5,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 97,
                             AcademicYearStart = 2025,
-                            AssignmentId = 18,
                             DisciplineId = 3,
+                            EnrollmentId = 20,
+                            GroupPlanAssignmentId = 5,
                             Status = "Planned"
                         },
                         new
                         {
                             CourseEnrollmentId = 98,
                             AcademicYearStart = 2023,
-                            AssignmentId = 19,
                             DisciplineId = 1,
+                            EnrollmentId = 21,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 99,
                             AcademicYearStart = 2023,
-                            AssignmentId = 19,
                             DisciplineId = 2,
+                            EnrollmentId = 21,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 100,
                             AcademicYearStart = 2024,
-                            AssignmentId = 19,
                             DisciplineId = 3,
+                            EnrollmentId = 21,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 101,
                             AcademicYearStart = 2024,
-                            AssignmentId = 19,
                             DisciplineId = 5,
+                            EnrollmentId = 21,
+                            GroupPlanAssignmentId = 3,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 102,
                             AcademicYearStart = 2025,
-                            AssignmentId = 19,
                             DisciplineId = 6,
+                            EnrollmentId = 21,
+                            GroupPlanAssignmentId = 3,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 103,
                             AcademicYearStart = 2024,
-                            AssignmentId = 20,
                             DisciplineId = 1,
+                            EnrollmentId = 22,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 104,
                             AcademicYearStart = 2024,
-                            AssignmentId = 20,
                             DisciplineId = 2,
+                            EnrollmentId = 22,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 105,
                             AcademicYearStart = 2024,
-                            AssignmentId = 20,
                             DisciplineId = 5,
+                            EnrollmentId = 22,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 106,
                             AcademicYearStart = 2025,
-                            AssignmentId = 21,
                             DisciplineId = 1,
+                            EnrollmentId = 23,
+                            GroupPlanAssignmentId = 6,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 107,
                             AcademicYearStart = 2025,
-                            AssignmentId = 21,
                             DisciplineId = 2,
+                            EnrollmentId = 23,
+                            GroupPlanAssignmentId = 6,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 108,
                             AcademicYearStart = 2025,
-                            AssignmentId = 22,
                             DisciplineId = 1,
+                            EnrollmentId = 24,
+                            GroupPlanAssignmentId = 6,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 109,
                             AcademicYearStart = 2025,
-                            AssignmentId = 22,
                             DisciplineId = 2,
+                            EnrollmentId = 24,
+                            GroupPlanAssignmentId = 6,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 110,
                             AcademicYearStart = 2025,
-                            AssignmentId = 23,
                             DisciplineId = 1,
+                            EnrollmentId = 25,
+                            GroupPlanAssignmentId = 6,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 111,
                             AcademicYearStart = 2025,
-                            AssignmentId = 23,
                             DisciplineId = 2,
+                            EnrollmentId = 25,
+                            GroupPlanAssignmentId = 6,
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = 112,
                             AcademicYearStart = 2024,
-                            AssignmentId = 24,
                             DisciplineId = 1,
+                            EnrollmentId = 26,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 113,
                             AcademicYearStart = 2024,
-                            AssignmentId = 24,
                             DisciplineId = 2,
+                            EnrollmentId = 26,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 114,
                             AcademicYearStart = 2024,
-                            AssignmentId = 24,
                             DisciplineId = 5,
+                            EnrollmentId = 26,
+                            GroupPlanAssignmentId = 4,
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = 115,
                             AcademicYearStart = 2025,
-                            AssignmentId = 24,
                             DisciplineId = 11,
+                            EnrollmentId = 26,
+                            GroupPlanAssignmentId = 4,
                             Status = "InProgress"
                         });
                 });
@@ -2929,213 +3130,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                             DateFrom = new DateOnly(2024, 9, 1),
                             GroupId = 4,
                             ReasonStart = "Вступ",
-                            StudentId = 24
-                        });
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentPlanAssignment", b =>
-                {
-                    b.Property<int>("AssignmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("assignment_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentId"));
-
-                    b.Property<DateOnly>("DateFrom")
-                        .HasColumnType("date")
-                        .HasColumnName("date_from");
-
-                    b.Property<DateOnly?>("DateTo")
-                        .HasColumnType("date")
-                        .HasColumnName("date_to");
-
-                    b.Property<int>("PlanId")
-                        .HasColumnType("int")
-                        .HasColumnName("plan_id");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int")
-                        .HasColumnName("student_id");
-
-                    b.HasKey("AssignmentId");
-
-                    b.HasIndex("PlanId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Student_Plan_Assignment", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            AssignmentId = 1,
-                            DateFrom = new DateOnly(2021, 9, 1),
-                            PlanId = 1,
-                            StudentId = 1
-                        },
-                        new
-                        {
-                            AssignmentId = 2,
-                            DateFrom = new DateOnly(2021, 9, 1),
-                            DateTo = new DateOnly(2025, 6, 30),
-                            PlanId = 1,
-                            StudentId = 2
-                        },
-                        new
-                        {
-                            AssignmentId = 3,
-                            DateFrom = new DateOnly(2022, 9, 1),
-                            PlanId = 1,
-                            StudentId = 3
-                        },
-                        new
-                        {
-                            AssignmentId = 4,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 4
-                        },
-                        new
-                        {
-                            AssignmentId = 5,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 5
-                        },
-                        new
-                        {
-                            AssignmentId = 6,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 6
-                        },
-                        new
-                        {
-                            AssignmentId = 7,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 7
-                        },
-                        new
-                        {
-                            AssignmentId = 8,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 8
-                        },
-                        new
-                        {
-                            AssignmentId = 9,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 9
-                        },
-                        new
-                        {
-                            AssignmentId = 10,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 3,
-                            StudentId = 10
-                        },
-                        new
-                        {
-                            AssignmentId = 11,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 3,
-                            StudentId = 11
-                        },
-                        new
-                        {
-                            AssignmentId = 12,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 3,
-                            StudentId = 12
-                        },
-                        new
-                        {
-                            AssignmentId = 13,
-                            DateFrom = new DateOnly(2021, 9, 1),
-                            DateTo = new DateOnly(2025, 6, 30),
-                            PlanId = 1,
-                            StudentId = 13
-                        },
-                        new
-                        {
-                            AssignmentId = 14,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 2,
-                            StudentId = 14
-                        },
-                        new
-                        {
-                            AssignmentId = 15,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            DateTo = new DateOnly(2025, 2, 14),
-                            PlanId = 2,
-                            StudentId = 15
-                        },
-                        new
-                        {
-                            AssignmentId = 16,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 3,
-                            StudentId = 16
-                        },
-                        new
-                        {
-                            AssignmentId = 17,
-                            DateFrom = new DateOnly(2022, 9, 1),
-                            PlanId = 1,
-                            StudentId = 17
-                        },
-                        new
-                        {
-                            AssignmentId = 18,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 2,
-                            StudentId = 18
-                        },
-                        new
-                        {
-                            AssignmentId = 19,
-                            DateFrom = new DateOnly(2023, 9, 1),
-                            PlanId = 2,
-                            StudentId = 19
-                        },
-                        new
-                        {
-                            AssignmentId = 20,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 3,
-                            StudentId = 20
-                        },
-                        new
-                        {
-                            AssignmentId = 21,
-                            DateFrom = new DateOnly(2025, 9, 1),
-                            PlanId = 3,
-                            StudentId = 21
-                        },
-                        new
-                        {
-                            AssignmentId = 22,
-                            DateFrom = new DateOnly(2025, 9, 1),
-                            PlanId = 3,
-                            StudentId = 22
-                        },
-                        new
-                        {
-                            AssignmentId = 23,
-                            DateFrom = new DateOnly(2025, 9, 1),
-                            PlanId = 3,
-                            StudentId = 23
-                        },
-                        new
-                        {
-                            AssignmentId = 24,
-                            DateFrom = new DateOnly(2024, 9, 1),
-                            PlanId = 3,
                             StudentId = 24
                         });
                 });
@@ -3564,6 +3558,25 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Navigation("CourseEnrollment");
                 });
 
+            modelBuilder.Entity("UniversityHistory.Domain.Entities.GroupPlanAssignment", b =>
+                {
+                    b.HasOne("UniversityHistory.Domain.Entities.StudyGroup", "Group")
+                        .WithMany("PlanAssignments")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("UniversityHistory.Domain.Entities.StudyPlan", "Plan")
+                        .WithMany("GroupPlanAssignments")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Plan");
+                });
+
             modelBuilder.Entity("UniversityHistory.Domain.Entities.PlanDiscipline", b =>
                 {
                     b.HasOne("UniversityHistory.Domain.Entities.Discipline", "Discipline")
@@ -3585,21 +3598,29 @@ namespace UniversityHistory.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentCourseEnrollment", b =>
                 {
-                    b.HasOne("UniversityHistory.Domain.Entities.StudentPlanAssignment", "Assignment")
-                        .WithMany("CourseEnrollments")
-                        .HasForeignKey("AssignmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UniversityHistory.Domain.Entities.Discipline", "Discipline")
                         .WithMany("CourseEnrollments")
                         .HasForeignKey("DisciplineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Assignment");
+                    b.HasOne("UniversityHistory.Domain.Entities.StudentGroupEnrollment", "Enrollment")
+                        .WithMany("CourseEnrollments")
+                        .HasForeignKey("EnrollmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniversityHistory.Domain.Entities.GroupPlanAssignment", "GroupPlanAssignment")
+                        .WithMany("StudentCourseEnrollments")
+                        .HasForeignKey("GroupPlanAssignmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Discipline");
+
+                    b.Navigation("Enrollment");
+
+                    b.Navigation("GroupPlanAssignment");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentGroupEnrollment", b =>
@@ -3617,25 +3638,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Group");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentPlanAssignment", b =>
-                {
-                    b.HasOne("UniversityHistory.Domain.Entities.StudyPlan", "Plan")
-                        .WithMany("PlanAssignments")
-                        .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("UniversityHistory.Domain.Entities.Student", "Student")
-                        .WithMany("PlanAssignments")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Plan");
 
                     b.Navigation("Student");
                 });
@@ -3698,6 +3700,11 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Navigation("PlanDisciplines");
                 });
 
+            modelBuilder.Entity("UniversityHistory.Domain.Entities.GroupPlanAssignment", b =>
+                {
+                    b.Navigation("StudentCourseEnrollments");
+                });
+
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Institution", b =>
                 {
                     b.Navigation("Transfers");
@@ -3708,8 +3715,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Navigation("Enrollments");
 
                     b.Navigation("ExternalTransfers");
-
-                    b.Navigation("PlanAssignments");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentCourseEnrollment", b =>
@@ -3721,24 +3726,23 @@ namespace UniversityHistory.Infrastructure.Migrations
                 {
                     b.Navigation("AcademicLeaves");
 
-                    b.Navigation("SubgroupAssignment");
-                });
-
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentPlanAssignment", b =>
-                {
                     b.Navigation("CourseEnrollments");
+
+                    b.Navigation("SubgroupAssignment");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudyGroup", b =>
                 {
                     b.Navigation("Enrollments");
 
+                    b.Navigation("PlanAssignments");
+
                     b.Navigation("Subgroups");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudyPlan", b =>
                 {
-                    b.Navigation("PlanAssignments");
+                    b.Navigation("GroupPlanAssignments");
 
                     b.Navigation("PlanDisciplines");
                 });

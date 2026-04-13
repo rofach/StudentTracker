@@ -15,7 +15,6 @@ public class StudentService : IStudentService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMovementService _movementService;
-    private readonly IStudyPlanService _planService;
     private readonly IGetTimelineQueryHandler _timelineHandler;
     private readonly IGetClassmatesQueryHandler _classmatesHandler;
     private readonly IGetStudentGroupOnDateQueryHandler _groupOnDateHandler;
@@ -23,14 +22,12 @@ public class StudentService : IStudentService
     public StudentService(
         IUnitOfWork unitOfWork,
         IMovementService movementService,
-        IStudyPlanService planService,
         IGetTimelineQueryHandler timelineHandler,
         IGetClassmatesQueryHandler classmatesHandler,
         IGetStudentGroupOnDateQueryHandler groupOnDateHandler)
     {
         _unitOfWork = unitOfWork;
         _movementService = movementService;
-        _planService = planService;
         _timelineHandler = timelineHandler;
         _classmatesHandler = classmatesHandler;
         _groupOnDateHandler = groupOnDateHandler;
@@ -99,12 +96,26 @@ public class StudentService : IStudentService
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
-        var plans = await _planService.GetPlanAssignmentsAsync(studentId, ct);
-        var movements = await _movementService.GetMovementsAsync(studentId, ct);
+        var movements   = await _movementService.GetMovementsAsync(studentId, ct);
+
+        // Effective plan history: group plan assignments active during each group enrollment
+        var plans = new List<GroupPlanAssignmentDto>();
+        foreach (var enrollment in enrollments)
+        {
+            var groupPlans = await _unitOfWork.GroupPlanAssignments.GetByGroupIdAsync(enrollment.GroupId, ct);
+            foreach (var gpa in groupPlans)
+            {
+                // Include if the plan period overlaps the enrollment period
+                var enrollEnd = enrollment.DateTo ?? DateOnly.MaxValue;
+                var planEnd   = gpa.DateTo ?? DateOnly.MaxValue;
+                if (gpa.DateFrom <= enrollEnd && planEnd >= enrollment.DateFrom)
+                    plans.Add(gpa.ToDto());
+            }
+        }
 
         return student.ToDto(
-            enrollments.Select(static enrollment => enrollment.ToDto()),
-            plans,
+            enrollments.Select(static e => e.ToDto()),
+            plans.DistinctBy(p => p.GroupPlanAssignmentId),
             movements.Leaves,
             movements.Transfers);
     }

@@ -13,6 +13,7 @@ public interface IUnitOfWork
     IDisciplineRepository Disciplines { get; }
     IAcademicUnitRepository AcademicUnits { get; }
     IDepartmentRepository Departments { get; }
+    IGroupPlanAssignmentRepository GroupPlanAssignments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

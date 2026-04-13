@@ -9,10 +9,7 @@ namespace UniversityHistory.Infrastructure.Repositories;
 public class GradeRepository : IGradeRepository
 {
     private readonly UniversityDbContext _db;
-    public GradeRepository(UniversityDbContext db)
-    {
-        _db = db;
-    }
+    public GradeRepository(UniversityDbContext db) => _db = db;
 
     public async Task<PagedData<GradeRecord>> GetByStudentIdAsync(int studentId, int page, int pageSize, CancellationToken ct = default)
     {
@@ -20,10 +17,10 @@ public class GradeRepository : IGradeRepository
             .Include(g => g.CourseEnrollment)
                 .ThenInclude(ce => ce.Discipline)
             .Include(g => g.CourseEnrollment)
-                .ThenInclude(ce => ce.Assignment)
+                .ThenInclude(ce => ce.GroupPlanAssignment)
                     .ThenInclude(a => a.Plan)
                         .ThenInclude(p => p.PlanDisciplines)
-            .Where(g => g.CourseEnrollment.Assignment.StudentId == studentId);
+            .Where(g => g.CourseEnrollment.Enrollment.StudentId == studentId);
 
         var count = await query.CountAsync(ct);
         var items = await query.OrderBy(g => g.AssessmentDate)

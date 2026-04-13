@@ -1,14 +1,22 @@
 namespace UniversityHistory.Application.DTOs;
 
-public record StudyPlanAssignmentDto(
-    int AssignmentId,
+// ── Group plan assignment ────────────────────────────────────────────────────
+
+public record GroupPlanAssignmentDto(
+    int GroupPlanAssignmentId,
+    int GroupId,
+    int PlanId,
     string SpecialtyCode,
     string? PlanName,
     DateOnly DateFrom,
     DateOnly? DateTo
 );
 
-public record AssignPlanDto(int PlanId, DateOnly DateFrom);
+public record AssignGroupPlanDto(int PlanId, DateOnly DateFrom);
+
+public record ChangeGroupPlanDto(int NewPlanId, DateOnly EffectiveFrom);
+
+// ── Study plan ───────────────────────────────────────────────────────────────
 
 public record StudyPlanDto(
     int PlanId,
