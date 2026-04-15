@@ -7,6 +7,7 @@ public interface IAcademicLeaveRepository
     Task<IEnumerable<AcademicLeave>> GetByStudentIdAsync(int studentId, CancellationToken ct = default);
     Task<AcademicLeave?> GetByIdAsync(int leaveId, CancellationToken ct = default);
     Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default);
+    Task<bool> HasActiveLeaveOnDateAsync(int enrollmentId, DateOnly date, CancellationToken ct = default);
     Task<bool> HasOverlapAsync(
         int enrollmentId,
         DateOnly startDate,

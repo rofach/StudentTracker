@@ -136,6 +136,10 @@ public class StudyPlanService : IStudyPlanService
         var activeEnrollments = await _uow.Enrollments.GetActiveByGroupIdOnDateAsync(groupId, dto.DateFrom, ct);
         foreach (var enrollment in activeEnrollments)
         {
+            if (await _uow.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollment.EnrollmentId, dto.DateFrom, ct))
+                throw new DomainException(
+                    $"Cannot modify study process while student enrollment {enrollment.EnrollmentId} is on academic leave.");
+
             var existingDisciplineIds = (await _uow.StudyPlans
                     .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct))
                 .Select(ce => ce.DisciplineId)
@@ -168,7 +172,7 @@ public class StudyPlanService : IStudyPlanService
         if (current is not null)
         {
             if (dto.NewPlanDateFrom <= current.DateFrom)
-                throw new DomainException("EffectiveFrom must be after the current assignment's start date.");
+                throw new DomainException("DateFrom must be after the current assignment's start date.");
             current.DateTo = dto.NewPlanDateFrom.AddDays(-1);
             _uow.GroupPlanAssignments.Update(current);
         }
@@ -185,6 +189,10 @@ public class StudyPlanService : IStudyPlanService
         var activeEnrollments = await _uow.Enrollments.GetActiveByGroupIdOnDateAsync(groupId, dto.NewPlanDateFrom, ct);
         foreach (var enrollment in activeEnrollments)
         {
+            if (await _uow.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollment.EnrollmentId, dto.NewPlanDateFrom, ct))
+                throw new DomainException(
+                    $"Cannot modify study process while student enrollment {enrollment.EnrollmentId} is on academic leave.");
+
             var allCourses = (await _uow.StudyPlans
                 .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct)).ToList();
 

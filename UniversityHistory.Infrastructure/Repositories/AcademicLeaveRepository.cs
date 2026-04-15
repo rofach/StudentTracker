@@ -36,6 +36,16 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
             .FirstOrDefaultAsync(l => l.EnrollmentId == enrollmentId && l.EndDate == null, ct);
     }
 
+    public async Task<bool> HasActiveLeaveOnDateAsync(int enrollmentId, DateOnly date, CancellationToken ct = default)
+    {
+        return await _db.AcademicLeaves
+            .AnyAsync(
+                l => l.EnrollmentId == enrollmentId
+                     && l.StartDate <= date
+                     && (!l.EndDate.HasValue || l.EndDate.Value >= date),
+                ct);
+    }
+
     public async Task<bool> HasOverlapAsync(
         int enrollmentId,
         DateOnly startDate,

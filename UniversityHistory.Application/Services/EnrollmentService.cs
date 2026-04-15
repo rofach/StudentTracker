@@ -77,7 +77,10 @@ public class EnrollmentService : IEnrollmentService
 
         var current = await _uow.Enrollments.GetActiveByStudentIdAsync(studentId, ct)
             ?? throw new DomainException($"Student {studentId} has no active enrollment to move from.");
-        
+
+        if (await _uow.AcademicLeaves.HasActiveLeaveOnDateAsync(current.EnrollmentId, dto.MoveDate, ct))
+            throw new DomainException("Cannot modify study process while the student is on academic leave.");
+
         if (dto.MoveDate <= current.DateFrom)
             throw new DomainException("Move date cannot be before the current enrollment's start date.");
 
@@ -125,6 +128,11 @@ public class EnrollmentService : IEnrollmentService
             ?? throw new NotFoundException(nameof(StudentGroupEnrollment), enrollmentId);
         if (enrollment.DateTo.HasValue)
             throw new DomainException($"Cannot assign subgroup to a closed enrollment {enrollmentId}.");
+
+        var operationDate = DateOnly.FromDateTime(DateTime.Today);
+        if (await _uow.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollmentId, operationDate, ct))
+            throw new DomainException("Cannot modify study process while the student is on academic leave.");
+
         if (!enrollment.Group.Subgroups.Any(sg => sg.SubgroupId == dto.SubgroupId))
             throw new DomainException($"Subgroup {dto.SubgroupId} does not belong to Group {enrollment.GroupId}.");
         var existing = await _uow.SubgroupAssignments.GetByEnrollmentIdAsync(enrollmentId, ct);
