@@ -24,13 +24,33 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
 
     public async Task<AcademicLeave?> GetByIdAsync(int leaveId, CancellationToken ct = default)
     {
-        return await _db.AcademicLeaves.FindAsync(new object[] { leaveId }, ct);
+        return await _db.AcademicLeaves
+            .Include(l => l.Enrollment)
+                .ThenInclude(e => e.Student)
+            .FirstOrDefaultAsync(l => l.LeaveId == leaveId, ct);
     }
 
     public async Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default)
     {
         return await _db.AcademicLeaves
             .FirstOrDefaultAsync(l => l.EnrollmentId == enrollmentId && l.EndDate == null, ct);
+    }
+
+    public async Task<bool> HasOverlapAsync(
+        int enrollmentId,
+        DateOnly startDate,
+        DateOnly? endDate,
+        int? excludeLeaveId = null,
+        CancellationToken ct = default)
+    {
+        var overlapEnd = endDate ?? new DateOnly(9999, 12, 31);
+
+        return await _db.AcademicLeaves.AnyAsync(
+            l => l.EnrollmentId == enrollmentId
+                 && (!excludeLeaveId.HasValue || l.LeaveId != excludeLeaveId.Value)
+                 && l.StartDate <= overlapEnd
+                 && (l.EndDate == null || l.EndDate >= startDate),
+            ct);
     }
 
     public AcademicLeave Add(AcademicLeave leave)

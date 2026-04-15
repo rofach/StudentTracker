@@ -15,7 +15,8 @@ public record AcademicLeaveDto(
     int LeaveId,
     DateOnly StartDate,
     DateOnly? EndDate,
-    string? Reason
+    string? Reason,
+    string? ReturnReason
 );
 
 public record ExternalTransferDto(

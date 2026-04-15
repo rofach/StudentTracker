@@ -1,5 +1,6 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Domain.Entities;
+using UniversityHistory.Domain.Enums;
 
 namespace UniversityHistory.Application.Mappings;
 
@@ -16,7 +17,7 @@ public static class MovementMappingExtensions
         };
     }
 
-    public static ExternalTransfer ToEntity(this CreateTransferDto dto, int studentId, Domain.Enums.TransferType transferType)
+    public static ExternalTransfer ToEntity(this CreateTransferDto dto, int studentId, TransferType transferType)
     {
         return new ExternalTransfer
         {
@@ -30,7 +31,12 @@ public static class MovementMappingExtensions
 
     public static AcademicLeaveDto ToDto(this AcademicLeave leave)
     {
-        return new AcademicLeaveDto(leave.LeaveId, leave.StartDate, leave.EndDate, leave.Reason);
+        return new AcademicLeaveDto(
+            leave.LeaveId,
+            leave.StartDate,
+            leave.EndDate,
+            leave.Reason,
+            leave.ReturnReason);
     }
 
     public static ExternalTransferDto ToDto(this ExternalTransfer transfer)

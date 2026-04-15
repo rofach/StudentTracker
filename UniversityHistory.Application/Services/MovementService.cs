@@ -57,6 +57,9 @@ public class MovementService : IMovementService
         if (enrollment.DateTo.HasValue)
             throw new DomainException($"Enrollment {dto.EnrollmentId} is already closed. Cannot add academic leave.");
 
+        if (dto.StartDate < enrollment.DateFrom)
+            throw new DomainException("StartDate cannot be before the enrollment's DateFrom.");
+
         if (dto.EndDate.HasValue && dto.EndDate.Value < dto.StartDate)
             throw new DomainException("EndDate cannot be before StartDate.");
 
@@ -64,8 +67,19 @@ public class MovementService : IMovementService
         if (openLeave is not null)
             throw new DomainException($"Enrollment {dto.EnrollmentId} already has an open academic leave (leave #{openLeave.LeaveId}).");
 
+        if (await _unitOfWork.AcademicLeaves.HasOverlapAsync(dto.EnrollmentId, dto.StartDate, dto.EndDate, ct: ct))
+            throw new DomainException($"Academic leave for enrollment {dto.EnrollmentId} overlaps with an existing leave period.");
+
         var leave = dto.ToEntity();
         var created = _unitOfWork.AcademicLeaves.Add(leave);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (dto.StartDate <= today && (!dto.EndDate.HasValue || dto.EndDate.Value >= today))
+        {
+            enrollment.Student.Status = StudentStatus.OnLeave;
+            _unitOfWork.Students.Update(enrollment.Student);
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
         return created.ToDto();
     }
@@ -82,7 +96,26 @@ public class MovementService : IMovementService
             throw new DomainException("EndDate cannot be before the leave's StartDate.");
 
         leave.EndDate = dto.EndDate;
+        leave.ReturnReason = dto.ReturnReason;
         _unitOfWork.AcademicLeaves.Update(leave);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (dto.EndDate <= today)
+        {
+            var hasAnotherActiveLeave = (await _unitOfWork.AcademicLeaves
+                    .GetByStudentIdAsync(leave.Enrollment.StudentId, ct))
+                .Any(existing =>
+                    existing.LeaveId != leave.LeaveId &&
+                    existing.StartDate <= today &&
+                    (!existing.EndDate.HasValue || existing.EndDate.Value >= today));
+
+            if (!hasAnotherActiveLeave && leave.Enrollment.Student.Status == StudentStatus.OnLeave)
+            {
+                leave.Enrollment.Student.Status = StudentStatus.Active;
+                _unitOfWork.Students.Update(leave.Enrollment.Student);
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
         return leave.ToDto();
     }

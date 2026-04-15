@@ -193,6 +193,7 @@ public class UniversityDbContext : DbContext
             e.Property(l => l.StartDate).HasColumnName("start_date").IsRequired();
             e.Property(l => l.EndDate).HasColumnName("end_date");
             e.Property(l => l.Reason).HasColumnName("reason").HasMaxLength(200);
+            e.Property(l => l.ReturnReason).HasColumnName("return_reason").HasMaxLength(200);
             e.HasOne(l => l.Enrollment).WithMany(en => en.AcademicLeaves)
                 .HasForeignKey(l => l.EnrollmentId).OnDelete(DeleteBehavior.Restrict);
         });
