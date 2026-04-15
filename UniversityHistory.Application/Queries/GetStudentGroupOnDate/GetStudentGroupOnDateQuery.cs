@@ -1,3 +1,4 @@
 namespace UniversityHistory.Application.Queries.GetStudentGroupOnDate;
 
-public record GetStudentGroupOnDateQuery(int StudentId, DateOnly Date);
+public record GetStudentGroupOnDateQuery(Guid StudentId, DateOnly Date);
+

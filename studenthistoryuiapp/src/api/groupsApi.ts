@@ -2,6 +2,7 @@ import type {
   ActiveGroupDto,
   AssignGroupPlanDto,
   ChangeGroupPlanDto,
+  EntityId,
   GroupCompositionMemberDto,
   GroupPlanAssignmentDto,
   GroupStudentDto,
@@ -14,27 +15,27 @@ export function getActiveGroups(date?: string): Promise<ActiveGroupDto[]> {
 }
 
 export function getGroupComposition(
-  groupId: number,
+  groupId: EntityId,
   params: { date?: string; page: number; pageSize: number },
 ): Promise<PagedResult<GroupCompositionMemberDto>> {
   return fetchJson<PagedResult<GroupCompositionMemberDto>>(`/groups/${groupId}/composition`, undefined, params)
 }
 
 export function getStudentsInGroup(
-  groupId: number,
+  groupId: EntityId,
   params: { date?: string; page: number; pageSize: number },
 ): Promise<PagedResult<GroupStudentDto>> {
   return fetchJson<PagedResult<GroupStudentDto>>(`/groups/${groupId}/students`, undefined, params)
 }
 
-export function getGroupPlanHistory(groupId: number): Promise<GroupPlanAssignmentDto[]> {
+export function getGroupPlanHistory(groupId: EntityId): Promise<GroupPlanAssignmentDto[]> {
   return fetchJson<GroupPlanAssignmentDto[]>(`/groups/${groupId}/plans`)
 }
 
-export function assignGroupPlan(groupId: number, dto: AssignGroupPlanDto): Promise<GroupPlanAssignmentDto> {
+export function assignGroupPlan(groupId: EntityId, dto: AssignGroupPlanDto): Promise<GroupPlanAssignmentDto> {
   return postJson<GroupPlanAssignmentDto>(`/groups/${groupId}/plans`, dto)
 }
 
-export function changeCurrentGroupPlan(groupId: number, dto: ChangeGroupPlanDto): Promise<GroupPlanAssignmentDto> {
+export function changeCurrentGroupPlan(groupId: EntityId, dto: ChangeGroupPlanDto): Promise<GroupPlanAssignmentDto> {
   return putJson<GroupPlanAssignmentDto>(`/groups/${groupId}/plans/current`, dto)
 }

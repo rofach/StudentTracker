@@ -9,10 +9,10 @@ public class EnrollStudentDtoValidator : AppValidator<EnrollStudentDto>
     public EnrollStudentDtoValidator()
     {
         RuleFor(x => x.StudentId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.GroupId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.DateFrom)
             .NotDefaultDate();
@@ -24,7 +24,7 @@ public class EnrollStudentDtoValidator : AppValidator<EnrollStudentDto>
         When(x => x.SubgroupId.HasValue, () =>
         {
             RuleFor(x => x.SubgroupId!.Value)
-                .GreaterThan(0);
+                .NotEmpty();
         });
     }
 }
@@ -47,7 +47,7 @@ public class MoveStudentDtoValidator : AppValidator<MoveStudentDto>
     public MoveStudentDtoValidator()
     {
         RuleFor(x => x.NewGroupId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.MoveDate)
             .NotDefaultDate();
@@ -63,7 +63,7 @@ public class MoveStudentDtoValidator : AppValidator<MoveStudentDto>
         When(x => x.NewSubgroupId.HasValue, () =>
         {
             RuleFor(x => x.NewSubgroupId!.Value)
-                .GreaterThan(0);
+                .NotEmpty();
         });
     }
 }
@@ -73,6 +73,8 @@ public class AssignSubgroupDtoValidator : AppValidator<AssignSubgroupDto>
     public AssignSubgroupDtoValidator()
     {
         RuleFor(x => x.SubgroupId)
-            .GreaterThan(0);
+            .NotEmpty();
     }
 }
+
+

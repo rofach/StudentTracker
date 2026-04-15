@@ -18,3 +18,4 @@ public static class DisciplineMappingExtensions
         return new DisciplineDto(discipline.DisciplineId, discipline.DisciplineName);
     }
 }
+

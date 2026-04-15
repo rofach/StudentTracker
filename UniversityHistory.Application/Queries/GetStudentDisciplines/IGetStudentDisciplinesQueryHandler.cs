@@ -8,3 +8,4 @@ public interface IGetStudentDisciplinesQueryHandler
         GetStudentDisciplinesQuery query,
         CancellationToken ct = default);
 }
+

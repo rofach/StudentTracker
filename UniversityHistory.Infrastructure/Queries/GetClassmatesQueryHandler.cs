@@ -60,3 +60,4 @@ public class GetClassmatesQueryHandler : IGetClassmatesQueryHandler
             .ToListAsync(ct);
     }
 }
+

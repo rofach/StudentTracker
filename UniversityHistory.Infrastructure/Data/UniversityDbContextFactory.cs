@@ -16,3 +16,4 @@ public class UniversityDbContextFactory : IDesignTimeDbContextFactory<University
         return new UniversityDbContext(options);
     }
 }
+

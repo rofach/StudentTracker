@@ -3,6 +3,7 @@ import type {
   CreateAcademicUnitDto,
   CreateDepartmentDto,
   DepartmentDto,
+  EntityId,
   UpdateAcademicUnitDto,
   UpdateDepartmentDto,
 } from "../types/api"
@@ -16,11 +17,11 @@ export function createAcademicUnit(dto: CreateAcademicUnitDto): Promise<Academic
   return postJson<AcademicUnitDto>("/academicunits", dto)
 }
 
-export function updateAcademicUnit(academicUnitId: number, dto: UpdateAcademicUnitDto): Promise<AcademicUnitDto> {
+export function updateAcademicUnit(academicUnitId: EntityId, dto: UpdateAcademicUnitDto): Promise<AcademicUnitDto> {
   return putJson<AcademicUnitDto>(`/academicunits/${academicUnitId}`, dto)
 }
 
-export function deleteAcademicUnit(academicUnitId: number): Promise<void> {
+export function deleteAcademicUnit(academicUnitId: EntityId): Promise<void> {
   return deleteJson(`/academicunits/${academicUnitId}`)
 }
 
@@ -32,10 +33,10 @@ export function createDepartment(dto: CreateDepartmentDto): Promise<DepartmentDt
   return postJson<DepartmentDto>("/departments", dto)
 }
 
-export function updateDepartment(departmentId: number, dto: UpdateDepartmentDto): Promise<DepartmentDto> {
+export function updateDepartment(departmentId: EntityId, dto: UpdateDepartmentDto): Promise<DepartmentDto> {
   return putJson<DepartmentDto>(`/departments/${departmentId}`, dto)
 }
 
-export function deleteDepartment(departmentId: number): Promise<void> {
+export function deleteDepartment(departmentId: EntityId): Promise<void> {
   return deleteJson(`/departments/${departmentId}`)
 }

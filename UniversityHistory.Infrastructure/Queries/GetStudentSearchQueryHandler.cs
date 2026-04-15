@@ -61,3 +61,4 @@ public class GetStudentSearchQueryHandler : IGetStudentSearchQueryHandler
         return new PagedResult<StudentDto>(items, query.Page, query.PageSize, count);
     }
 }
+

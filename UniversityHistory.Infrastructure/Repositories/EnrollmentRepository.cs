@@ -14,7 +14,7 @@ public class EnrollmentRepository : IEnrollmentRepository
         _db = db;
     }
 
-    public async Task<StudentGroupEnrollment?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<StudentGroupEnrollment?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
        return  await _db.StudentGroupEnrollments
             .Include(e => e.Student)
@@ -25,7 +25,7 @@ public class EnrollmentRepository : IEnrollmentRepository
             .FirstOrDefaultAsync(e => e.EnrollmentId == id, ct);
     }
 
-    public async Task<StudentGroupEnrollment?> GetActiveByStudentIdAsync(int studentId, CancellationToken ct = default)
+    public async Task<StudentGroupEnrollment?> GetActiveByStudentIdAsync(Guid studentId, CancellationToken ct = default)
     {
         return await _db.StudentGroupEnrollments
             .Include(e => e.Group)
@@ -35,7 +35,7 @@ public class EnrollmentRepository : IEnrollmentRepository
             .FirstOrDefaultAsync(e => e.StudentId == studentId && e.DateTo == null, ct);
     }
 
-    public async Task<IEnumerable<StudentGroupEnrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct = default)
+    public async Task<IEnumerable<StudentGroupEnrollment>> GetByStudentIdAsync(Guid studentId, CancellationToken ct = default)
     {
         return await _db.StudentGroupEnrollments
             .AsNoTracking()
@@ -50,7 +50,7 @@ public class EnrollmentRepository : IEnrollmentRepository
     }
 
     public async Task<IEnumerable<StudentGroupEnrollment>> GetByGroupIdOnDateAsync(
-        int groupId, DateOnly date, CancellationToken ct = default)
+        Guid groupId, DateOnly date, CancellationToken ct = default)
     {
         return await _db.StudentGroupEnrollments
             .AsNoTracking()
@@ -66,7 +66,7 @@ public class EnrollmentRepository : IEnrollmentRepository
     }
 
     public async Task<IEnumerable<StudentGroupEnrollment>> GetAllForGroupsAsync(
-        IEnumerable<int> groupIds, CancellationToken ct = default)
+        IEnumerable<Guid> groupIds, CancellationToken ct = default)
     {
         return await _db.StudentGroupEnrollments
             .AsNoTracking()
@@ -76,14 +76,14 @@ public class EnrollmentRepository : IEnrollmentRepository
             .ToListAsync(ct);
     }
 
-    public async Task<IEnumerable<StudentGroupEnrollment>> GetActiveByGroupIdAsync(int groupId, CancellationToken ct = default)
+    public async Task<IEnumerable<StudentGroupEnrollment>> GetActiveByGroupIdAsync(Guid groupId, CancellationToken ct = default)
     {
         return await _db.StudentGroupEnrollments
             .Where(e => e.GroupId == groupId && e.DateTo == null)
             .ToListAsync(ct);
     }
 
-    public async Task<IEnumerable<StudentGroupEnrollment>> GetActiveByGroupIdOnDateAsync(int groupId, DateOnly date, CancellationToken ct = default)
+    public async Task<IEnumerable<StudentGroupEnrollment>> GetActiveByGroupIdOnDateAsync(Guid groupId, DateOnly date, CancellationToken ct = default)
     {
         return await _db.StudentGroupEnrollments
             .Where(e => e.GroupId == groupId
@@ -92,8 +92,8 @@ public class EnrollmentRepository : IEnrollmentRepository
             .ToListAsync(ct);
     }
 
-    public async Task<bool> HasOverlapAsync(int studentId, DateOnly dateFrom, DateOnly? dateTo,
-        int? excludeId = null, CancellationToken ct = default)
+    public async Task<bool> HasOverlapAsync(Guid studentId, DateOnly dateFrom, DateOnly? dateTo,
+        Guid? excludeId = null, CancellationToken ct = default)
     {
         var overlapDateTo = dateTo ?? new DateOnly(9999, 12, 31);
 
@@ -116,3 +116,4 @@ public class EnrollmentRepository : IEnrollmentRepository
         _db.StudentGroupEnrollments.Update(enrollment);
     }
 }
+

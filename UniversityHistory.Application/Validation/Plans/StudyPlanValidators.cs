@@ -10,7 +10,7 @@ public class AssignGroupPlanDtoValidator : AppValidator<AssignGroupPlanDto>
     public AssignGroupPlanDtoValidator()
     {
         RuleFor(x => x.PlanId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.DateFrom)
             .NotDefaultDate();
@@ -22,7 +22,7 @@ public class ChangeGroupPlanDtoValidator : AppValidator<ChangeGroupPlanDto>
     public ChangeGroupPlanDtoValidator()
     {
         RuleFor(x => x.NewPlanId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.NewPlanDateFrom)
             .NotDefaultDate();
@@ -72,20 +72,20 @@ public class AddPlanDisciplineDtoValidator : AppValidator<AddPlanDisciplineDto>
     public AddPlanDisciplineDtoValidator()
     {
         RuleFor(x => x.DisciplineId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.SemesterNo)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.ControlType)
             .NotEmpty()
             .IsEnumName(typeof(ControlType), caseSensitive: false);
 
         RuleFor(x => x.Hours)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.Credits)
-            .GreaterThan(0);
+            .NotEmpty();
     }
 }
 
@@ -94,16 +94,18 @@ public class UpdatePlanDisciplineDtoValidator : AppValidator<UpdatePlanDisciplin
     public UpdatePlanDisciplineDtoValidator()
     {
         RuleFor(x => x.SemesterNo)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.ControlType)
             .NotEmpty()
             .IsEnumName(typeof(ControlType), caseSensitive: false);
 
         RuleFor(x => x.Hours)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.Credits)
-            .GreaterThan(0);
+            .NotEmpty();
     }
 }
+
+

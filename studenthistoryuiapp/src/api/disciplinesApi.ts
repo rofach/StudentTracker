@@ -1,6 +1,7 @@
 import type {
   CreateDisciplineDto,
   DisciplineDto,
+  EntityId,
   UpdateDisciplineDto,
 } from "../types/api"
 import { deleteJson, fetchJson, postJson, putJson } from "./http"
@@ -13,10 +14,10 @@ export function createDiscipline(dto: CreateDisciplineDto): Promise<DisciplineDt
   return postJson<DisciplineDto>("/disciplines", dto)
 }
 
-export function updateDiscipline(disciplineId: number, dto: UpdateDisciplineDto): Promise<DisciplineDto> {
+export function updateDiscipline(disciplineId: EntityId, dto: UpdateDisciplineDto): Promise<DisciplineDto> {
   return putJson<DisciplineDto>(`/disciplines/${disciplineId}`, dto)
 }
 
-export function deleteDiscipline(disciplineId: number): Promise<void> {
+export function deleteDiscipline(disciplineId: EntityId): Promise<void> {
   return deleteJson(`/disciplines/${disciplineId}`)
 }

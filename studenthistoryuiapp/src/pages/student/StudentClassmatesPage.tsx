@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 import { getStudentById, getStudentClassmates } from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { ClassmateDto, StudentDto } from "../../types/api"
+import type { ClassmateDto, EntityId, StudentDto } from "../../types/api"
 import { formatDate, formatNullable } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
 type StudentClassmatesPageProps = {
-  studentId: number
+  studentId: EntityId
 }
 
 type FilterMode = "current" | "date" | "period"
@@ -22,7 +22,7 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [selectedClassmateId, setSelectedClassmateId] = useState<number | null>(null)
+  const [selectedClassmateId, setSelectedClassmateId] = useState<EntityId | null>(null)
   const [selectedClassmate, setSelectedClassmate] = useState<StudentDto | null>(null)
   const [isClassmateLoading, setIsClassmateLoading] = useState(false)
 

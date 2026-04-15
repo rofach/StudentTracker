@@ -6,3 +6,4 @@ public interface IGetActiveGroupsQueryHandler
 {
     Task<IEnumerable<ActiveGroupDto>> HandleAsync(GetActiveGroupsQuery query, CancellationToken ct = default);
 }
+

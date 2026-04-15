@@ -3,11 +3,11 @@ import { getStudentTimeline } from "../../api/studentsApi"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { PagedResult, TimelineEventDto } from "../../types/api"
+import type { EntityId, PagedResult, TimelineEventDto } from "../../types/api"
 import { formatDate } from "../../utils/format"
 
 type StudentHistoryPageProps = {
-  studentId: number
+  studentId: EntityId
 }
 
 const DEFAULT_PAGE_SIZE = 20

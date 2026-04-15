@@ -6,3 +6,4 @@ public interface IGetClassmatesQueryHandler
 {
     Task<IEnumerable<ClassmateDto>> HandleAsync(GetClassmatesQuery query, CancellationToken ct = default);
 }
+

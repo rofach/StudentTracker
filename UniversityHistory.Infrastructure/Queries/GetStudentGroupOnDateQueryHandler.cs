@@ -41,3 +41,4 @@ public class GetStudentGroupOnDateQueryHandler : IGetStudentGroupOnDateQueryHand
             .FirstOrDefaultAsync(ct);
     }
 }
+

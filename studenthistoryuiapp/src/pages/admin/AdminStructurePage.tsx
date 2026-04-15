@@ -10,13 +10,13 @@ import {
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { AcademicUnitDto, DepartmentDto } from "../../types/api"
+import type { AcademicUnitDto, DepartmentDto, EntityId } from "../../types/api"
 
 export function AdminStructurePage() {
   const [units, setUnits] = useState<AcademicUnitDto[]>([])
   const [departments, setDepartments] = useState<DepartmentDto[]>([])
-  const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null)
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null)
+  const [selectedUnitId, setSelectedUnitId] = useState<EntityId | null>(null)
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<EntityId | null>(null)
   const [newUnitName, setNewUnitName] = useState("")
   const [newUnitType, setNewUnitType] = useState("Faculty")
   const [newDepartmentName, setNewDepartmentName] = useState("")

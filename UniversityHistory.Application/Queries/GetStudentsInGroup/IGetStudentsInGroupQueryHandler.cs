@@ -6,3 +6,4 @@ public interface IGetStudentsInGroupQueryHandler
 {
     Task<PagedResult<GroupStudentDto>> HandleAsync(GetStudentsInGroupQuery query, CancellationToken ct = default);
 }
+

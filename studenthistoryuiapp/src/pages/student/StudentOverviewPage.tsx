@@ -2,12 +2,12 @@ import { useEffect, useState } from "react"
 import { getStudentDetails } from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { StudentDetailDto } from "../../types/api"
+import type { EntityId, StudentDetailDto } from "../../types/api"
 import { formatDate, formatNullable, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
 type StudentOverviewPageProps = {
-  studentId: number
+  studentId: EntityId
 }
 
 export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {

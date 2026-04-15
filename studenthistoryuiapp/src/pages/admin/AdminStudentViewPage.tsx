@@ -3,7 +3,7 @@ import { getStudentDetails } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { StudentDetailDto } from "../../types/api"
+import type { EntityId, StudentDetailDto } from "../../types/api"
 import { fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 import { StudentClassmatesPage } from "../student/StudentClassmatesPage"
@@ -14,7 +14,7 @@ import { StudentSubjectsPage } from "../student/StudentSubjectsPage"
 type StudentSection = "overview" | "subjects" | "classmates" | "history"
 
 type AdminStudentViewPageProps = {
-  studentId: number
+  studentId: EntityId
   navigate: (path: string) => void
 }
 

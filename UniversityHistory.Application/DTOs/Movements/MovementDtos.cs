@@ -12,7 +12,7 @@ public record TimelineEventDto(
 );
 
 public record AcademicLeaveDto(
-    int LeaveId,
+    Guid LeaveId,
     DateOnly StartDate,
     DateOnly? EndDate,
     string? Reason,
@@ -20,7 +20,7 @@ public record AcademicLeaveDto(
 );
 
 public record ExternalTransferDto(
-    int TransferId,
+    Guid TransferId,
     string TransferType,
     DateOnly TransferDate,
     string InstitutionName,
@@ -33,14 +33,14 @@ public record StudentMovementDto(
 );
 
 public record CreateTransferDto(
-    int InstitutionId,
+    Guid InstitutionId,
     string TransferType,
     DateOnly TransferDate,
     string? Notes
 );
 
 public record CreateLeaveDto(
-    int EnrollmentId,
+    Guid EnrollmentId,
     DateOnly StartDate,
     DateOnly? EndDate,
     string Reason
@@ -50,3 +50,4 @@ public record CloseAcademicLeaveDto(
     DateOnly EndDate,
     string? ReturnReason
 );
+

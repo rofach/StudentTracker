@@ -1,7 +1,7 @@
 namespace UniversityHistory.Application.DTOs;
 
 public record GradeDto(
-    int GradeId,
+    Guid GradeId,
     string DisciplineName,
     int SemesterNo,
     int AcademicYearStart,
@@ -17,10 +17,11 @@ public record AverageGradeDto(
 );
 
 public record StudentDisciplineOptionDto(
-    int DisciplineId,
+    Guid DisciplineId,
     string DisciplineName,
     int SemesterNo,
     int AcademicYearStart,
     string AcademicYearLabel,
     bool HasGrade
 );
+

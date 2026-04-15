@@ -10,7 +10,7 @@ public class CreateTransferDtoValidator : AppValidator<CreateTransferDto>
     public CreateTransferDtoValidator()
     {
         RuleFor(x => x.InstitutionId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.TransferType)
             .NotEmpty()
@@ -32,7 +32,7 @@ public class CreateLeaveDtoValidator : AppValidator<CreateLeaveDto>
     public CreateLeaveDtoValidator()
     {
         RuleFor(x => x.EnrollmentId)
-            .GreaterThan(0);
+            .NotEmpty();
 
         RuleFor(x => x.StartDate)
             .NotDefaultDate();
@@ -64,3 +64,5 @@ public class CloseAcademicLeaveDtoValidator : AppValidator<CloseAcademicLeaveDto
         });
     }
 }
+
+

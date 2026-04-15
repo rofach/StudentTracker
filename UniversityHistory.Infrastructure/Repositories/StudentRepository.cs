@@ -14,7 +14,7 @@ public class StudentRepository : IStudentRepository
         _db = db;
     }
 
-    public async Task<Student?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<Student?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.Students.FindAsync(new object[] { id }, ct);
     }
@@ -46,3 +46,4 @@ public class StudentRepository : IStudentRepository
         _db.Students.Remove(student);
     }
 }
+

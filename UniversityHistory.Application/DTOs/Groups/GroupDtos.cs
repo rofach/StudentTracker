@@ -1,9 +1,9 @@
 namespace UniversityHistory.Application.DTOs;
 
 public record EnrollStudentDto(
-    int StudentId,
-    int GroupId,
-    int? SubgroupId,
+    Guid StudentId,
+    Guid GroupId,
+    Guid? SubgroupId,
     DateOnly DateFrom,
     string ReasonStart
 );
@@ -14,7 +14,7 @@ public record CloseEnrollmentDto(
 );
 
 public record GroupDto(
-    int GroupId,
+    Guid GroupId,
     string GroupCode,
     string DepartmentName,
     string AcademicUnitName,
@@ -22,7 +22,7 @@ public record GroupDto(
 );
 
 public record ActiveGroupDto(
-    int GroupId,
+    Guid GroupId,
     string GroupCode,
     string DepartmentName,
     string AcademicUnitName,
@@ -32,8 +32,8 @@ public record ActiveGroupDto(
 );
 
 public record GroupStudentDto(
-    int EnrollmentId,
-    int StudentId,
+    Guid EnrollmentId,
+    Guid StudentId,
     string FirstName,
     string LastName,
     string? Email,
@@ -42,8 +42,8 @@ public record GroupStudentDto(
 );
 
 public record StudentCurrentGroupDto(
-    int EnrollmentId,
-    int GroupId,
+    Guid EnrollmentId,
+    Guid GroupId,
     string GroupCode,
     string DepartmentName,
     string AcademicUnitName,
@@ -53,32 +53,33 @@ public record StudentCurrentGroupDto(
 );
 
 public record GroupCompositionMemberDto(
-    int StudentId,
+    Guid StudentId,
     string FirstName,
     string LastName,
     string? Email,
-    int? SubgroupId,
+    Guid? SubgroupId,
     string? SubgroupName,
     DateOnly DateFrom,
     DateOnly? DateTo
 );
 
 public record ClassmateDto(
-    int ClassmateStudentId,
+    Guid ClassmateStudentId,
     string FirstName,
     string LastName,
-    int GroupId,
+    Guid GroupId,
     string GroupCode,
     DateOnly SharedFrom,
     DateOnly? SharedTo
 );
 
 public record MoveStudentDto(
-    int NewGroupId,
-    int? NewSubgroupId,
+    Guid NewGroupId,
+    Guid? NewSubgroupId,
     DateOnly MoveDate,
     string ReasonEnd,
     string ReasonStart
 );
 
-public record AssignSubgroupDto(int SubgroupId);
+public record AssignSubgroupDto(Guid SubgroupId);
+

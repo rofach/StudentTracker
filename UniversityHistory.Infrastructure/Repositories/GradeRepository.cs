@@ -11,7 +11,7 @@ public class GradeRepository : IGradeRepository
     private readonly UniversityDbContext _db;
     public GradeRepository(UniversityDbContext db) => _db = db;
 
-    public async Task<PagedData<GradeRecord>> GetByStudentIdAsync(int studentId, int page, int pageSize, CancellationToken ct = default)
+    public async Task<PagedData<GradeRecord>> GetByStudentIdAsync(Guid studentId, int page, int pageSize, CancellationToken ct = default)
     {
         var query = _db.GradeRecords.AsNoTracking()
             .Include(g => g.CourseEnrollment)
@@ -37,3 +37,4 @@ public class GradeRepository : IGradeRepository
         return grade;
     }
 }
+

@@ -55,3 +55,4 @@ public class GetGroupCompositionQueryHandler : IGetGroupCompositionQueryHandler
         return new PagedResult<GroupCompositionMemberDto>(items, query.Page, query.PageSize, count);
     }
 }
+

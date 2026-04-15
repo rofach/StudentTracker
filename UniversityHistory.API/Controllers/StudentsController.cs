@@ -48,8 +48,8 @@ public class StudentsController : ControllerBase
         return Ok(await _studentService.SearchAsync(fullName, email, status, page, pageSize, ct));
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var student = await _studentService.GetByIdAsync(id, ct);
         return student is null ? NotFound() : Ok(student);
@@ -62,29 +62,29 @@ public class StudentsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.StudentId }, created);
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] StudentUpdateDto dto, CancellationToken ct)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] StudentUpdateDto dto, CancellationToken ct)
     {
         var updated = await _studentService.UpdateAsync(id, dto, ct);
         return Ok(updated);
     }
 
-    [HttpPut("{id:int}/status")]
-    public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusDto dto, CancellationToken ct)
+    [HttpPut("{id:guid}/status")]
+    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] ChangeStatusDto dto, CancellationToken ct)
     {
         await _studentService.ChangeStatusAsync(id, dto, ct);
         return NoContent();
     }
 
-    [HttpGet("{id:int}/details")]
-    public async Task<IActionResult> GetDetails(int id, CancellationToken ct)
+    [HttpGet("{id:guid}/details")]
+    public async Task<IActionResult> GetDetails(Guid id, CancellationToken ct)
     {
         return Ok(await _studentService.GetDetailAsync(id, ct));
     }
 
-    [HttpGet("{id:int}/timeline")]
+    [HttpGet("{id:guid}/timeline")]
     public async Task<IActionResult> GetTimeline(
-        int id,
+        Guid id,
         CancellationToken ct,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
@@ -94,9 +94,9 @@ public class StudentsController : ControllerBase
         return Ok(await _studentService.GetTimelineAsync(id, page, pageSize, ct));
     }
 
-    [HttpGet("{id:int}/classmates")]
+    [HttpGet("{id:guid}/classmates")]
     public async Task<IActionResult> GetClassmates(
-        int id,
+        Guid id,
         [FromQuery] DateOnly? dateFrom,
         [FromQuery] DateOnly? dateTo,
         CancellationToken ct)
@@ -105,43 +105,43 @@ public class StudentsController : ControllerBase
         return Ok(classmates);
     }
 
-    [HttpGet("{id:int}/group")]
-    public async Task<IActionResult> GetGroup(int id, [FromQuery] DateOnly? date, CancellationToken ct)
+    [HttpGet("{id:guid}/group")]
+    public async Task<IActionResult> GetGroup(Guid id, [FromQuery] DateOnly? date, CancellationToken ct)
     {
         var result = await _studentService.GetGroupOnDateAsync(id, date, ct);
         return result is null ? NotFound() : Ok(result);
     }
 
-    [HttpGet("{id:int}/movements")]
-    public async Task<IActionResult> GetMovements(int id, CancellationToken ct)
+    [HttpGet("{id:guid}/movements")]
+    public async Task<IActionResult> GetMovements(Guid id, CancellationToken ct)
     {
         return Ok(await _movementService.GetMovementsAsync(id, ct));
     }
 
-    [HttpPost("{id:int}/transfers")]
-    public async Task<IActionResult> CreateTransfer(int id, [FromBody] CreateTransferDto dto, CancellationToken ct)
+    [HttpPost("{id:guid}/transfers")]
+    public async Task<IActionResult> CreateTransfer(Guid id, [FromBody] CreateTransferDto dto, CancellationToken ct)
     {
         var result = await _movementService.CreateTransferAsync(id, dto, ct);
         return CreatedAtAction(nameof(GetMovements), new { id }, result);
     }
 
-    [HttpPost("{id:int}/leaves")]
-    public async Task<IActionResult> CreateLeave(int id, [FromBody] CreateLeaveDto dto, CancellationToken ct)
+    [HttpPost("{id:guid}/leaves")]
+    public async Task<IActionResult> CreateLeave(Guid id, [FromBody] CreateLeaveDto dto, CancellationToken ct)
     {
         var result = await _movementService.CreateLeaveAsync(id, dto, ct);
         return CreatedAtAction(nameof(GetMovements), new { id }, result);
     }
 
 
-    [HttpPost("{id:int}/move")]
-    public async Task<IActionResult> MoveToGroup(int id, [FromBody] MoveStudentDto dto, CancellationToken ct)
+    [HttpPost("{id:guid}/move")]
+    public async Task<IActionResult> MoveToGroup(Guid id, [FromBody] MoveStudentDto dto, CancellationToken ct)
     {
         await _enrollmentService.MoveToGroupAsync(id, dto, ct);
         return NoContent();
     }
 
-    [HttpGet("{id:int}/grades")]
-    public async Task<IActionResult> GetGrades(int id, CancellationToken ct,
+    [HttpGet("{id:guid}/grades")]
+    public async Task<IActionResult> GetGrades(Guid id, CancellationToken ct,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         page     = Math.Max(1, page);
@@ -149,17 +149,18 @@ public class StudentsController : ControllerBase
         return Ok(await _gradeService.GetGradesAsync(id, page, pageSize, ct));
     }
 
-    [HttpGet("{id:int}/disciplines")]
-    public async Task<IActionResult> GetDisciplines(int id, CancellationToken ct)
+    [HttpGet("{id:guid}/disciplines")]
+    public async Task<IActionResult> GetDisciplines(Guid id, CancellationToken ct)
     {
         return Ok(await _gradeService.GetStudentDisciplinesAsync(id, ct));
     }
 
-    [HttpGet("{id:int}/grades/average")]
-    public async Task<IActionResult> GetAverageGrade(int id,
-        [FromQuery] int? semesterNo, [FromQuery] int? disciplineId,
+    [HttpGet("{id:guid}/grades/average")]
+    public async Task<IActionResult> GetAverageGrade(Guid id,
+        [FromQuery] int? semesterNo, [FromQuery] Guid? disciplineId,
         [FromQuery] int? academicYearStart, CancellationToken ct)
     {
         return Ok(await _gradeService.GetAverageGradeAsync(id, semesterNo, disciplineId, academicYearStart, ct));
     }
 }
+

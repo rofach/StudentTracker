@@ -3,11 +3,11 @@ import { changeStudentStatus, getStudentById, updateStudent } from "../../api/st
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { StudentUpdateDto } from "../../types/api"
+import type { EntityId, StudentUpdateDto } from "../../types/api"
 import { fullName } from "../../utils/format"
 
 type AdminStudentEditPageProps = {
-  studentId: number
+  studentId: EntityId
   navigate: (path: string) => void
 }
 

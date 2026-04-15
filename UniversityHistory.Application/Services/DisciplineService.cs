@@ -22,7 +22,7 @@ public class DisciplineService : IDisciplineService
         return all.Select(static discipline => discipline.ToDto());
     }
 
-    public async Task<DisciplineDto?> GetByIdAsync(int disciplineId, CancellationToken ct = default)
+    public async Task<DisciplineDto?> GetByIdAsync(Guid disciplineId, CancellationToken ct = default)
     {
         var discipline = await _unitOfWork.Disciplines.GetByIdAsync(disciplineId, ct);
         return discipline is null ? null : discipline.ToDto();
@@ -41,7 +41,7 @@ public class DisciplineService : IDisciplineService
         return discipline.ToDto();
     }
 
-    public async Task<DisciplineDto> UpdateAsync(int disciplineId, UpdateDisciplineDto dto, CancellationToken ct = default)
+    public async Task<DisciplineDto> UpdateAsync(Guid disciplineId, UpdateDisciplineDto dto, CancellationToken ct = default)
     {
         var discipline = await _unitOfWork.Disciplines.GetByIdAsync(disciplineId, ct)
             ?? throw new NotFoundException(nameof(Discipline), disciplineId);
@@ -57,7 +57,7 @@ public class DisciplineService : IDisciplineService
         return discipline.ToDto();
     }
 
-    public async Task DeleteAsync(int disciplineId, CancellationToken ct = default)
+    public async Task DeleteAsync(Guid disciplineId, CancellationToken ct = default)
     {
         var discipline = await _unitOfWork.Disciplines.GetByIdAsync(disciplineId, ct)
             ?? throw new NotFoundException(nameof(Discipline), disciplineId);
@@ -71,3 +71,4 @@ public class DisciplineService : IDisciplineService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 }
+

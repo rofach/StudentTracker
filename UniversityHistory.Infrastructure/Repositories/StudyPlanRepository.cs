@@ -28,12 +28,12 @@ public class StudyPlanRepository : IStudyPlanRepository
             .ToListAsync(ct);
     }
 
-    public async Task<StudyPlan?> GetPlanByIdAsync(int planId, CancellationToken ct = default)
+    public async Task<StudyPlan?> GetPlanByIdAsync(Guid planId, CancellationToken ct = default)
     {
         return await _db.StudyPlans.FindAsync(new object[] { planId }, ct);
     }
 
-    public async Task<StudyPlan?> GetPlanWithDisciplinesAsync(int planId, CancellationToken ct = default)
+    public async Task<StudyPlan?> GetPlanWithDisciplinesAsync(Guid planId, CancellationToken ct = default)
     {
         return await _db.StudyPlans.AsNoTracking()
             .Include(p => p.PlanDisciplines)
@@ -41,12 +41,12 @@ public class StudyPlanRepository : IStudyPlanRepository
             .FirstOrDefaultAsync(p => p.PlanId == planId, ct);
     }
 
-    public async Task<bool> PlanHasAssignmentsAsync(int planId, CancellationToken ct = default)
+    public async Task<bool> PlanHasAssignmentsAsync(Guid planId, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments.AnyAsync(a => a.PlanId == planId, ct);
     }
 
-    public async Task<PlanDiscipline?> GetPlanDisciplineAsync(int planId, int disciplineId, CancellationToken ct = default)
+    public async Task<PlanDiscipline?> GetPlanDisciplineAsync(Guid planId, Guid disciplineId, CancellationToken ct = default)
     {
         return await _db.PlanDisciplines
             .Include(pd => pd.Discipline)
@@ -58,7 +58,7 @@ public class StudyPlanRepository : IStudyPlanRepository
         _db.PlanDisciplines.Add(pd); return pd;
     }
 
-    public async Task<bool> PlanDisciplineIsUsedAsync(int planId, int disciplineId, CancellationToken ct = default)
+    public async Task<bool> PlanDisciplineIsUsedAsync(Guid planId, Guid disciplineId, CancellationToken ct = default)
     {
         return await _db.StudentCourseEnrollments
             .AnyAsync(ce => ce.GroupPlanAssignment.PlanId == planId
@@ -72,7 +72,7 @@ public class StudyPlanRepository : IStudyPlanRepository
     }
 
     public async Task<IEnumerable<StudentCourseEnrollment>> GetCourseEnrollmentsByEnrollmentIdAsync(
-        int enrollmentId, CancellationToken ct = default)
+        Guid enrollmentId, CancellationToken ct = default)
     {
         return await _db.StudentCourseEnrollments
             .Where(ce => ce.EnrollmentId == enrollmentId)
@@ -85,7 +85,7 @@ public class StudyPlanRepository : IStudyPlanRepository
     }
 
     public async Task RemovePlannedCourseEnrollmentsForDisciplineAsync(
-        int planId, int disciplineId, CancellationToken ct = default)
+        Guid planId, Guid disciplineId, CancellationToken ct = default)
     {
         var rows = await _db.StudentCourseEnrollments
             .Where(ce => ce.GroupPlanAssignment.PlanId == planId
@@ -97,3 +97,4 @@ public class StudyPlanRepository : IStudyPlanRepository
             _db.StudentCourseEnrollments.RemoveRange(rows);
     }
 }
+

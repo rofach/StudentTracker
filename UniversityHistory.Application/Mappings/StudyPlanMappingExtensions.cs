@@ -11,7 +11,7 @@ public static class StudyPlanMappingExtensions
     public static StudyPlanDto ToDto(this StudyPlan plan) =>
         new(plan.PlanId, plan.SpecialtyCode, plan.PlanName, plan.ValidFrom);
 
-    public static PlanDiscipline ToEntity(this AddPlanDisciplineDto dto, int planId, Domain.Enums.ControlType controlType) =>
+    public static PlanDiscipline ToEntity(this AddPlanDisciplineDto dto, Guid planId, Domain.Enums.ControlType controlType) =>
         new()
         {
             PlanId = planId,
@@ -30,3 +30,4 @@ public static class StudyPlanMappingExtensions
         new(a.GroupPlanAssignmentId, a.GroupId, a.PlanId,
             a.Plan.SpecialtyCode, a.Plan.PlanName, a.DateFrom, a.DateTo);
 }
+

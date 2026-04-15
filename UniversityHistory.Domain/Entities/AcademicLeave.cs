@@ -2,8 +2,8 @@ namespace UniversityHistory.Domain.Entities;
 
 public class AcademicLeave
 {
-    public int LeaveId { get; set; }
-    public int EnrollmentId { get; set; }
+    public Guid LeaveId { get; set; }
+    public Guid EnrollmentId { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Reason { get; set; }
@@ -11,3 +11,4 @@ public class AcademicLeave
 
     public StudentGroupEnrollment Enrollment { get; set; } = null!;
 }
+

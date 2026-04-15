@@ -6,3 +6,4 @@ public interface IGetAverageGradeQueryHandler
 {
     Task<AverageGradeDto> HandleAsync(GetAverageGradeQuery query, CancellationToken ct = default);
 }
+

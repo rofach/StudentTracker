@@ -7,6 +7,7 @@ import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import type {
   ActiveGroupDto,
+  EntityId,
   GroupCompositionMemberDto,
   GroupPlanAssignmentDto,
   PagedResult,
@@ -25,13 +26,13 @@ function todayValue(): string {
 export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
   const [date, setDate] = useState("")
   const [groups, setGroups] = useState<ActiveGroupDto[]>([])
-  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
+  const [selectedGroupId, setSelectedGroupId] = useState<EntityId | null>(null)
   const [compositionPage, setCompositionPage] = useState(1)
   const [compositionPageSize, setCompositionPageSize] = useState(20)
   const [composition, setComposition] = useState<PagedResult<GroupCompositionMemberDto> | null>(null)
   const [studyPlans, setStudyPlans] = useState<StudyPlanDto[]>([])
   const [planHistory, setPlanHistory] = useState<GroupPlanAssignmentDto[]>([])
-  const [selectedPlanId, setSelectedPlanId] = useState<number | "">("")
+  const [selectedPlanId, setSelectedPlanId] = useState<EntityId | "">("")
   const [planDateFrom, setPlanDateFrom] = useState(todayValue())
   const [isGroupsLoading, setIsGroupsLoading] = useState(true)
   const [isCompositionLoading, setIsCompositionLoading] = useState(false)
@@ -208,13 +209,13 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
     try {
       if (currentPlan) {
         await changeCurrentGroupPlan(selectedGroupId, {
-          newPlanId: Number(selectedPlanId),
+          newPlanId: selectedPlanId,
           newPlanDateFrom: planDateFrom,
         })
         setMessage("Поточний план групи змінено.")
       } else {
         await assignGroupPlan(selectedGroupId, {
-          planId: Number(selectedPlanId),
+          planId: selectedPlanId,
           dateFrom: planDateFrom,
         })
         setMessage("План групи призначено.")
@@ -335,7 +336,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                           План
                           <select
                             value={selectedPlanId}
-                            onChange={(event) => setSelectedPlanId(event.target.value ? Number(event.target.value) : "")}
+                            onChange={(event) => setSelectedPlanId(event.target.value)}
                           >
                             <option value="">Оберіть план</option>
                             {studyPlans.map((plan) => (

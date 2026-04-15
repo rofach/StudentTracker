@@ -25,7 +25,7 @@ public class GradeService : IGradeService
         _studentDisciplinesHandler = studentDisciplinesHandler;
     }
 
-    public async Task<PagedResult<GradeDto>> GetGradesAsync(int studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
+    public async Task<PagedResult<GradeDto>> GetGradesAsync(Guid studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -37,9 +37,9 @@ public class GradeService : IGradeService
     }
 
     public async Task<AverageGradeDto> GetAverageGradeAsync(
-        int studentId,
+        Guid studentId,
         int? semesterNo,
-        int? disciplineId,
+        Guid? disciplineId,
         int? academicYearStart,
         CancellationToken ct = default)
     {
@@ -51,7 +51,7 @@ public class GradeService : IGradeService
     }
 
     public async Task<IReadOnlyList<StudentDisciplineOptionDto>> GetStudentDisciplinesAsync(
-        int studentId,
+        Guid studentId,
         CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
@@ -73,3 +73,4 @@ public class GradeService : IGradeService
             $"for discipline {grade.CourseEnrollment.DisciplineId}.");
     }
 }
+

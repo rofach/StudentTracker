@@ -1,3 +1,5 @@
+export type EntityId = string
+
 export type PagedResult<TItem> = {
   items: TItem[]
   page: number
@@ -6,7 +8,7 @@ export type PagedResult<TItem> = {
 }
 
 export type StudentDto = {
-  studentId: number
+  studentId: EntityId
   firstName: string
   lastName: string
   patronymic: string | null
@@ -17,21 +19,21 @@ export type StudentDto = {
 }
 
 export type EnrollmentSummaryDto = {
-  enrollmentId: number
-  groupId: number
+  enrollmentId: EntityId
+  groupId: EntityId
   groupCode: string
   departmentName: string
   academicUnitName: string
   dateFrom: string
   dateTo: string | null
-  subgroupId: number | null
+  subgroupId: EntityId | null
   subgroupName: string | null
 }
 
 export type GroupPlanAssignmentDto = {
-  groupPlanAssignmentId: number
-  groupId: number
-  planId: number
+  groupPlanAssignmentId: EntityId
+  groupId: EntityId
+  planId: EntityId
   specialtyCode: string
   planName: string | null
   dateFrom: string
@@ -39,14 +41,15 @@ export type GroupPlanAssignmentDto = {
 }
 
 export type AcademicLeaveDto = {
-  leaveId: number
+  leaveId: EntityId
   startDate: string
   endDate: string | null
   reason: string | null
+  returnReason?: string | null
 }
 
 export type ExternalTransferDto = {
-  transferId: number
+  transferId: EntityId
   transferType: string
   transferDate: string
   institutionName: string
@@ -54,7 +57,7 @@ export type ExternalTransferDto = {
 }
 
 export type StudentDetailDto = {
-  studentId: number
+  studentId: EntityId
   firstName: string
   lastName: string
   patronymic: string | null
@@ -69,7 +72,7 @@ export type StudentDetailDto = {
 }
 
 export type StudentDisciplineOptionDto = {
-  disciplineId: number
+  disciplineId: EntityId
   disciplineName: string
   semesterNo: number
   academicYearStart: number
@@ -78,7 +81,7 @@ export type StudentDisciplineOptionDto = {
 }
 
 export type GradeDto = {
-  gradeId: number
+  gradeId: EntityId
   disciplineName: string
   semesterNo: number
   academicYearStart: number
@@ -94,10 +97,10 @@ export type AverageGradeDto = {
 }
 
 export type ClassmateDto = {
-  classmateStudentId: number
+  classmateStudentId: EntityId
   firstName: string
   lastName: string
-  groupId: number
+  groupId: EntityId
   groupCode: string
   sharedFrom: string
   sharedTo: string | null
@@ -115,18 +118,18 @@ export type TimelineEventDto = {
 }
 
 export type GroupCompositionMemberDto = {
-  studentId: number
+  studentId: EntityId
   firstName: string
   lastName: string
   email: string | null
-  subgroupId: number | null
+  subgroupId: EntityId | null
   subgroupName: string | null
   dateFrom: string
   dateTo: string | null
 }
 
 export type ActiveGroupDto = {
-  groupId: number
+  groupId: EntityId
   groupCode: string
   departmentName: string
   academicUnitName: string
@@ -136,8 +139,8 @@ export type ActiveGroupDto = {
 }
 
 export type GroupStudentDto = {
-  enrollmentId: number
-  studentId: number
+  enrollmentId: EntityId
+  studentId: EntityId
   firstName: string
   lastName: string
   email: string | null
@@ -146,15 +149,15 @@ export type GroupStudentDto = {
 }
 
 export type StudyPlanDto = {
-  planId: number
+  planId: EntityId
   specialtyCode: string
   planName: string | null
   validFrom: string
 }
 
 export type PlanDisciplineDto = {
-  planId: number
-  disciplineId: number
+  planId: EntityId
+  disciplineId: EntityId
   disciplineName: string
   semesterNo: number
   controlType: string
@@ -163,7 +166,7 @@ export type PlanDisciplineDto = {
 }
 
 export type AddPlanDisciplineDto = {
-  disciplineId: number
+  disciplineId: EntityId
   semesterNo: number
   controlType: string
   hours: number
@@ -178,25 +181,25 @@ export type UpdatePlanDisciplineDto = {
 }
 
 export type DisciplineDto = {
-  disciplineId: number
+  disciplineId: EntityId
   disciplineName: string
 }
 
 export type AcademicUnitDto = {
-  academicUnitId: number
+  academicUnitId: EntityId
   name: string
   type: string
   departments: DepartmentSummaryDto[]
 }
 
 export type DepartmentSummaryDto = {
-  departmentId: number
+  departmentId: EntityId
   name: string
 }
 
 export type DepartmentDto = {
-  departmentId: number
-  academicUnitId: number
+  departmentId: EntityId
+  academicUnitId: EntityId
   name: string
   academicUnitName: string
   academicUnitType: string
@@ -218,9 +221,9 @@ export type ChangeStatusDto = {
 }
 
 export type EnrollStudentDto = {
-  studentId: number
-  groupId: number
-  subgroupId: number | null
+  studentId: EntityId
+  groupId: EntityId
+  subgroupId: EntityId | null
   dateFrom: string
   reasonStart: string
 }
@@ -231,26 +234,27 @@ export type CloseEnrollmentDto = {
 }
 
 export type MoveStudentDto = {
-  newGroupId: number
-  newSubgroupId: number | null
+  newGroupId: EntityId
+  newSubgroupId: EntityId | null
   moveDate: string
   reasonEnd: string
   reasonStart: string
 }
 
 export type CreateLeaveDto = {
-  enrollmentId: number
+  enrollmentId: EntityId
   startDate: string
+  endDate?: string | null
   reason: string | null
 }
 
 export type AssignGroupPlanDto = {
-  planId: number
+  planId: EntityId
   dateFrom: string
 }
 
 export type ChangeGroupPlanDto = {
-  newPlanId: number
+  newPlanId: EntityId
   newPlanDateFrom: string
 }
 
@@ -276,7 +280,7 @@ export type CreateAcademicUnitDto = {
 export type UpdateAcademicUnitDto = CreateAcademicUnitDto
 
 export type CreateDepartmentDto = {
-  academicUnitId: number
+  academicUnitId: EntityId
   name: string
 }
 

@@ -13,7 +13,7 @@ public class GroupRepository : IGroupRepository
         _db = db;
     }
 
-    public async Task<StudyGroup?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<StudyGroup?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.StudyGroups.Include(g => g.Subgroups).FirstOrDefaultAsync(g => g.GroupId == id, ct);
     }
@@ -29,3 +29,4 @@ public class GroupRepository : IGroupRepository
         return group;
     }
 }
+

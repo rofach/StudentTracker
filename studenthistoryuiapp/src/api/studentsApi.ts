@@ -4,6 +4,7 @@ import type {
   ClassmateDto,
   CloseEnrollmentDto,
   CreateLeaveDto,
+  EntityId,
   EnrollStudentDto,
   EnrollmentSummaryDto,
   ExternalTransferDto,
@@ -34,7 +35,7 @@ export function searchStudents(params: {
   return fetchJson<PagedResult<StudentDto>>("/students/search", undefined, params)
 }
 
-export function getStudentById(studentId: number): Promise<StudentDto> {
+export function getStudentById(studentId: EntityId): Promise<StudentDto> {
   return fetchJson<StudentDto>(`/students/${studentId}`)
 }
 
@@ -42,24 +43,24 @@ export function createStudent(dto: StudentCreateDto): Promise<StudentDto> {
   return postJson<StudentDto>("/students", dto)
 }
 
-export function updateStudent(studentId: number, dto: StudentUpdateDto): Promise<StudentDto> {
+export function updateStudent(studentId: EntityId, dto: StudentUpdateDto): Promise<StudentDto> {
   return putJson<StudentDto>(`/students/${studentId}`, dto)
 }
 
-export function changeStudentStatus(studentId: number, dto: ChangeStatusDto): Promise<void> {
+export function changeStudentStatus(studentId: EntityId, dto: ChangeStatusDto): Promise<void> {
   return putJson<void>(`/students/${studentId}/status`, dto)
 }
 
-export function getStudentDetails(studentId: number): Promise<StudentDetailDto> {
+export function getStudentDetails(studentId: EntityId): Promise<StudentDetailDto> {
   return fetchJson<StudentDetailDto>(`/students/${studentId}/details`)
 }
 
-export function getStudentEnrollments(studentId: number): Promise<EnrollmentSummaryDto[]> {
+export function getStudentEnrollments(studentId: EntityId): Promise<EnrollmentSummaryDto[]> {
   return getStudentDetails(studentId).then((result) => result.enrollments)
 }
 
 export function getStudentTimeline(
-  studentId: number,
+  studentId: EntityId,
   page: number,
   pageSize: number,
 ): Promise<PagedResult<TimelineEventDto>> {
@@ -67,7 +68,7 @@ export function getStudentTimeline(
 }
 
 export function getStudentClassmates(
-  studentId: number,
+  studentId: EntityId,
   dateFrom?: string,
   dateTo?: string,
 ): Promise<ClassmateDto[]> {
@@ -77,12 +78,12 @@ export function getStudentClassmates(
   })
 }
 
-export function getStudentDisciplines(studentId: number): Promise<StudentDisciplineOptionDto[]> {
+export function getStudentDisciplines(studentId: EntityId): Promise<StudentDisciplineOptionDto[]> {
   return fetchJson<StudentDisciplineOptionDto[]>(`/students/${studentId}/disciplines`)
 }
 
 export function getStudentGrades(
-  studentId: number,
+  studentId: EntityId,
   page: number,
   pageSize: number,
 ): Promise<PagedResult<GradeDto>> {
@@ -90,33 +91,33 @@ export function getStudentGrades(
 }
 
 export function getStudentAverageGrade(
-  studentId: number,
+  studentId: EntityId,
   params: {
     semesterNo?: number
-    disciplineId?: number
+    disciplineId?: EntityId
     academicYearStart?: number
   },
 ): Promise<AverageGradeDto> {
   return fetchJson<AverageGradeDto>(`/students/${studentId}/grades/average`, undefined, params)
 }
 
-export function getStudentTransfers(studentId: number): Promise<ExternalTransferDto[]> {
+export function getStudentTransfers(studentId: EntityId): Promise<ExternalTransferDto[]> {
   return getStudentDetails(studentId).then((result) => result.transfers)
 }
 
-export function moveStudentToGroup(studentId: number, dto: MoveStudentDto): Promise<void> {
+export function moveStudentToGroup(studentId: EntityId, dto: MoveStudentDto): Promise<void> {
   return postJson<void>(`/students/${studentId}/move`, dto)
 }
 
-export function createAcademicLeave(studentId: number, dto: CreateLeaveDto): Promise<void> {
+export function createAcademicLeave(studentId: EntityId, dto: CreateLeaveDto): Promise<void> {
   return postJson<void>(`/students/${studentId}/leaves`, dto)
 }
 
-export function enrollStudent(dto: EnrollStudentDto): Promise<{ enrollmentId: number }> {
-  return postJson<{ enrollmentId: number }>("/enrollments", dto)
+export function enrollStudent(dto: EnrollStudentDto): Promise<{ enrollmentId: EntityId }> {
+  return postJson<{ enrollmentId: EntityId }>("/enrollments", dto)
 }
 
-export function closeEnrollment(enrollmentId: number, dto: CloseEnrollmentDto): Promise<void> {
+export function closeEnrollment(enrollmentId: EntityId, dto: CloseEnrollmentDto): Promise<void> {
   return putJson<void>(`/enrollments/${enrollmentId}/close`, dto)
 }
 

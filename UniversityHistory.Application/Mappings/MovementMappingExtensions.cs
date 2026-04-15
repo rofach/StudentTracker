@@ -17,7 +17,7 @@ public static class MovementMappingExtensions
         };
     }
 
-    public static ExternalTransfer ToEntity(this CreateTransferDto dto, int studentId, TransferType transferType)
+    public static ExternalTransfer ToEntity(this CreateTransferDto dto, Guid studentId, TransferType transferType)
     {
         return new ExternalTransfer
         {
@@ -63,3 +63,4 @@ public static class MovementMappingExtensions
             transfers.Select(static transfer => transfer.ToDto()));
     }
 }
+

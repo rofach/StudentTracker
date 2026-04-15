@@ -51,3 +51,4 @@ public class GetAverageGradeQueryHandler : IGetAverageGradeQueryHandler
         public int GradeCount { get; set; }
     }
 }
+

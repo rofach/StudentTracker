@@ -2,11 +2,11 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react"
 import { getStudentAverageGrade, getStudentDisciplines, getStudentGrades } from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { AverageGradeDto, GradeDto, StudentDisciplineOptionDto } from "../../types/api"
+import type { AverageGradeDto, EntityId, GradeDto, StudentDisciplineOptionDto } from "../../types/api"
 import { formatDate } from "../../utils/format"
 
 type StudentSubjectsPageProps = {
-  studentId: number
+  studentId: EntityId
 }
 
 type SemesterOption = {

@@ -2,9 +2,9 @@ namespace UniversityHistory.Domain.Entities;
 
 public class StudyGroup
 {
-    public int GroupId { get; set; }
+    public Guid GroupId { get; set; }
     public string GroupCode { get; set; } = string.Empty;
-    public int DepartmentId { get; set; }
+    public Guid DepartmentId { get; set; }
     public DateOnly DateCreated { get; set; }
     public DateOnly? DateClosed { get; set; }
 
@@ -13,3 +13,4 @@ public class StudyGroup
     public ICollection<StudentGroupEnrollment> Enrollments { get; set; } = new List<StudentGroupEnrollment>();
     public ICollection<GroupPlanAssignment> PlanAssignments { get; set; } = new List<GroupPlanAssignment>();
 }
+

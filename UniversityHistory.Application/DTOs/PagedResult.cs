@@ -6,3 +6,4 @@ public record PagedResult<T>(
     int PageSize,
     int TotalCount
 );
+

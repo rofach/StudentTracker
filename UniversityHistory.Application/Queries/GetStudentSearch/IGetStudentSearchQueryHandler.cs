@@ -6,3 +6,4 @@ public interface IGetStudentSearchQueryHandler
 {
     Task<PagedResult<StudentDto>> HandleAsync(GetStudentSearchQuery query, CancellationToken ct = default);
 }
+

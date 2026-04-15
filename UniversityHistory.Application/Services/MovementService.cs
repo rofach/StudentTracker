@@ -17,7 +17,7 @@ public class MovementService : IMovementService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<StudentMovementDto> GetMovementsAsync(int studentId, CancellationToken ct = default)
+    public async Task<StudentMovementDto> GetMovementsAsync(Guid studentId, CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -28,7 +28,7 @@ public class MovementService : IMovementService
         return leaves.ToDto(transfers);
     }
 
-    public async Task<ExternalTransferDto> CreateTransferAsync(int studentId, CreateTransferDto dto, CancellationToken ct = default)
+    public async Task<ExternalTransferDto> CreateTransferAsync(Guid studentId, CreateTransferDto dto, CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -43,7 +43,7 @@ public class MovementService : IMovementService
         return created.ToDto(institution.InstitutionName);
     }
 
-    public async Task<AcademicLeaveDto> CreateLeaveAsync(int studentId, CreateLeaveDto dto, CancellationToken ct = default)
+    public async Task<AcademicLeaveDto> CreateLeaveAsync(Guid studentId, CreateLeaveDto dto, CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -84,7 +84,7 @@ public class MovementService : IMovementService
         return created.ToDto();
     }
 
-    public async Task<AcademicLeaveDto> CloseLeaveAsync(int leaveId, CloseAcademicLeaveDto dto, CancellationToken ct = default)
+    public async Task<AcademicLeaveDto> CloseLeaveAsync(Guid leaveId, CloseAcademicLeaveDto dto, CancellationToken ct = default)
     {
         var leave = await _unitOfWork.AcademicLeaves.GetByIdAsync(leaveId, ct)
             ?? throw new NotFoundException(nameof(AcademicLeave), leaveId);
@@ -120,3 +120,4 @@ public class MovementService : IMovementService
         return leave.ToDto();
     }
 }
+

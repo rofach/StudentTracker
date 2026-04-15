@@ -82,3 +82,5 @@ public class ChangeStatusDtoValidator : AppValidator<ChangeStatusDto>
             .IsEnumName(typeof(StudentStatus), caseSensitive: false);
     }
 }
+
+

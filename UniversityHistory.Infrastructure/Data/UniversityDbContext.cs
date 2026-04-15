@@ -31,7 +31,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Student");
             e.HasKey(s => s.StudentId);
-            e.Property(s => s.StudentId).HasColumnName("student_id").UseIdentityColumn();
+            e.Property(s => s.StudentId).HasColumnName("student_id");
             e.Property(s => s.FirstName).HasColumnName("first_name").HasMaxLength(50).IsRequired();
             e.Property(s => s.LastName).HasColumnName("last_name").HasMaxLength(50).IsRequired();
             e.Property(s => s.Patronymic).HasColumnName("patronymic").HasMaxLength(50);
@@ -52,7 +52,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Academic_Unit");
             e.HasKey(u => u.AcademicUnitId);
-            e.Property(u => u.AcademicUnitId).HasColumnName("academic_unit_id").UseIdentityColumn();
+            e.Property(u => u.AcademicUnitId).HasColumnName("academic_unit_id");
             e.Property(u => u.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
             e.HasIndex(u => u.Name).IsUnique();
             e.Property(u => u.Type)
@@ -67,7 +67,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Department");
             e.HasKey(d => d.DepartmentId);
-            e.Property(d => d.DepartmentId).HasColumnName("department_id").UseIdentityColumn();
+            e.Property(d => d.DepartmentId).HasColumnName("department_id");
             e.Property(d => d.AcademicUnitId).HasColumnName("academic_unit_id");
             e.Property(d => d.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
             e.HasIndex(d => new { d.AcademicUnitId, d.Name }).IsUnique();
@@ -79,7 +79,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Study_Group");
             e.HasKey(g => g.GroupId);
-            e.Property(g => g.GroupId).HasColumnName("group_id").UseIdentityColumn();
+            e.Property(g => g.GroupId).HasColumnName("group_id");
             e.Property(g => g.GroupCode).HasColumnName("group_code").HasMaxLength(20).IsRequired();
             e.HasIndex(g => g.GroupCode).IsUnique();
             e.Property(g => g.DepartmentId).HasColumnName("department_id");
@@ -93,7 +93,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Subgroup");
             e.HasKey(s => s.SubgroupId);
-            e.Property(s => s.SubgroupId).HasColumnName("subgroup_id").UseIdentityColumn();
+            e.Property(s => s.SubgroupId).HasColumnName("subgroup_id");
             e.Property(s => s.SubgroupName).HasColumnName("subgroup_name").HasMaxLength(50).IsRequired();
             e.Property(s => s.GroupId).HasColumnName("group_id");
             e.HasOne(s => s.Group)
@@ -106,7 +106,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Institution");
             e.HasKey(i => i.InstitutionId);
-            e.Property(i => i.InstitutionId).HasColumnName("institution_id").UseIdentityColumn();
+            e.Property(i => i.InstitutionId).HasColumnName("institution_id");
             e.Property(i => i.InstitutionName).HasColumnName("institution_name").HasMaxLength(200).IsRequired();
             e.Property(i => i.City).HasColumnName("city").HasMaxLength(100);
             e.Property(i => i.Country).HasColumnName("country").HasMaxLength(100);
@@ -116,7 +116,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Discipline");
             e.HasKey(d => d.DisciplineId);
-            e.Property(d => d.DisciplineId).HasColumnName("discipline_id").UseIdentityColumn();
+            e.Property(d => d.DisciplineId).HasColumnName("discipline_id");
             e.Property(d => d.DisciplineName).HasColumnName("discipline_name").HasMaxLength(200).IsRequired();
         });
 
@@ -124,7 +124,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Study_Plan");
             e.HasKey(p => p.PlanId);
-            e.Property(p => p.PlanId).HasColumnName("plan_id").UseIdentityColumn();
+            e.Property(p => p.PlanId).HasColumnName("plan_id");
             e.Property(p => p.SpecialtyCode).HasColumnName("specialty_code").HasMaxLength(20).IsRequired();
             e.Property(p => p.PlanName).HasColumnName("plan_name").HasMaxLength(100);
             e.Property(p => p.ValidFrom).HasColumnName("valid_from").IsRequired();
@@ -157,7 +157,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Student_Group_Enrollment");
             e.HasKey(en => en.EnrollmentId);
-            e.Property(en => en.EnrollmentId).HasColumnName("enrollment_id").UseIdentityColumn();
+            e.Property(en => en.EnrollmentId).HasColumnName("enrollment_id");
             e.Property(en => en.StudentId).HasColumnName("student_id");
             e.Property(en => en.GroupId).HasColumnName("group_id");
             e.Property(en => en.DateFrom).HasColumnName("date_from").IsRequired();
@@ -188,7 +188,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Academic_Leave");
             e.HasKey(l => l.LeaveId);
-            e.Property(l => l.LeaveId).HasColumnName("leave_id").UseIdentityColumn();
+            e.Property(l => l.LeaveId).HasColumnName("leave_id");
             e.Property(l => l.EnrollmentId).HasColumnName("enrollment_id");
             e.Property(l => l.StartDate).HasColumnName("start_date").IsRequired();
             e.Property(l => l.EndDate).HasColumnName("end_date");
@@ -202,7 +202,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("External_Transfers");
             e.HasKey(t => t.TransferId);
-            e.Property(t => t.TransferId).HasColumnName("transfer_id").UseIdentityColumn();
+            e.Property(t => t.TransferId).HasColumnName("transfer_id");
             e.Property(t => t.StudentId).HasColumnName("student_id");
             e.Property(t => t.InstitutionId).HasColumnName("institution_id");
             e.Property(t => t.TransferType)
@@ -225,7 +225,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Group_Plan_Assignment");
             e.HasKey(a => a.GroupPlanAssignmentId);
-            e.Property(a => a.GroupPlanAssignmentId).HasColumnName("group_plan_assignment_id").UseIdentityColumn();
+            e.Property(a => a.GroupPlanAssignmentId).HasColumnName("group_plan_assignment_id");
             e.Property(a => a.GroupId).HasColumnName("group_id");
             e.Property(a => a.PlanId).HasColumnName("plan_id");
             e.Property(a => a.DateFrom).HasColumnName("date_from").IsRequired();
@@ -242,7 +242,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Student_Course_Enrollment");
             e.HasKey(ce => ce.CourseEnrollmentId);
-            e.Property(ce => ce.CourseEnrollmentId).HasColumnName("course_enrollment_id").UseIdentityColumn();
+            e.Property(ce => ce.CourseEnrollmentId).HasColumnName("course_enrollment_id");
             e.Property(ce => ce.EnrollmentId).HasColumnName("enrollment_id");
             e.Property(ce => ce.GroupPlanAssignmentId).HasColumnName("group_plan_assignment_id");
             e.Property(ce => ce.DisciplineId).HasColumnName("discipline_id");
@@ -267,7 +267,7 @@ public class UniversityDbContext : DbContext
         {
             e.ToTable("Grade_Record");
             e.HasKey(gr => gr.GradeId);
-            e.Property(gr => gr.GradeId).HasColumnName("grade_id").UseIdentityColumn();
+            e.Property(gr => gr.GradeId).HasColumnName("grade_id");
             e.Property(gr => gr.CourseEnrollmentId).HasColumnName("course_enrollment_id");
             e.Property(gr => gr.GradeValue).HasColumnName("grade_value").HasMaxLength(20).IsRequired();
             e.Property(gr => gr.AssessmentDate).HasColumnName("assessment_date").IsRequired();
@@ -279,3 +279,5 @@ public class UniversityDbContext : DbContext
         modelBuilder.Seed();
     }
 }
+
+

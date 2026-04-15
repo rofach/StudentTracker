@@ -21,8 +21,8 @@ public class DisciplinesController : ControllerBase
         return Ok(await _service.GetAllAsync(ct));
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var result = await _service.GetByIdAsync(id, ct);
         return result is null ? NotFound() : Ok(result);
@@ -35,17 +35,18 @@ public class DisciplinesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.DisciplineId }, created);
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateDisciplineDto dto, CancellationToken ct)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDisciplineDto dto, CancellationToken ct)
     {
         var updated = await _service.UpdateAsync(id, dto, ct);
         return Ok(updated);
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         await _service.DeleteAsync(id, ct);
         return NoContent();
     }
 }
+

@@ -23,3 +23,5 @@ public class UpdateDisciplineDtoValidator : AppValidator<UpdateDisciplineDto>
             .MaximumLength(200);
     }
 }
+
+

@@ -11,12 +11,12 @@ import {
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { ActiveGroupDto, StudentDetailDto, StudyPlanDto } from "../../types/api"
+import type { ActiveGroupDto, EntityId, StudentDetailDto, StudyPlanDto } from "../../types/api"
 import { formatDate, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
 type AdminStudentOperationsPageProps = {
-  studentId: number
+  studentId: EntityId
   navigate: (path: string) => void
 }
 
@@ -33,11 +33,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [message, setMessage] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  const [enrollGroupId, setEnrollGroupId] = useState<number | "">("")
+  const [enrollGroupId, setEnrollGroupId] = useState<EntityId | "">("")
   const [enrollDate, setEnrollDate] = useState(todayValue())
   const [enrollReasonStart, setEnrollReasonStart] = useState("Вступ")
 
-  const [moveGroupId, setMoveGroupId] = useState<number | "">("")
+  const [moveGroupId, setMoveGroupId] = useState<EntityId | "">("")
   const [moveDate, setMoveDate] = useState(todayValue())
   const [moveReasonEnd, setMoveReasonEnd] = useState("Переведення")
   const [moveReasonStart, setMoveReasonStart] = useState("Переведення")
@@ -46,6 +46,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [closeReasonEnd, setCloseReasonEnd] = useState("")
 
   const [leaveDate, setLeaveDate] = useState(todayValue())
+  const [leaveEndDate, setLeaveEndDate] = useState("")
   const [leaveReason, setLeaveReason] = useState("")
 
   const loadData = async () => {
@@ -172,7 +173,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               Група
               <select
                 value={enrollGroupId}
-                onChange={(event) => setEnrollGroupId(event.target.value ? Number(event.target.value) : "")}
+                onChange={(event) => setEnrollGroupId(event.target.value)}
               >
                 <option value="">Оберіть групу</option>
                 {groups.map((group) => (
@@ -203,7 +204,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 () =>
                   enrollStudent({
                     studentId,
-                    groupId: Number(enrollGroupId),
+                    groupId: enrollGroupId,
                     subgroupId: null,
                     dateFrom: enrollDate,
                     reasonStart: enrollReasonStart,
@@ -225,7 +226,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   Нова група
                   <select
                     value={moveGroupId}
-                    onChange={(event) => setMoveGroupId(event.target.value ? Number(event.target.value) : "")}
+                    onChange={(event) => setMoveGroupId(event.target.value)}
                   >
                     <option value="">Оберіть групу</option>
                     {availableMoveGroups.map((group) => (
@@ -263,7 +264,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   void runAction(
                     () =>
                       moveStudentToGroup(studentId, {
-                        newGroupId: Number(moveGroupId),
+                        newGroupId: moveGroupId,
                         newSubgroupId: null,
                         moveDate,
                         reasonEnd: moveReasonEnd,
@@ -331,20 +332,25 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   <input type="date" value={leaveDate} onChange={(event) => setLeaveDate(event.target.value)} />
                 </label>
                 <label>
+                  Р”Р°С‚Р° Р·Р°РІРµСЂС€РµРЅРЅСЏ
+                  <input type="date" value={leaveEndDate} onChange={(event) => setLeaveEndDate(event.target.value)} />
+                </label>
+                <label>
                   Причина
                   <input type="text" value={leaveReason} onChange={(event) => setLeaveReason(event.target.value)} />
                 </label>
               </div>
               <button
                 type="button"
-                disabled={isSaving}
+                disabled={isSaving || leaveReason.trim().length === 0}
                 onClick={() =>
                   void runAction(
                     () =>
                       createAcademicLeave(studentId, {
                         enrollmentId: currentEnrollment.enrollmentId,
                         startDate: leaveDate,
-                        reason: leaveReason || null,
+                        endDate: leaveEndDate || null,
+                        reason: leaveReason.trim(),
                       }),
                     "Академвідпустку оформлено.",
                   )

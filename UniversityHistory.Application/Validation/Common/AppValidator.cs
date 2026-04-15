@@ -9,3 +9,5 @@ public abstract class AppValidator<T> : AbstractValidator<T>
         RuleLevelCascadeMode = CascadeMode.Stop;
     }
 }
+
+

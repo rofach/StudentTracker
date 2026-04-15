@@ -1,3 +1,4 @@
 namespace UniversityHistory.Application.Queries.GetStudentDisciplines;
 
-public record GetStudentDisciplinesQuery(int StudentId);
+public record GetStudentDisciplinesQuery(Guid StudentId);
+

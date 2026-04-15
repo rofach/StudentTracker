@@ -10,14 +10,14 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
     private readonly UniversityDbContext _db;
     public GroupPlanAssignmentRepository(UniversityDbContext db) => _db = db;
 
-    public async Task<GroupPlanAssignment?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<GroupPlanAssignment?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments
             .Include(a => a.Plan).ThenInclude(p => p.PlanDisciplines)
             .FirstOrDefaultAsync(a => a.GroupPlanAssignmentId == id, ct);
     }
 
-    public async Task<GroupPlanAssignment?> GetActiveOnDateAsync(int groupId, DateOnly date, CancellationToken ct = default)
+    public async Task<GroupPlanAssignment?> GetActiveOnDateAsync(Guid groupId, DateOnly date, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments
             .Include(a => a.Plan).ThenInclude(p => p.PlanDisciplines)
@@ -28,7 +28,7 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IEnumerable<GroupPlanAssignment>> GetByGroupIdAsync(int groupId, CancellationToken ct = default)
+    public async Task<IEnumerable<GroupPlanAssignment>> GetByGroupIdAsync(Guid groupId, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments
             .AsNoTracking()
@@ -38,7 +38,7 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
             .ToListAsync(ct);
     }
 
-    public async Task<bool> HasOverlapAsync(int groupId, DateOnly dateFrom, DateOnly? dateTo, int? excludeId = null, CancellationToken ct = default)
+    public async Task<bool> HasOverlapAsync(Guid groupId, DateOnly dateFrom, DateOnly? dateTo, Guid? excludeId = null, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments.AnyAsync(a =>
             a.GroupId == groupId
@@ -47,7 +47,7 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
             && (a.DateTo == null || a.DateTo > dateFrom), ct);
     }
 
-    public async Task<bool> HasCourseEnrollmentsAsync(int planId, CancellationToken ct = default)
+    public async Task<bool> HasCourseEnrollmentsAsync(Guid planId, CancellationToken ct = default)
     {
         return await _db.StudentCourseEnrollments
             .AnyAsync(ce => ce.GroupPlanAssignment.PlanId == planId, ct);
@@ -64,3 +64,4 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
         _db.GroupPlanAssignments.Update(assignment);
     }
 }
+

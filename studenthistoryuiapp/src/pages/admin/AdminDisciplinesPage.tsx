@@ -3,11 +3,11 @@ import { createDiscipline, deleteDiscipline, getDisciplines, updateDiscipline } 
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { DisciplineDto } from "../../types/api"
+import type { DisciplineDto, EntityId } from "../../types/api"
 
 export function AdminDisciplinesPage() {
   const [items, setItems] = useState<DisciplineDto[]>([])
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selectedId, setSelectedId] = useState<EntityId | null>(null)
   const [newName, setNewName] = useState("")
   const [editName, setEditName] = useState("")
   const [isLoading, setIsLoading] = useState(true)

@@ -2,9 +2,9 @@ namespace UniversityHistory.Domain.Entities;
 
 public class StudentGroupEnrollment
 {
-    public int EnrollmentId { get; set; }
-    public int StudentId { get; set; }
-    public int GroupId { get; set; }
+    public Guid EnrollmentId { get; set; }
+    public Guid StudentId { get; set; }
+    public Guid GroupId { get; set; }
     public DateOnly DateFrom { get; set; }
     public DateOnly? DateTo { get; set; }
     public string ReasonStart { get; set; } = string.Empty;
@@ -16,3 +16,4 @@ public class StudentGroupEnrollment
     public ICollection<AcademicLeave> AcademicLeaves { get; set; } = new List<AcademicLeave>();
     public ICollection<StudentCourseEnrollment> CourseEnrollments { get; set; } = new List<StudentCourseEnrollment>();
 }
+

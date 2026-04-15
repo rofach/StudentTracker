@@ -21,14 +21,14 @@ public class DepartmentRepository : IDepartmentRepository
             .ToListAsync(ct);
     }
 
-    public async Task<Department?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<Department?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.Departments
             .Include(d => d.AcademicUnit)
             .FirstOrDefaultAsync(d => d.DepartmentId == id, ct);
     }
 
-    public async Task<bool> HasGroupsAsync(int departmentId, CancellationToken ct = default)
+    public async Task<bool> HasGroupsAsync(Guid departmentId, CancellationToken ct = default)
     {
         return await _db.StudyGroups.AnyAsync(g => g.DepartmentId == departmentId, ct);
     }
@@ -37,3 +37,4 @@ public class DepartmentRepository : IDepartmentRepository
     public void Update(Department department) => _db.Departments.Update(department);
     public void Remove(Department department) => _db.Departments.Remove(department);
 }
+

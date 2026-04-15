@@ -13,7 +13,7 @@ public class SubgroupAssignmentRepository : ISubgroupAssignmentRepository
         _db = db;
     }
 
-    public async Task<StudentSubgroupAssignment?> GetByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default)
+    public async Task<StudentSubgroupAssignment?> GetByEnrollmentIdAsync(Guid enrollmentId, CancellationToken ct = default)
     {
         return await _db.StudentSubgroupAssignments
             .FirstOrDefaultAsync(sa => sa.EnrollmentId == enrollmentId, ct);
@@ -31,3 +31,4 @@ public class SubgroupAssignmentRepository : ISubgroupAssignmentRepository
         }
     }
 }
+

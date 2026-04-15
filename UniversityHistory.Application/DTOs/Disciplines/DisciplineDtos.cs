@@ -5,6 +5,7 @@ public record CreateDisciplineDto(string DisciplineName);
 public record UpdateDisciplineDto(string DisciplineName);
 
 public record DisciplineDto(
-    int DisciplineId,
+    Guid DisciplineId,
     string DisciplineName
 );
+

@@ -4,8 +4,8 @@ namespace UniversityHistory.Domain.Entities;
 
 public class PlanDiscipline
 {
-    public int PlanId { get; set; }
-    public int DisciplineId { get; set; }
+    public Guid PlanId { get; set; }
+    public Guid DisciplineId { get; set; }
     public int SemesterNo { get; set; }
     public ControlType ControlType { get; set; }
     public int Hours { get; set; }
@@ -14,3 +14,4 @@ public class PlanDiscipline
     public StudyPlan Plan { get; set; } = null!;
     public Discipline Discipline { get; set; } = null!;
 }
+

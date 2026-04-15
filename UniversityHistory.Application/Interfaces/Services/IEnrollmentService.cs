@@ -4,8 +4,10 @@ namespace UniversityHistory.Application.Interfaces.Services;
 
 public interface IEnrollmentService
 {
-    Task<int> EnrollStudentAsync(EnrollStudentDto dto, CancellationToken ct = default);
-    Task CloseEnrollmentAsync(int enrollmentId, CloseEnrollmentDto dto, CancellationToken ct = default);
-    Task MoveToGroupAsync(int studentId, MoveStudentDto dto, CancellationToken ct = default);
-    Task AssignSubgroupAsync(int enrollmentId, AssignSubgroupDto dto, CancellationToken ct = default);
+    Task<Guid> EnrollStudentAsync(EnrollStudentDto dto, CancellationToken ct = default);
+    Task CloseEnrollmentAsync(Guid enrollmentId, CloseEnrollmentDto dto, CancellationToken ct = default);
+    Task MoveToGroupAsync(Guid studentId, MoveStudentDto dto, CancellationToken ct = default);
+    Task AssignSubgroupAsync(Guid enrollmentId, AssignSubgroupDto dto, CancellationToken ct = default);
 }
+
+

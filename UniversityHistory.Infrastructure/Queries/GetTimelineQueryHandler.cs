@@ -77,3 +77,4 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
         return new PagedResult<TimelineEventDto>(items, query.Page, query.PageSize, count);
     }
 }
+

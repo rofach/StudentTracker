@@ -14,6 +14,7 @@ import { StatusState } from "../../components/common/StatusState"
 import type {
   AddPlanDisciplineDto,
   DisciplineDto,
+  EntityId,
   PlanDisciplineDto,
   StudyPlanDto,
   UpdatePlanDisciplineDto,
@@ -22,12 +23,12 @@ import type {
 import { formatDate } from "../../utils/format"
 
 type AdminStudyPlanDetailPageProps = {
-  planId: number
+  planId: EntityId
   navigate: (path: string) => void
 }
 
 const emptyDisciplineForm: AddPlanDisciplineDto = {
-  disciplineId: 0,
+  disciplineId: "",
   semesterNo: 1,
   controlType: "",
   hours: 0,
@@ -43,7 +44,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
   })
   const [disciplines, setDisciplines] = useState<PlanDisciplineDto[]>([])
   const [allDisciplines, setAllDisciplines] = useState<DisciplineDto[]>([])
-  const [selectedDisciplineId, setSelectedDisciplineId] = useState<number | null>(null)
+  const [selectedDisciplineId, setSelectedDisciplineId] = useState<EntityId | null>(null)
   const [addForm, setAddForm] = useState<AddPlanDisciplineDto>(emptyDisciplineForm)
   const [editForm, setEditForm] = useState<UpdatePlanDisciplineDto>({
     semesterNo: 1,
@@ -114,7 +115,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
   }, [allDisciplines, disciplines])
 
   useEffect(() => {
-    if (availableDisciplines.length > 0 && addForm.disciplineId === 0) {
+    if (availableDisciplines.length > 0 && addForm.disciplineId === "") {
       setAddForm((prev) => ({ ...prev, disciplineId: availableDisciplines[0].disciplineId }))
     }
   }, [availableDisciplines, addForm.disciplineId])
@@ -224,7 +225,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                 <select
                   value={addForm.disciplineId}
                   onChange={(event) =>
-                    setAddForm((prev) => ({ ...prev, disciplineId: Number(event.target.value) }))
+                    setAddForm((prev) => ({ ...prev, disciplineId: event.target.value }))
                   }
                 >
                   {availableDisciplines.map((discipline) => (
@@ -276,7 +277,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
 
             <button
               type="button"
-              disabled={isSaving || addForm.disciplineId === 0}
+              disabled={isSaving || addForm.disciplineId === ""}
               onClick={() =>
                 void runAction(
                   () => addPlanDiscipline(planId, addForm).then(() => undefined),

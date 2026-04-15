@@ -37,7 +37,7 @@ public class StudentService : IStudentService
         _studentSearchHandler = studentSearchHandler;
     }
 
-    public async Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default)
+    public async Task<StudentDto?> GetByIdAsync(Guid studentId, CancellationToken ct = default)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct);
         return student is null ? null : student.ToDto();
@@ -74,7 +74,7 @@ public class StudentService : IStudentService
         return student.ToDto();
     }
 
-    public async Task<StudentDto> UpdateAsync(int studentId, StudentUpdateDto dto, CancellationToken ct = default)
+    public async Task<StudentDto> UpdateAsync(Guid studentId, StudentUpdateDto dto, CancellationToken ct = default)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -91,7 +91,7 @@ public class StudentService : IStudentService
         return student.ToDto();
     }
 
-    public async Task ChangeStatusAsync(int studentId, ChangeStatusDto dto, CancellationToken ct = default)
+    public async Task ChangeStatusAsync(Guid studentId, ChangeStatusDto dto, CancellationToken ct = default)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -108,7 +108,7 @@ public class StudentService : IStudentService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
-    public async Task<StudentDetailDto> GetDetailAsync(int studentId, CancellationToken ct = default)
+    public async Task<StudentDetailDto> GetDetailAsync(Guid studentId, CancellationToken ct = default)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -137,7 +137,7 @@ public class StudentService : IStudentService
     }
 
     public Task<PagedResult<TimelineEventDto>> GetTimelineAsync(
-        int studentId,
+        Guid studentId,
         int page = 1,
         int pageSize = 20,
         CancellationToken ct = default)
@@ -146,7 +146,7 @@ public class StudentService : IStudentService
     }
 
     public Task<IEnumerable<ClassmateDto>> GetClassmatesAsync(
-        int studentId,
+        Guid studentId,
         DateOnly? dateFrom,
         DateOnly? dateTo,
         CancellationToken ct = default)
@@ -155,7 +155,7 @@ public class StudentService : IStudentService
     }
 
     public Task<StudentCurrentGroupDto?> GetGroupOnDateAsync(
-        int studentId,
+        Guid studentId,
         DateOnly? date,
         CancellationToken ct = default)
     {
@@ -163,3 +163,4 @@ public class StudentService : IStudentService
         return _groupOnDateHandler.HandleAsync(new GetStudentGroupOnDateQuery(studentId, targetDate), ct);
     }
 }
+

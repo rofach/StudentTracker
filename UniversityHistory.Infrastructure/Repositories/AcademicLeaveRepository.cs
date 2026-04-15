@@ -14,7 +14,7 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
         _db = db;
     }
 
-    public async Task<IEnumerable<AcademicLeave>> GetByStudentIdAsync(int studentId, CancellationToken ct = default)
+    public async Task<IEnumerable<AcademicLeave>> GetByStudentIdAsync(Guid studentId, CancellationToken ct = default)
     {
         return await _db.AcademicLeaves.AsNoTracking()
             .Where(l => l.Enrollment.StudentId == studentId)
@@ -22,7 +22,7 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
             .ToListAsync(ct);
     }
 
-    public async Task<AcademicLeave?> GetByIdAsync(int leaveId, CancellationToken ct = default)
+    public async Task<AcademicLeave?> GetByIdAsync(Guid leaveId, CancellationToken ct = default)
     {
         return await _db.AcademicLeaves
             .Include(l => l.Enrollment)
@@ -30,13 +30,13 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
             .FirstOrDefaultAsync(l => l.LeaveId == leaveId, ct);
     }
 
-    public async Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default)
+    public async Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(Guid enrollmentId, CancellationToken ct = default)
     {
         return await _db.AcademicLeaves
             .FirstOrDefaultAsync(l => l.EnrollmentId == enrollmentId && l.EndDate == null, ct);
     }
 
-    public async Task<bool> HasActiveLeaveOnDateAsync(int enrollmentId, DateOnly date, CancellationToken ct = default)
+    public async Task<bool> HasActiveLeaveOnDateAsync(Guid enrollmentId, DateOnly date, CancellationToken ct = default)
     {
         return await _db.AcademicLeaves
             .AnyAsync(
@@ -47,10 +47,10 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
     }
 
     public async Task<bool> HasOverlapAsync(
-        int enrollmentId,
+        Guid enrollmentId,
         DateOnly startDate,
         DateOnly? endDate,
-        int? excludeLeaveId = null,
+        Guid? excludeLeaveId = null,
         CancellationToken ct = default)
     {
         var overlapEnd = endDate ?? new DateOnly(9999, 12, 31);
@@ -74,3 +74,4 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
         _db.AcademicLeaves.Update(leave);
     }
 }
+

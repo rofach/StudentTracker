@@ -50,3 +50,4 @@ public class GetStudentsInGroupQueryHandler : IGetStudentsInGroupQueryHandler
         return new PagedResult<GroupStudentDto>(items, query.Page, query.PageSize, count);
     }
 }
+

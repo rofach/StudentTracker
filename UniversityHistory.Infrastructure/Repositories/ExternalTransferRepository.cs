@@ -13,7 +13,7 @@ public class ExternalTransferRepository : IExternalTransferRepository
         _db = db;
     }
 
-    public async Task<IEnumerable<ExternalTransfer>> GetByStudentIdAsync(int studentId, CancellationToken ct = default)
+    public async Task<IEnumerable<ExternalTransfer>> GetByStudentIdAsync(Guid studentId, CancellationToken ct = default)
     {
         return await _db.ExternalTransfers.AsNoTracking()
             .Include(t => t.Institution)
@@ -22,7 +22,7 @@ public class ExternalTransferRepository : IExternalTransferRepository
             .ToListAsync(ct);
     }
 
-    public async Task<Institution?> GetInstitutionByIdAsync(int institutionId, CancellationToken ct = default)
+    public async Task<Institution?> GetInstitutionByIdAsync(Guid institutionId, CancellationToken ct = default)
     {
         return await _db.Institutions.FindAsync(new object[] { institutionId }, ct);
     }
@@ -33,3 +33,4 @@ public class ExternalTransferRepository : IExternalTransferRepository
         return transfer;
     }
 }
+

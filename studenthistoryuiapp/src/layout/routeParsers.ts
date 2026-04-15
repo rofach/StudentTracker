@@ -1,14 +1,14 @@
 export type AdminStudentRoute =
   | { kind: "list" }
   | { kind: "create" }
-  | { kind: "view"; studentId: number }
-  | { kind: "edit"; studentId: number }
-  | { kind: "operations"; studentId: number }
+  | { kind: "view"; studentId: string }
+  | { kind: "edit"; studentId: string }
+  | { kind: "operations"; studentId: string }
 
 export type AdminStudyPlanRoute =
   | { kind: "list" }
   | { kind: "create" }
-  | { kind: "detail"; planId: number }
+  | { kind: "detail"; planId: string }
 
 export function parseAdminStudentRoute(path: string): AdminStudentRoute {
   if (path === "/admin/students") {
@@ -19,19 +19,19 @@ export function parseAdminStudentRoute(path: string): AdminStudentRoute {
     return { kind: "create" }
   }
 
-  const operationsMatch = path.match(/^\/admin\/students\/(\d+)\/operations$/)
+  const operationsMatch = path.match(/^\/admin\/students\/([^/]+)\/operations$/)
   if (operationsMatch) {
-    return { kind: "operations", studentId: Number(operationsMatch[1]) }
+    return { kind: "operations", studentId: operationsMatch[1] }
   }
 
-  const editMatch = path.match(/^\/admin\/students\/(\d+)\/edit$/)
+  const editMatch = path.match(/^\/admin\/students\/([^/]+)\/edit$/)
   if (editMatch) {
-    return { kind: "edit", studentId: Number(editMatch[1]) }
+    return { kind: "edit", studentId: editMatch[1] }
   }
 
-  const viewMatch = path.match(/^\/admin\/students\/(\d+)$/)
+  const viewMatch = path.match(/^\/admin\/students\/([^/]+)$/)
   if (viewMatch) {
-    return { kind: "view", studentId: Number(viewMatch[1]) }
+    return { kind: "view", studentId: viewMatch[1] }
   }
 
   return { kind: "list" }
@@ -46,9 +46,9 @@ export function parseAdminStudyPlanRoute(path: string): AdminStudyPlanRoute {
     return { kind: "create" }
   }
 
-  const detailMatch = path.match(/^\/admin\/study-plans\/(\d+)$/)
+  const detailMatch = path.match(/^\/admin\/study-plans\/([^/]+)$/)
   if (detailMatch) {
-    return { kind: "detail", planId: Number(detailMatch[1]) }
+    return { kind: "detail", planId: detailMatch[1] }
   }
 
   return { kind: "list" }

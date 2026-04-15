@@ -16,10 +16,11 @@ public class LeavesController : ControllerBase
         _movementService = movementService;
     }
 
-    [HttpPut("{id:int}/close")]
-    public async Task<IActionResult> Close(int id, [FromBody] CloseAcademicLeaveDto dto, CancellationToken ct)
+    [HttpPut("{id:guid}/close")]
+    public async Task<IActionResult> Close(Guid id, [FromBody] CloseAcademicLeaveDto dto, CancellationToken ct)
     {
         var result = await _movementService.CloseLeaveAsync(id, dto, ct);
         return Ok(result);
     }
 }
+

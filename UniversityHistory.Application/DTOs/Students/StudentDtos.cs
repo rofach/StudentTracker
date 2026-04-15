@@ -1,7 +1,7 @@
 namespace UniversityHistory.Application.DTOs;
 
 public record StudentDto(
-    int StudentId,
+    Guid StudentId,
     string FirstName,
     string LastName,
     string? Patronymic,
@@ -32,19 +32,19 @@ public record StudentUpdateDto(
 public record ChangeStatusDto(string Status);
 
 public record EnrollmentSummaryDto(
-    int EnrollmentId,
-    int GroupId,
+    Guid EnrollmentId,
+    Guid GroupId,
     string GroupCode,
     string DepartmentName,
     string AcademicUnitName,
     DateOnly DateFrom,
     DateOnly? DateTo,
-    int? SubgroupId,
+    Guid? SubgroupId,
     string? SubgroupName
 );
 
 public record StudentDetailDto(
-    int StudentId,
+    Guid StudentId,
     string FirstName,
     string LastName,
     string? Patronymic,
@@ -57,3 +57,4 @@ public record StudentDetailDto(
     IEnumerable<AcademicLeaveDto> Leaves,
     IEnumerable<ExternalTransferDto> Transfers
 );
+

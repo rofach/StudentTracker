@@ -69,7 +69,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
 
     private sealed class StudentDisciplineOptionRaw
     {
-        public int DisciplineId { get; set; }
+        public Guid DisciplineId { get; set; }
         public string DisciplineName { get; set; } = string.Empty;
         public int SemesterNo { get; set; }
         public int AcademicYearStart { get; set; }
@@ -77,3 +77,4 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
         public bool HasGrade { get; set; }
     }
 }
+
