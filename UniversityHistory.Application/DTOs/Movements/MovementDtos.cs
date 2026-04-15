@@ -41,5 +41,11 @@ public record CreateTransferDto(
 public record CreateLeaveDto(
     int EnrollmentId,
     DateOnly StartDate,
-    string? Reason
+    DateOnly? EndDate,
+    string Reason
+);
+
+public record CloseAcademicLeaveDto(
+    DateOnly EndDate,
+    string? ReturnReason
 );

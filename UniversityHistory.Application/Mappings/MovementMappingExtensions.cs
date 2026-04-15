@@ -11,6 +11,7 @@ public static class MovementMappingExtensions
         {
             EnrollmentId = dto.EnrollmentId,
             StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
             Reason = dto.Reason
         };
     }

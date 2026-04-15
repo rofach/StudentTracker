@@ -1,11 +1,11 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react"
-import { getStudents } from "../../api/studentsApi"
+import { getStudents, searchStudents } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import type { PagedResult, StudentDto } from "../../types/api"
-import { formatDate } from "../../utils/format"
+import { formatDate, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
 type AdminStudentsPageProps = {
@@ -15,21 +15,37 @@ type AdminStudentsPageProps = {
 export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  const [searchText, setSearchText] = useState("")
+  const [fullNameFilter, setFullNameFilter] = useState("")
+  const [emailFilter, setEmailFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const deferredSearchText = useDeferredValue(searchText)
+  const deferredFullNameFilter = useDeferredValue(fullNameFilter)
+  const deferredEmailFilter = useDeferredValue(emailFilter)
 
   const [data, setData] = useState<PagedResult<StudentDto> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const normalizedFullName = deferredFullNameFilter.trim()
+    const normalizedEmail = deferredEmailFilter.trim()
+    const hasSearch = normalizedFullName.length > 0 || normalizedEmail.length > 0 || statusFilter !== "all"
+
     let isActive = true
 
     setIsLoading(true)
     setError(null)
 
-    getStudents(page, pageSize)
+    const request = hasSearch
+      ? searchStudents({
+          fullName: normalizedFullName || undefined,
+          email: normalizedEmail || undefined,
+          status: statusFilter === "all" ? undefined : statusFilter,
+          page,
+          pageSize,
+        })
+      : getStudents(page, pageSize)
+
+    request
       .then((result) => {
         if (!isActive) {
           return
@@ -55,22 +71,13 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
     return () => {
       isActive = false
     }
-  }, [page, pageSize])
+  }, [page, pageSize, deferredFullNameFilter, deferredEmailFilter, statusFilter])
 
-  const filteredStudents = useMemo(() => {
-    if (!data) {
-      return []
-    }
+  useEffect(() => {
+    setPage(1)
+  }, [deferredFullNameFilter, deferredEmailFilter, statusFilter])
 
-    const normalizedSearch = deferredSearchText.trim().toLowerCase()
-
-    return data.items.filter((student) => {
-      const fullName = `${student.lastName} ${student.firstName}`.toLowerCase()
-      const matchesSearch = normalizedSearch.length === 0 || fullName.includes(normalizedSearch)
-      const matchesStatus = statusFilter === "all" || student.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
-  }, [data, deferredSearchText, statusFilter])
+  const students = useMemo(() => data?.items ?? [], [data])
 
   return (
     <div className="page-stack">
@@ -88,12 +95,22 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
         <h2>Пошук і фільтри</h2>
         <div className="filters-row">
           <label>
-            Пошук студента
+            ПІБ
             <input
               type="text"
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value)}
-              placeholder="Прізвище або ім'я"
+              value={fullNameFilter}
+              onChange={(event) => setFullNameFilter(event.target.value)}
+              placeholder="Прізвище, ім'я, по батькові"
+            />
+          </label>
+
+          <label>
+            Email
+            <input
+              type="text"
+              value={emailFilter}
+              onChange={(event) => setEmailFilter(event.target.value)}
+              placeholder="Пошта"
             />
           </label>
 
@@ -108,18 +125,17 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
             </select>
           </label>
         </div>
-
       </section>
 
       <section className="panel">
         <h2>Список студентів</h2>
         {isLoading ? <Spinner label="Завантаження списку студентів..." /> : null}
         {error ? <StatusState tone="error" message={error} /> : null}
-        {!isLoading && !error && filteredStudents.length === 0 ? (
+        {!isLoading && !error && students.length === 0 ? (
           <StatusState tone="info" message="Студентів за заданими умовами не знайдено." />
         ) : null}
 
-        {!isLoading && !error && filteredStudents.length > 0 ? (
+        {!isLoading && !error && students.length > 0 ? (
           <>
             <div className="table-wrap">
               <table>
@@ -133,11 +149,9 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStudents.map((student) => (
+                  {students.map((student) => (
                     <tr key={student.studentId}>
-                      <td>
-                        {student.lastName} {student.firstName}
-                      </td>
+                      <td>{fullName(student.firstName, student.lastName, student.patronymic)}</td>
                       <td>{formatStudentStatus(student.status)}</td>
                       <td>{student.email ?? "—"}</td>
                       <td>{formatDate(student.birthDate)}</td>

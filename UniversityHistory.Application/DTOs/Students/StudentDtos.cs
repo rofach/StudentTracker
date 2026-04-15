@@ -4,6 +4,7 @@ public record StudentDto(
     int StudentId,
     string FirstName,
     string LastName,
+    string? Patronymic,
     DateOnly? BirthDate,
     string? Email,
     string? Phone,
@@ -13,6 +14,7 @@ public record StudentDto(
 public record StudentCreateDto(
     string FirstName,
     string LastName,
+    string? Patronymic,
     DateOnly? BirthDate,
     string? Email,
     string? Phone
@@ -21,6 +23,7 @@ public record StudentCreateDto(
 public record StudentUpdateDto(
     string FirstName,
     string LastName,
+    string? Patronymic,
     DateOnly? BirthDate,
     string? Email,
     string? Phone
@@ -44,6 +47,7 @@ public record StudentDetailDto(
     int StudentId,
     string FirstName,
     string LastName,
+    string? Patronymic,
     DateOnly? BirthDate,
     string? Email,
     string? Phone,

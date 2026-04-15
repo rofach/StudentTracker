@@ -4,6 +4,7 @@ import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import type { StudentUpdateDto } from "../../types/api"
+import { fullName } from "../../utils/format"
 
 type AdminStudentEditPageProps = {
   studentId: number
@@ -13,6 +14,7 @@ type AdminStudentEditPageProps = {
 const emptyForm: StudentUpdateDto = {
   firstName: "",
   lastName: "",
+  patronymic: null,
   birthDate: null,
   email: null,
   phone: null,
@@ -38,10 +40,11 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
           return
         }
 
-        setTitle(`${result.lastName} ${result.firstName}`)
+        setTitle(fullName(result.firstName, result.lastName, result.patronymic))
         setForm({
           firstName: result.firstName,
           lastName: result.lastName,
+          patronymic: result.patronymic,
           birthDate: result.birthDate,
           email: result.email,
           phone: result.phone,
@@ -140,6 +143,14 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
               type="text"
               value={form.lastName}
               onChange={(event) => setForm((prev) => ({ ...prev, lastName: event.target.value }))}
+            />
+          </label>
+          <label>
+            По батькові
+            <input
+              type="text"
+              value={form.patronymic ?? ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, patronymic: event.target.value || null }))}
             />
           </label>
           <label>

@@ -83,6 +83,15 @@ public class EnrollmentRepository : IEnrollmentRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IEnumerable<StudentGroupEnrollment>> GetActiveByGroupIdOnDateAsync(int groupId, DateOnly date, CancellationToken ct = default)
+    {
+        return await _db.StudentGroupEnrollments
+            .Where(e => e.GroupId == groupId
+                     && e.DateFrom <= date
+                     && (e.DateTo == null || e.DateTo >= date))
+            .ToListAsync(ct);
+    }
+
     public async Task<bool> HasOverlapAsync(int studentId, DateOnly dateFrom, DateOnly? dateTo,
         int? excludeId = null, CancellationToken ct = default)
     {

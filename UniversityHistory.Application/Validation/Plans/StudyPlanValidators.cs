@@ -24,7 +24,7 @@ public class ChangeGroupPlanDtoValidator : AppValidator<ChangeGroupPlanDto>
         RuleFor(x => x.NewPlanId)
             .GreaterThan(0);
 
-        RuleFor(x => x.EffectiveFrom)
+        RuleFor(x => x.NewPlanDateFrom)
             .NotDefaultDate();
     }
 }

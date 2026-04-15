@@ -1,5 +1,6 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
+using UniversityHistory.Application.Queries.GetStudentSearch;
 using UniversityHistory.Application.Mappings;
 using UniversityHistory.Application.Queries.GetClassmates;
 using UniversityHistory.Application.Queries.GetStudentGroupOnDate;
@@ -18,19 +19,22 @@ public class StudentService : IStudentService
     private readonly IGetTimelineQueryHandler _timelineHandler;
     private readonly IGetClassmatesQueryHandler _classmatesHandler;
     private readonly IGetStudentGroupOnDateQueryHandler _groupOnDateHandler;
+    private readonly IGetStudentSearchQueryHandler _studentSearchHandler;
 
     public StudentService(
         IUnitOfWork unitOfWork,
         IMovementService movementService,
         IGetTimelineQueryHandler timelineHandler,
         IGetClassmatesQueryHandler classmatesHandler,
-        IGetStudentGroupOnDateQueryHandler groupOnDateHandler)
+        IGetStudentGroupOnDateQueryHandler groupOnDateHandler,
+        IGetStudentSearchQueryHandler studentSearchHandler)
     {
         _unitOfWork = unitOfWork;
         _movementService = movementService;
         _timelineHandler = timelineHandler;
         _classmatesHandler = classmatesHandler;
         _groupOnDateHandler = groupOnDateHandler;
+        _studentSearchHandler = studentSearchHandler;
     }
 
     public async Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default)
@@ -49,6 +53,19 @@ public class StudentService : IStudentService
             result.TotalCount);
     }
 
+    public Task<PagedResult<StudentDto>> SearchAsync(
+        string? fullName,
+        string? email,
+        string? status,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        return _studentSearchHandler.HandleAsync(
+            new GetStudentSearchQuery(fullName, email, status, page, pageSize),
+            ct);
+    }
+
     public async Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default)
     {
         var student = dto.ToEntity();
@@ -64,6 +81,7 @@ public class StudentService : IStudentService
 
         student.FirstName = dto.FirstName;
         student.LastName = dto.LastName;
+        student.Patronymic = dto.Patronymic;
         student.BirthDate = dto.BirthDate;
         student.Email = dto.Email;
         student.Phone = dto.Phone;
@@ -98,14 +116,12 @@ public class StudentService : IStudentService
         var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
         var movements   = await _movementService.GetMovementsAsync(studentId, ct);
 
-        // Effective plan history: group plan assignments active during each group enrollment
         var plans = new List<GroupPlanAssignmentDto>();
         foreach (var enrollment in enrollments)
         {
             var groupPlans = await _unitOfWork.GroupPlanAssignments.GetByGroupIdAsync(enrollment.GroupId, ct);
             foreach (var gpa in groupPlans)
             {
-                // Include if the plan period overlaps the enrollment period
                 var enrollEnd = enrollment.DateTo ?? DateOnly.MaxValue;
                 var planEnd   = gpa.DateTo ?? DateOnly.MaxValue;
                 if (gpa.DateFrom <= enrollEnd && planEnd >= enrollment.DateFrom)

@@ -11,6 +11,7 @@ public static class StudentMappingExtensions
         {
             FirstName = dto.FirstName,
             LastName = dto.LastName,
+            Patronymic = dto.Patronymic,
             BirthDate = dto.BirthDate,
             Email = dto.Email,
             Phone = dto.Phone,
@@ -24,6 +25,7 @@ public static class StudentMappingExtensions
             student.StudentId,
             student.FirstName,
             student.LastName,
+            student.Patronymic,
             student.BirthDate,
             student.Email,
             student.Phone,
@@ -55,6 +57,7 @@ public static class StudentMappingExtensions
             student.StudentId,
             student.FirstName,
             student.LastName,
+            student.Patronymic,
             student.BirthDate,
             student.Email,
             student.Phone,

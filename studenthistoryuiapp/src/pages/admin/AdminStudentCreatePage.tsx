@@ -11,6 +11,7 @@ type AdminStudentCreatePageProps = {
 const emptyForm: StudentCreateDto = {
   firstName: "",
   lastName: "",
+  patronymic: null,
   birthDate: null,
   email: null,
   phone: null,
@@ -67,6 +68,14 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
               type="text"
               value={form.lastName}
               onChange={(event) => setForm((prev) => ({ ...prev, lastName: event.target.value }))}
+            />
+          </label>
+          <label>
+            По батькові
+            <input
+              type="text"
+              value={form.patronymic ?? ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, patronymic: event.target.value || null }))}
             />
           </label>
           <label>

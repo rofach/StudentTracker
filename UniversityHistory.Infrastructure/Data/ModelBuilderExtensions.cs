@@ -122,30 +122,30 @@ public static class ModelBuilderExtensions
 
         var students = new[]
         {
-            new Student { StudentId = 1, FirstName = "Андрій", LastName = "Мельник", BirthDate = new DateOnly(2003, 4, 15), Email = "andrii.melnyk@campus.ua", Phone = "+380671000001", Status = StudentStatus.Active },
-            new Student { StudentId = 2, FirstName = "Олена", LastName = "Коваль", BirthDate = new DateOnly(2002, 9, 3), Email = "olena.koval@campus.ua", Phone = "+380671000002", Status = StudentStatus.Graduated },
-            new Student { StudentId = 3, FirstName = "Максим", LastName = "Шевченко", BirthDate = new DateOnly(2004, 1, 27), Email = "maksym.shevchenko@campus.ua", Phone = "+380671000003", Status = StudentStatus.Active },
-            new Student { StudentId = 4, FirstName = "Ірина", LastName = "Бойко", BirthDate = new DateOnly(2004, 6, 11), Email = "iryna.boiko@campus.ua", Phone = "+380671000004", Status = StudentStatus.Active },
-            new Student { StudentId = 5, FirstName = "Богдан", LastName = "Ткаченко", BirthDate = new DateOnly(2004, 12, 1), Email = "bohdan.tkachenko@campus.ua", Phone = "+380671000005", Status = StudentStatus.OnLeave },
-            new Student { StudentId = 6, FirstName = "Марія", LastName = "Кравець", BirthDate = new DateOnly(2004, 2, 18), Email = "mariia.kravets@campus.ua", Phone = "+380671000006", Status = StudentStatus.Active },
-            new Student { StudentId = 7, FirstName = "Дмитро", LastName = "Поліщук", BirthDate = new DateOnly(2004, 8, 5), Email = "dmytro.polishchuk@campus.ua", Phone = "+380671000007", Status = StudentStatus.Active },
-            new Student { StudentId = 8, FirstName = "Наталія", LastName = "Савчук", BirthDate = new DateOnly(2004, 11, 22), Email = "nataliia.savchuk@campus.ua", Phone = "+380671000008", Status = StudentStatus.Active },
-            new Student { StudentId = 9, FirstName = "Владислав", LastName = "Романюк", BirthDate = new DateOnly(2003, 7, 14), Email = "vladyslav.romaniuk@campus.ua", Phone = "+380671000009", Status = StudentStatus.Active },
-            new Student { StudentId = 10, FirstName = "Софія", LastName = "Козак", BirthDate = new DateOnly(2005, 3, 8), Email = "sofiia.kozak@campus.ua", Phone = "+380671000010", Status = StudentStatus.Active },
-            new Student { StudentId = 11, FirstName = "Артем", LastName = "Литвин", BirthDate = new DateOnly(2005, 9, 21), Email = "artem.lytvyn@campus.ua", Phone = "+380671000011", Status = StudentStatus.Active },
-            new Student { StudentId = 12, FirstName = "Катерина", LastName = "Павленко", BirthDate = new DateOnly(2005, 5, 12), Email = "kateryna.pavlenko@campus.ua", Phone = "+380671000012", Status = StudentStatus.Active },
-            new Student { StudentId = 13, FirstName = "Юрій", LastName = "Мороз", BirthDate = new DateOnly(2002, 2, 17), Email = "yurii.moroz@campus.ua", Phone = "+380671000013", Status = StudentStatus.Graduated },
-            new Student { StudentId = 14, FirstName = "Анастасія", LastName = "Іванчук", BirthDate = new DateOnly(2005, 1, 30), Email = "anastasiia.ivanchuk@campus.ua", Phone = "+380671000014", Status = StudentStatus.Active },
-            new Student { StudentId = 15, FirstName = "Денис", LastName = "Олійник", BirthDate = new DateOnly(2004, 10, 6), Email = "denys.oliinyk@campus.ua", Phone = "+380671000015", Status = StudentStatus.Expelled },
-            new Student { StudentId = 16, FirstName = "Вероніка", LastName = "Гнатюк", BirthDate = new DateOnly(2005, 7, 19), Email = "veronika.hnatiuk@campus.ua", Phone = "+380671000016", Status = StudentStatus.Active },
-            new Student { StudentId = 17, FirstName = "Тарас", LastName = "Бондар", BirthDate = new DateOnly(2004, 4, 2), Email = "taras.bondar@campus.ua", Phone = "+380671000017", Status = StudentStatus.Active },
-            new Student { StudentId = 18, FirstName = "Христина", LastName = "Федорук", BirthDate = new DateOnly(2005, 8, 9), Email = "khrystyna.fedoruk@campus.ua", Phone = "+380671000018", Status = StudentStatus.OnLeave },
-            new Student { StudentId = 19, FirstName = "Роман", LastName = "Сорока", BirthDate = new DateOnly(2004, 3, 25), Email = "roman.soroka@campus.ua", Phone = "+380671000019", Status = StudentStatus.Active },
-            new Student { StudentId = 20, FirstName = "Дарина", LastName = "Мазур", BirthDate = new DateOnly(2005, 11, 13), Email = "daryna.mazur@campus.ua", Phone = "+380671000020", Status = StudentStatus.Active },
-            new Student { StudentId = 21, FirstName = "Павло", LastName = "Дяченко", BirthDate = new DateOnly(2006, 2, 16), Email = "pavlo.diachenko@campus.ua", Phone = "+380671000021", Status = StudentStatus.Active },
-            new Student { StudentId = 22, FirstName = "Юлія", LastName = "Власенко", BirthDate = new DateOnly(2006, 4, 1), Email = "yuliia.vlasenko@campus.ua", Phone = "+380671000022", Status = StudentStatus.Active },
-            new Student { StudentId = 23, FirstName = "Ілля", LastName = "Ковтун", BirthDate = new DateOnly(2006, 6, 6), Email = "illia.kovtun@campus.ua", Phone = "+380671000023", Status = StudentStatus.Active },
-            new Student { StudentId = 24, FirstName = "Оксана", LastName = "Чумак", BirthDate = new DateOnly(2005, 9, 28), Email = "oksana.chumak@campus.ua", Phone = "+380671000024", Status = StudentStatus.Active }
+            new Student { StudentId = 1, FirstName = "Андрій", LastName = "Мельник", Patronymic = "Олександрович", BirthDate = new DateOnly(2003, 4, 15), Email = "andrii.melnyk@campus.ua", Phone = "+380671000001", Status = StudentStatus.Active },
+            new Student { StudentId = 2, FirstName = "Олена", LastName = "Коваль", Patronymic = "Ігорівна", BirthDate = new DateOnly(2002, 9, 3), Email = "olena.koval@campus.ua", Phone = "+380671000002", Status = StudentStatus.Graduated },
+            new Student { StudentId = 3, FirstName = "Максим", LastName = "Шевченко", Patronymic = "Сергійович", BirthDate = new DateOnly(2004, 1, 27), Email = "maksym.shevchenko@campus.ua", Phone = "+380671000003", Status = StudentStatus.Active },
+            new Student { StudentId = 4, FirstName = "Ірина", LastName = "Бойко", Patronymic = "Василівна", BirthDate = new DateOnly(2004, 6, 11), Email = "iryna.boiko@campus.ua", Phone = "+380671000004", Status = StudentStatus.Active },
+            new Student { StudentId = 5, FirstName = "Богдан", LastName = "Ткаченко", Patronymic = "Романович", BirthDate = new DateOnly(2004, 12, 1), Email = "bohdan.tkachenko@campus.ua", Phone = "+380671000005", Status = StudentStatus.OnLeave },
+            new Student { StudentId = 6, FirstName = "Марія", LastName = "Кравець", Patronymic = "Андріївна", BirthDate = new DateOnly(2004, 2, 18), Email = "mariia.kravets@campus.ua", Phone = "+380671000006", Status = StudentStatus.Active },
+            new Student { StudentId = 7, FirstName = "Дмитро", LastName = "Поліщук", Patronymic = "Олегович", BirthDate = new DateOnly(2004, 8, 5), Email = "dmytro.polishchuk@campus.ua", Phone = "+380671000007", Status = StudentStatus.Active },
+            new Student { StudentId = 8, FirstName = "Наталія", LastName = "Савчук", Patronymic = "Вікторівна", BirthDate = new DateOnly(2004, 11, 22), Email = "nataliia.savchuk@campus.ua", Phone = "+380671000008", Status = StudentStatus.Active },
+            new Student { StudentId = 9, FirstName = "Владислав", LastName = "Романюк", Patronymic = "Миколайович", BirthDate = new DateOnly(2003, 7, 14), Email = "vladyslav.romaniuk@campus.ua", Phone = "+380671000009", Status = StudentStatus.Active },
+            new Student { StudentId = 10, FirstName = "Софія", LastName = "Козак", Patronymic = "Петрівна", BirthDate = new DateOnly(2005, 3, 8), Email = "sofiia.kozak@campus.ua", Phone = "+380671000010", Status = StudentStatus.Active },
+            new Student { StudentId = 11, FirstName = "Артем", LastName = "Литвин", Patronymic = "Володимирович", BirthDate = new DateOnly(2005, 9, 21), Email = "artem.lytvyn@campus.ua", Phone = "+380671000011", Status = StudentStatus.Active },
+            new Student { StudentId = 12, FirstName = "Катерина", LastName = "Павленко", Patronymic = "Юріївна", BirthDate = new DateOnly(2005, 5, 12), Email = "kateryna.pavlenko@campus.ua", Phone = "+380671000012", Status = StudentStatus.Active },
+            new Student { StudentId = 13, FirstName = "Юрій", LastName = "Мороз", Patronymic = "Степанович", BirthDate = new DateOnly(2002, 2, 17), Email = "yurii.moroz@campus.ua", Phone = "+380671000013", Status = StudentStatus.Graduated },
+            new Student { StudentId = 14, FirstName = "Анастасія", LastName = "Іванчук", Patronymic = "Павлівна", BirthDate = new DateOnly(2005, 1, 30), Email = "anastasiia.ivanchuk@campus.ua", Phone = "+380671000014", Status = StudentStatus.Active },
+            new Student { StudentId = 15, FirstName = "Денис", LastName = "Олійник", Patronymic = "Олексійович", BirthDate = new DateOnly(2004, 10, 6), Email = "denys.oliinyk@campus.ua", Phone = "+380671000015", Status = StudentStatus.Expelled },
+            new Student { StudentId = 16, FirstName = "Вероніка", LastName = "Гнатюк", Patronymic = "Іванівна", BirthDate = new DateOnly(2005, 7, 19), Email = "veronika.hnatiuk@campus.ua", Phone = "+380671000016", Status = StudentStatus.Active },
+            new Student { StudentId = 17, FirstName = "Тарас", LastName = "Бондар", Patronymic = "Михайлович", BirthDate = new DateOnly(2004, 4, 2), Email = "taras.bondar@campus.ua", Phone = "+380671000017", Status = StudentStatus.Active },
+            new Student { StudentId = 18, FirstName = "Христина", LastName = "Федорук", Patronymic = "Богданівна", BirthDate = new DateOnly(2005, 8, 9), Email = "khrystyna.fedoruk@campus.ua", Phone = "+380671000018", Status = StudentStatus.OnLeave },
+            new Student { StudentId = 19, FirstName = "Роман", LastName = "Сорока", Patronymic = "Дмитрович", BirthDate = new DateOnly(2004, 3, 25), Email = "roman.soroka@campus.ua", Phone = "+380671000019", Status = StudentStatus.Active },
+            new Student { StudentId = 20, FirstName = "Дарина", LastName = "Мазур", Patronymic = "Сергіївна", BirthDate = new DateOnly(2005, 11, 13), Email = "daryna.mazur@campus.ua", Phone = "+380671000020", Status = StudentStatus.Active },
+            new Student { StudentId = 21, FirstName = "Павло", LastName = "Дяченко", Patronymic = "Віталійович", BirthDate = new DateOnly(2006, 2, 16), Email = "pavlo.diachenko@campus.ua", Phone = "+380671000021", Status = StudentStatus.Active },
+            new Student { StudentId = 22, FirstName = "Юлія", LastName = "Власенко", Patronymic = "Анатоліївна", BirthDate = new DateOnly(2006, 4, 1), Email = "yuliia.vlasenko@campus.ua", Phone = "+380671000022", Status = StudentStatus.Active },
+            new Student { StudentId = 23, FirstName = "Ілля", LastName = "Ковтун", Patronymic = "Романович", BirthDate = new DateOnly(2006, 6, 6), Email = "illia.kovtun@campus.ua", Phone = "+380671000023", Status = StudentStatus.Active },
+            new Student { StudentId = 24, FirstName = "Оксана", LastName = "Чумак", Patronymic = "Миколаївна", BirthDate = new DateOnly(2005, 9, 28), Email = "oksana.chumak@campus.ua", Phone = "+380671000024", Status = StudentStatus.Active }
         };
 
         var enrollments = new[]
@@ -221,7 +221,6 @@ public static class ModelBuilderExtensions
             new ExternalTransfer { TransferId = 4, StudentId = 24, InstitutionId = 6, TransferType = TransferType.In, TransferDate = new DateOnly(2024, 8, 26), Notes = "Переведення з іншого закладу" }
         };
 
-        // ── Group plan assignments (one per group, matching historical plan data) ─
         var groupPlanAssignments = new[]
         {
             new GroupPlanAssignment { GroupPlanAssignmentId = 1, GroupId = 1, PlanId = 1, DateFrom = new DateOnly(2021, 9, 1), DateTo = null },
@@ -232,8 +231,6 @@ public static class ModelBuilderExtensions
             new GroupPlanAssignment { GroupPlanAssignmentId = 6, GroupId = 6, PlanId = 3, DateFrom = new DateOnly(2025, 9, 1), DateTo = null },
         };
 
-        // ── Student course enrollments ─────────────────────────────────────────
-        // AddCourse(enrollmentId, gpaId, disciplineId, academicYearStart, status, gradeValue?)
         var courseEnrollments = new List<StudentCourseEnrollment>();
         var gradeRecords = new List<GradeRecord>();
         var nextCourseEnrollmentId = 1;
@@ -275,7 +272,6 @@ public static class ModelBuilderExtensions
                 AddCourse(enrollmentId, gpaId, c.DisciplineId, academicYearStart, c.Status, c.GradeValue);
         }
 
-        // ── Assignment 1: Student 1, Enrollment 2 (Gr2→GPA2), Plan 1 ──────────
         AddCourses(2, 2, 2021,
             (1, CourseStatus.Completed, "96"),
             (2, CourseStatus.Completed, "94"),
@@ -289,7 +285,6 @@ public static class ModelBuilderExtensions
             (7, CourseStatus.InProgress, null),
             (12, CourseStatus.Planned, null));
 
-        // ── Assignment 2: Student 2, Enrollment 3 (Gr1→GPA1), Plan 1 ──────────
         AddCourses(3, 1, 2021,
             (1, CourseStatus.Completed, "98"),
             (2, CourseStatus.Completed, "95"),
@@ -307,7 +302,6 @@ public static class ModelBuilderExtensions
             (10, CourseStatus.Completed, "92"),
             (9, CourseStatus.Completed, "88"));
 
-        // ── Assignment 3: Student 3, Enrollment 4 (Gr2→GPA2), Plan 1 ──────────
         AddCourses(4, 2, 2022,
             (1, CourseStatus.Completed, "87"),
             (2, CourseStatus.Completed, "89"),
@@ -318,7 +312,6 @@ public static class ModelBuilderExtensions
         AddCourses(4, 2, 2024,
             (6, CourseStatus.InProgress, null));
 
-        // ── Assignment 4: Student 4, Enrollment 5 (Gr3→GPA3), Plan 2 ──────────
         AddCourses(5, 3, 2023,
             (1, CourseStatus.Completed, "90"),
             (2, CourseStatus.Completed, "92"),
@@ -327,7 +320,6 @@ public static class ModelBuilderExtensions
             (5, CourseStatus.Completed, "91"),
             (6, CourseStatus.InProgress, null));
 
-        // ── Assignment 5: Student 5, Enrollment 6 (Gr3→GPA3), Plan 2 ──────────
         AddCourses(6, 3, 2023,
             (1, CourseStatus.Completed, "83"),
             (2, CourseStatus.Completed, "85"),
@@ -335,7 +327,6 @@ public static class ModelBuilderExtensions
         AddCourses(6, 3, 2024,
             (5, CourseStatus.Completed, "84"));
 
-        // ── Assignment 6: Student 6, Enrollment 7 (Gr3→GPA3), Plan 2 ──────────
         AddCourses(7, 3, 2023,
             (1, CourseStatus.Completed, "88"),
             (2, CourseStatus.Completed, "87"),
@@ -344,7 +335,6 @@ public static class ModelBuilderExtensions
             (5, CourseStatus.Completed, "89"),
             (6, CourseStatus.InProgress, null));
 
-        // ── Assignment 7: Student 7, Enrollment 8 (Gr3→GPA3), Plan 2 ──────────
         AddCourses(8, 3, 2023,
             (1, CourseStatus.Completed, "82"),
             (2, CourseStatus.Completed, "84"),
@@ -355,7 +345,6 @@ public static class ModelBuilderExtensions
         AddCourses(8, 3, 2025,
             (7, CourseStatus.InProgress, null));
 
-        // ── Assignment 8: Student 8, Enrollment 9 (Gr3→GPA3), Plan 2 ──────────
         AddCourses(9, 3, 2023,
             (1, CourseStatus.Completed, "86"),
             (2, CourseStatus.Completed, "88"),
@@ -364,7 +353,6 @@ public static class ModelBuilderExtensions
             (5, CourseStatus.Completed, "87"),
             (10, CourseStatus.Retake, null));
 
-        // ── Assignment 9: Student 9, Enrollment 10 (Gr3→GPA3), Plan 2 ─────────
         AddCourses(10, 3, 2023,
             (1, CourseStatus.Completed, "79"),
             (2, CourseStatus.Completed, "82"),
@@ -373,7 +361,6 @@ public static class ModelBuilderExtensions
             (5, CourseStatus.Completed, "81"),
             (6, CourseStatus.InProgress, null));
 
-        // ── Assignment 10: Student 10, Enrollment 11 (Gr4→GPA4), Plan 3 ────────
         AddCourses(11, 4, 2024,
             (1, CourseStatus.Completed, "93"),
             (2, CourseStatus.Completed, "95"),
@@ -381,7 +368,6 @@ public static class ModelBuilderExtensions
         AddCourses(11, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
-        // ── Assignment 11: Student 11, Enrollment 12 (Gr4→GPA4), Plan 3 ────────
         AddCourses(12, 4, 2024,
             (1, CourseStatus.Completed, "91"),
             (2, CourseStatus.Completed, "92"),
@@ -389,7 +375,6 @@ public static class ModelBuilderExtensions
         AddCourses(12, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
-        // ── Assignment 12: Student 12, Enrollment 13 (Gr5→GPA5), Plan 2 ────────
         AddCourses(13, 5, 2024,
             (1, CourseStatus.Completed, "94"),
             (2, CourseStatus.Completed, "90"),
@@ -397,7 +382,6 @@ public static class ModelBuilderExtensions
         AddCourses(13, 5, 2025,
             (11, CourseStatus.InProgress, null));
 
-        // ── Assignment 13: Student 13, Enrollment 14 (Gr1→GPA1), Plan 1 ────────
         AddCourses(14, 1, 2021,
             (1, CourseStatus.Completed, "97"),
             (2, CourseStatus.Completed, "96"),
@@ -412,13 +396,11 @@ public static class ModelBuilderExtensions
             (12, CourseStatus.Completed, "90"),
             (8, CourseStatus.Completed, "89"));
 
-        // ── Assignment 14: Student 14, Enrollment 15 (Gr5→GPA5), Plan 2 ────────
         AddCourses(15, 5, 2024,
             (1, CourseStatus.Completed, "90"),
             (2, CourseStatus.Completed, "91"),
             (3, CourseStatus.InProgress, null));
 
-        // ── Assignment 15: Student 15, Enrollment 16 (Gr3→GPA3), Plan 2 ────────
         AddCourses(16, 3, 2023,
             (1, CourseStatus.Completed, "73"),
             (2, CourseStatus.Completed, "76"),
@@ -426,7 +408,6 @@ public static class ModelBuilderExtensions
         AddCourses(16, 3, 2024,
             (5, CourseStatus.Completed, "74"));
 
-        // ── Assignment 16: Student 16, Enrollment 17 (Gr4→GPA4), Plan 3 ────────
         AddCourses(17, 4, 2024,
             (1, CourseStatus.Completed, "89"),
             (2, CourseStatus.Completed, "91"),
@@ -434,7 +415,6 @@ public static class ModelBuilderExtensions
         AddCourses(17, 4, 2025,
             (11, CourseStatus.InProgress, null));
 
-        // ── Assignment 17: Student 17, Enrollment 18 (Gr2→GPA2), Plan 1 ────────
         AddCourses(18, 2, 2022,
             (1, CourseStatus.Completed, "88"),
             (2, CourseStatus.Completed, "86"),
@@ -447,14 +427,12 @@ public static class ModelBuilderExtensions
         AddCourses(18, 2, 2025,
             (7, CourseStatus.InProgress, null));
 
-        // ── Assignment 18: Student 18, Enrollment 20 (Gr5→GPA5), Plan 2 ────────
         AddCourses(20, 5, 2024,
             (1, CourseStatus.Completed, "85"),
             (2, CourseStatus.Completed, "84"));
         AddCourses(20, 5, 2025,
             (3, CourseStatus.Planned, null));
 
-        // ── Assignment 19: Student 19, Enrollment 21 (Gr3→GPA3), Plan 2 ────────
         AddCourses(21, 3, 2023,
             (1, CourseStatus.Completed, "84"),
             (2, CourseStatus.Completed, "86"));
@@ -464,28 +442,23 @@ public static class ModelBuilderExtensions
         AddCourses(21, 3, 2025,
             (6, CourseStatus.InProgress, null));
 
-        // ── Assignment 20: Student 20, Enrollment 22 (Gr4→GPA4), Plan 3 ────────
         AddCourses(22, 4, 2024,
             (1, CourseStatus.Completed, "92"),
             (2, CourseStatus.Completed, "90"),
             (5, CourseStatus.Completed, "88"));
 
-        // ── Assignment 21: Student 21, Enrollment 23 (Gr6→GPA6), Plan 3 ────────
         AddCourses(23, 6, 2025,
             (1, CourseStatus.InProgress, null),
             (2, CourseStatus.InProgress, null));
 
-        // ── Assignment 22: Student 22, Enrollment 24 (Gr6→GPA6), Plan 3 ────────
         AddCourses(24, 6, 2025,
             (1, CourseStatus.InProgress, null),
             (2, CourseStatus.InProgress, null));
 
-        // ── Assignment 23: Student 23, Enrollment 25 (Gr6→GPA6), Plan 3 ────────
         AddCourses(25, 6, 2025,
             (1, CourseStatus.InProgress, null),
             (2, CourseStatus.InProgress, null));
 
-        // ── Assignment 24: Student 24, Enrollment 26 (Gr4→GPA4), Plan 3 ────────
         AddCourses(26, 4, 2024,
             (1, CourseStatus.Completed, "90"),
             (2, CourseStatus.Completed, "89"),

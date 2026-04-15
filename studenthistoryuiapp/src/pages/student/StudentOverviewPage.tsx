@@ -3,7 +3,7 @@ import { getStudentDetails } from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import type { StudentDetailDto } from "../../types/api"
-import { formatDate, formatNullable } from "../../utils/format"
+import { formatDate, formatNullable, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
 type StudentOverviewPageProps = {
@@ -61,7 +61,7 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
         <h2>Профіль студента</h2>
         <div className="summary-grid">
           <div>
-            <strong>ПІБ:</strong> {data.lastName} {data.firstName}
+            <strong>ПІБ:</strong> {fullName(data.firstName, data.lastName, data.patronymic)}
           </div>
           <div>
             <strong>Статус:</strong> {formatStudentStatus(data.status)}
@@ -112,7 +112,7 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
             </div>
           </div>
         ) : (
-          <StatusState tone="info" message="Для студента ще не призначено навчальний план." />
+          <StatusState tone="info" message="Для студента ще не визначено навчальний план через групу." />
         )}
       </section>
     </div>

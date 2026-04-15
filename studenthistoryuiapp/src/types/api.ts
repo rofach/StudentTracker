@@ -9,6 +9,7 @@ export type StudentDto = {
   studentId: number
   firstName: string
   lastName: string
+  patronymic: string | null
   birthDate: string | null
   email: string | null
   phone: string | null
@@ -27,8 +28,10 @@ export type EnrollmentSummaryDto = {
   subgroupName: string | null
 }
 
-export type StudyPlanAssignmentDto = {
-  assignmentId: number
+export type GroupPlanAssignmentDto = {
+  groupPlanAssignmentId: number
+  groupId: number
+  planId: number
   specialtyCode: string
   planName: string | null
   dateFrom: string
@@ -54,12 +57,13 @@ export type StudentDetailDto = {
   studentId: number
   firstName: string
   lastName: string
+  patronymic: string | null
   birthDate: string | null
   email: string | null
   phone: string | null
   status: string
   enrollments: EnrollmentSummaryDto[]
-  plans: StudyPlanAssignmentDto[]
+  plans: GroupPlanAssignmentDto[]
   leaves: AcademicLeaveDto[]
   transfers: ExternalTransferDto[]
 }
@@ -201,6 +205,7 @@ export type DepartmentDto = {
 export type StudentCreateDto = {
   firstName: string
   lastName: string
+  patronymic: string | null
   birthDate: string | null
   email: string | null
   phone: string | null
@@ -239,9 +244,14 @@ export type CreateLeaveDto = {
   reason: string | null
 }
 
-export type AssignPlanDto = {
+export type AssignGroupPlanDto = {
   planId: number
   dateFrom: string
+}
+
+export type ChangeGroupPlanDto = {
+  newPlanId: number
+  newPlanDateFrom: string
 }
 
 export type CreateStudyPlanDto = {

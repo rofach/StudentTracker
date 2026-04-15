@@ -37,9 +37,29 @@ public class CreateLeaveDtoValidator : AppValidator<CreateLeaveDto>
         RuleFor(x => x.StartDate)
             .NotDefaultDate();
 
-        When(x => !string.IsNullOrWhiteSpace(x.Reason), () =>
+        RuleFor(x => x.Reason)
+            .NotEmpty()
+            .MaximumLength(200);
+
+        When(x => x.EndDate.HasValue, () =>
         {
-            RuleFor(x => x.Reason!)
+            RuleFor(x => x.EndDate!.Value)
+                .Must((dto, endDate) => endDate >= dto.StartDate)
+                .WithMessage("EndDate must be on or after StartDate.");
+        });
+    }
+}
+
+public class CloseAcademicLeaveDtoValidator : AppValidator<CloseAcademicLeaveDto>
+{
+    public CloseAcademicLeaveDtoValidator()
+    {
+        RuleFor(x => x.EndDate)
+            .NotDefaultDate();
+
+        When(x => !string.IsNullOrWhiteSpace(x.ReturnReason), () =>
+        {
+            RuleFor(x => x.ReturnReason!)
                 .MaximumLength(200);
         });
     }

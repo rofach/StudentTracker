@@ -8,6 +8,7 @@ namespace UniversityHistory.Infrastructure.Repositories;
 public class AcademicLeaveRepository : IAcademicLeaveRepository
 {
     private readonly UniversityDbContext _db;
+
     public AcademicLeaveRepository(UniversityDbContext db)
     {
         _db = db;
@@ -21,6 +22,11 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
             .ToListAsync(ct);
     }
 
+    public async Task<AcademicLeave?> GetByIdAsync(int leaveId, CancellationToken ct = default)
+    {
+        return await _db.AcademicLeaves.FindAsync(new object[] { leaveId }, ct);
+    }
+
     public async Task<AcademicLeave?> GetOpenByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default)
     {
         return await _db.AcademicLeaves
@@ -31,5 +37,10 @@ public class AcademicLeaveRepository : IAcademicLeaveRepository
     {
         _db.AcademicLeaves.Add(leave);
         return leave;
+    }
+
+    public void Update(AcademicLeave leave)
+    {
+        _db.AcademicLeaves.Update(leave);
     }
 }

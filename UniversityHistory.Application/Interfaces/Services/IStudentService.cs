@@ -6,6 +6,7 @@ public interface IStudentService
 {
     Task<StudentDto?> GetByIdAsync(int studentId, CancellationToken ct = default);
     Task<PagedResult<StudentDto>> GetAllAsync(int page = 1, int pageSize = 20, CancellationToken ct = default);
+    Task<PagedResult<StudentDto>> SearchAsync(string? fullName, string? email, string? status, int page = 1, int pageSize = 20, CancellationToken ct = default);
     Task<StudentDto> CreateAsync(StudentCreateDto dto, CancellationToken ct = default);
     Task<StudentDto> UpdateAsync(int studentId, StudentUpdateDto dto, CancellationToken ct = default);
     Task ChangeStatusAsync(int studentId, ChangeStatusDto dto, CancellationToken ct = default);

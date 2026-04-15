@@ -34,6 +34,20 @@ public class StudentsController : ControllerBase
         return Ok(await _studentService.GetAllAsync(page, pageSize, ct));
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> Search(
+        CancellationToken ct,
+        [FromQuery] string? fullName,
+        [FromQuery] string? email,
+        [FromQuery] string? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await _studentService.SearchAsync(fullName, email, status, page, pageSize, ct));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {

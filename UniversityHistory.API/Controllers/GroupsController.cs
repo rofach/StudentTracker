@@ -42,8 +42,6 @@ public class GroupsController : ControllerBase
         return Ok(await _groupService.GetStudentsInGroupAsync(id, date, page, pageSize, ct));
     }
 
-    // ── Group plan assignments ────────────────────────────────────────────────
-
     [HttpGet("{id:int}/plans")]
     public async Task<IActionResult> GetPlanHistory(int id, CancellationToken ct) =>
         Ok(await _planService.GetGroupPlanHistoryAsync(id, ct));

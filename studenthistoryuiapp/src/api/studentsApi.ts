@@ -1,6 +1,5 @@
 import type {
   AverageGradeDto,
-  AssignPlanDto,
   ChangeStatusDto,
   ClassmateDto,
   CloseEnrollmentDto,
@@ -16,7 +15,6 @@ import type {
   StudentDisciplineOptionDto,
   StudentDto,
   StudentUpdateDto,
-  StudyPlanAssignmentDto,
   TimelineEventDto,
 } from "../types/api"
 import { fetchJson, postJson, putJson } from "./http"
@@ -24,6 +22,16 @@ import { getActiveGroups } from "./groupsApi"
 
 export function getStudents(page: number, pageSize: number): Promise<PagedResult<StudentDto>> {
   return fetchJson<PagedResult<StudentDto>>("/students", undefined, { page, pageSize })
+}
+
+export function searchStudents(params: {
+  fullName?: string
+  email?: string
+  status?: string
+  page: number
+  pageSize: number
+}): Promise<PagedResult<StudentDto>> {
+  return fetchJson<PagedResult<StudentDto>>("/students/search", undefined, params)
 }
 
 export function getStudentById(studentId: number): Promise<StudentDto> {
@@ -92,16 +100,8 @@ export function getStudentAverageGrade(
   return fetchJson<AverageGradeDto>(`/students/${studentId}/grades/average`, undefined, params)
 }
 
-export function getStudentPlans(studentId: number): Promise<StudyPlanAssignmentDto[]> {
-  return fetchJson<StudyPlanAssignmentDto[]>(`/students/${studentId}/plans`)
-}
-
 export function getStudentTransfers(studentId: number): Promise<ExternalTransferDto[]> {
   return getStudentDetails(studentId).then((result) => result.transfers)
-}
-
-export function assignStudentPlan(studentId: number, dto: AssignPlanDto): Promise<StudyPlanAssignmentDto> {
-  return postJson<StudyPlanAssignmentDto>(`/students/${studentId}/plans`, dto)
 }
 
 export function moveStudentToGroup(studentId: number, dto: MoveStudentDto): Promise<void> {

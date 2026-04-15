@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { getStudyPlans } from "../../api/studyPlansApi"
 import {
-  assignStudentPlan,
   closeEnrollment,
   createAcademicLeave,
   enrollStudent,
@@ -13,7 +12,7 @@ import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import type { ActiveGroupDto, StudentDetailDto, StudyPlanDto } from "../../types/api"
-import { formatDate } from "../../utils/format"
+import { formatDate, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
 type AdminStudentOperationsPageProps = {
@@ -48,9 +47,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
 
   const [leaveDate, setLeaveDate] = useState(todayValue())
   const [leaveReason, setLeaveReason] = useState("")
-
-  const [planId, setPlanId] = useState<number | "">("")
-  const [planDateFrom, setPlanDateFrom] = useState(todayValue())
 
   const loadData = async () => {
     const [studentResult, groupsResult, plansResult] = await Promise.all([
@@ -136,7 +132,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   return (
     <div className="page-stack">
       <PageHeader
-        title={`${student.lastName} ${student.firstName}`}
+        title={fullName(student.firstName, student.lastName, student.patronymic)}
         description="Академічні операції над студентом."
         actions={
           <div className="inline-actions">
@@ -365,45 +361,43 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
 
       <div className="content-grid content-grid--two-columns">
         <section className="panel">
-          <h2>Призначення навчального плану</h2>
-          <div className="form-grid">
-            <label>
-              Навчальний план
-              <select value={planId} onChange={(event) => setPlanId(event.target.value ? Number(event.target.value) : "")}>
-                <option value="">Оберіть план</option>
-                {plans.map((plan) => (
-                  <option key={plan.planId} value={plan.planId}>
-                    {plan.planName ?? `План ${plan.planId}`} ({plan.specialtyCode})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Дата початку
-              <input type="date" value={planDateFrom} onChange={(event) => setPlanDateFrom(event.target.value)} />
-            </label>
-          </div>
-
-          <button
-            type="button"
-            disabled={isSaving || planId === ""}
-            onClick={() =>
-              void runAction(
-                () => assignStudentPlan(studentId, { planId: Number(planId), dateFrom: planDateFrom }).then(() => undefined),
-                "Навчальний план призначено.",
-              )
+          <h2>Навчальний план</h2>
+          <StatusState
+            tone="info"
+            message={
+              currentEnrollment
+                ? `План студента визначається через групу ${currentEnrollment.groupCode}. Змінюйте або призначайте план у розділі груп.`
+                : "Спочатку зарахуйте студента до групи, щоб для нього визначився навчальний план."
             }
-          >
-            {isSaving ? "Виконання..." : "Призначити план"}
-          </button>
+          />
         </section>
 
         <section className="panel">
-          <h2>Не готово</h2>
-          <StatusState
-            tone="info"
-            message="Поки що не зроблено"
-          />
+          <h2>Доступні плани</h2>
+          {plans.length === 0 ? (
+            <StatusState tone="info" message="Навчальні плани ще не створені." />
+          ) : (
+            <div className="table-wrap table-wrap--compact">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Назва</th>
+                    <th>Спеціальність</th>
+                    <th>Діє з</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plans.map((plan) => (
+                    <tr key={plan.planId}>
+                      <td>{plan.planName ?? `План ${plan.planId}`}</td>
+                      <td>{plan.specialtyCode}</td>
+                      <td>{formatDate(plan.validFrom)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       </div>
 

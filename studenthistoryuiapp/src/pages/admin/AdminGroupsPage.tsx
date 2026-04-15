@@ -1,22 +1,44 @@
 import { useEffect, useMemo, useState } from "react"
-import { getActiveGroups, getGroupComposition } from "../../api/groupsApi"
+import { assignGroupPlan, changeCurrentGroupPlan, getActiveGroups, getGroupComposition, getGroupPlanHistory } from "../../api/groupsApi"
+import { getStudyPlans } from "../../api/studyPlansApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { ActiveGroupDto, GroupCompositionMemberDto, PagedResult } from "../../types/api"
+import type {
+  ActiveGroupDto,
+  GroupCompositionMemberDto,
+  GroupPlanAssignmentDto,
+  PagedResult,
+  StudyPlanDto,
+} from "../../types/api"
 import { formatDate } from "../../utils/format"
 
-export function AdminGroupsPage() {
+type AdminGroupsPageProps = {
+  navigate: (path: string) => void
+}
+
+function todayValue(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
   const [date, setDate] = useState("")
   const [groups, setGroups] = useState<ActiveGroupDto[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [compositionPage, setCompositionPage] = useState(1)
   const [compositionPageSize, setCompositionPageSize] = useState(20)
   const [composition, setComposition] = useState<PagedResult<GroupCompositionMemberDto> | null>(null)
+  const [studyPlans, setStudyPlans] = useState<StudyPlanDto[]>([])
+  const [planHistory, setPlanHistory] = useState<GroupPlanAssignmentDto[]>([])
+  const [selectedPlanId, setSelectedPlanId] = useState<number | "">("")
+  const [planDateFrom, setPlanDateFrom] = useState(todayValue())
   const [isGroupsLoading, setIsGroupsLoading] = useState(true)
   const [isCompositionLoading, setIsCompositionLoading] = useState(false)
+  const [isPlanHistoryLoading, setIsPlanHistoryLoading] = useState(false)
+  const [isPlanSaving, setIsPlanSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let isActive = true
@@ -30,9 +52,17 @@ export function AdminGroupsPage() {
         }
 
         setGroups(result)
-        if (result.length > 0 && !selectedGroupId) {
-          setSelectedGroupId(result[0].groupId)
-        }
+        setSelectedGroupId((current) => {
+          if (result.length === 0) {
+            return null
+          }
+
+          if (current && result.some((group) => group.groupId === current)) {
+            return current
+          }
+
+          return result[0].groupId
+        })
       })
       .catch((err: unknown) => {
         if (!isActive) {
@@ -52,7 +82,31 @@ export function AdminGroupsPage() {
     return () => {
       isActive = false
     }
-  }, [date, selectedGroupId])
+  }, [date])
+
+  useEffect(() => {
+    let isActive = true
+
+    getStudyPlans()
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        setStudyPlans(result)
+      })
+      .catch((err: unknown) => {
+        if (!isActive) {
+          return
+        }
+
+        setError(err instanceof Error ? err.message : "Не вдалося завантажити навчальні плани.")
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!selectedGroupId) {
@@ -95,16 +149,96 @@ export function AdminGroupsPage() {
     }
   }, [selectedGroupId, date, compositionPage, compositionPageSize])
 
+  useEffect(() => {
+    if (!selectedGroupId) {
+      setPlanHistory([])
+      return
+    }
+
+    let isActive = true
+    setIsPlanHistoryLoading(true)
+
+    getGroupPlanHistory(selectedGroupId)
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        setPlanHistory(result)
+      })
+      .catch((err: unknown) => {
+        if (!isActive) {
+          return
+        }
+
+        setError(err instanceof Error ? err.message : "Не вдалося завантажити історію планів групи.")
+      })
+      .finally(() => {
+        if (!isActive) {
+          return
+        }
+
+        setIsPlanHistoryLoading(false)
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [selectedGroupId])
+
   const selectedGroup = useMemo(
     () => groups.find((group) => group.groupId === selectedGroupId) ?? null,
     [groups, selectedGroupId],
   )
 
+  const currentPlan = useMemo(
+    () => planHistory.find((assignment) => assignment.dateTo === null) ?? null,
+    [planHistory],
+  )
+
+  const savePlan = async () => {
+    if (!selectedGroupId || selectedPlanId === "") {
+      return
+    }
+
+    setIsPlanSaving(true)
+    setMessage(null)
+    setError(null)
+
+    try {
+      if (currentPlan) {
+        await changeCurrentGroupPlan(selectedGroupId, {
+          newPlanId: Number(selectedPlanId),
+          newPlanDateFrom: planDateFrom,
+        })
+        setMessage("Поточний план групи змінено.")
+      } else {
+        await assignGroupPlan(selectedGroupId, {
+          planId: Number(selectedPlanId),
+          dateFrom: planDateFrom,
+        })
+        setMessage("План групи призначено.")
+      }
+
+      const updatedHistory = await getGroupPlanHistory(selectedGroupId)
+      setPlanHistory(updatedHistory)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Не вдалося зберегти план групи.")
+    } finally {
+      setIsPlanSaving(false)
+    }
+  }
+
   return (
     <div className="page-stack">
       <PageHeader
         title="Групи"
-        description="Перегляд активних груп і їх складу на вибрану дату."
+        description="Перегляд активних груп, їх складу та призначених навчальних планів."
+        actions={
+          <button type="button" onClick={() => navigate("/admin/study-plans")}>
+            Навчальні плани
+          </button>
+        }
       />
 
       <section className="panel">
@@ -121,7 +255,6 @@ export function AdminGroupsPage() {
             />
           </label>
         </div>
-
       </section>
 
       {isGroupsLoading ? <Spinner label="Завантаження груп..." /> : null}
@@ -134,7 +267,7 @@ export function AdminGroupsPage() {
             {groups.length === 0 ? (
               <StatusState tone="info" message="Активні групи не знайдено." />
             ) : (
-              <div className="table-wrap">
+              <div className="table-wrap table-wrap--compact">
                 <table>
                   <thead>
                     <tr>
@@ -162,9 +295,9 @@ export function AdminGroupsPage() {
           </section>
 
           <section className="panel">
-            <h2>Склад групи</h2>
+            <h2>Деталі групи</h2>
             {selectedGroup ? (
-              <>
+              <div className="page-stack">
                 <div className="summary-grid summary-grid--compact">
                   <div>
                     <strong>Група:</strong> {selectedGroup.groupCode}
@@ -180,59 +313,140 @@ export function AdminGroupsPage() {
                   </div>
                 </div>
 
-                {isCompositionLoading ? <Spinner label="Завантаження складу..." /> : null}
-                {!isCompositionLoading && composition && composition.items.length === 0 ? (
-                  <StatusState tone="info" message="Для обраної групи склад не знайдено." />
-                ) : null}
+                <section className="panel panel--inner">
+                  <h3>Навчальний план групи</h3>
+                  {isPlanHistoryLoading ? <Spinner label="Завантаження історії планів..." /> : null}
+                  {!isPlanHistoryLoading ? (
+                    <div className="page-stack">
+                      <div className="summary-grid summary-grid--compact">
+                        <div>
+                          <strong>Поточний план:</strong> {currentPlan?.planName ?? "Не призначено"}
+                        </div>
+                        <div>
+                          <strong>Спеціальність:</strong> {currentPlan?.specialtyCode ?? "—"}
+                        </div>
+                        <div>
+                          <strong>Діє з:</strong> {formatDate(currentPlan?.dateFrom ?? null)}
+                        </div>
+                      </div>
 
-                {!isCompositionLoading && composition && composition.items.length > 0 ? (
-                  <>
-                    <div className="table-wrap">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>ПІБ</th>
-                            <th>Email</th>
-                            <th>Підгрупа</th>
-                            <th>З</th>
-                            <th>До</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {composition.items.map((member) => (
-                            <tr key={`${member.studentId}-${member.dateFrom}`}>
-                              <td>
-                                {member.lastName} {member.firstName}
-                              </td>
-                              <td>{member.email ?? "—"}</td>
-                              <td>{member.subgroupName ?? "—"}</td>
-                              <td>{formatDate(member.dateFrom)}</td>
-                              <td>{formatDate(member.dateTo)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <div className="form-grid">
+                        <label>
+                          План
+                          <select
+                            value={selectedPlanId}
+                            onChange={(event) => setSelectedPlanId(event.target.value ? Number(event.target.value) : "")}
+                          >
+                            <option value="">Оберіть план</option>
+                            {studyPlans.map((plan) => (
+                              <option key={plan.planId} value={plan.planId}>
+                                {plan.planName ?? `План ${plan.planId}`} ({plan.specialtyCode})
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          {currentPlan ? "Нова дата початку" : "Дата початку"}
+                          <input
+                            type="date"
+                            value={planDateFrom}
+                            onChange={(event) => setPlanDateFrom(event.target.value)}
+                          />
+                        </label>
+                      </div>
+
+                      <button type="button" disabled={isPlanSaving || selectedPlanId === ""} onClick={() => void savePlan()}>
+                        {isPlanSaving ? "Збереження..." : currentPlan ? "Змінити план групи" : "Призначити план групі"}
+                      </button>
+
+                      {planHistory.length > 0 ? (
+                        <div className="table-wrap table-wrap--compact">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>План</th>
+                                <th>Спеціальність</th>
+                                <th>З</th>
+                                <th>До</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {planHistory.map((assignment) => (
+                                <tr key={assignment.groupPlanAssignmentId}>
+                                  <td>{assignment.planName ?? `План ${assignment.planId}`}</td>
+                                  <td>{assignment.specialtyCode}</td>
+                                  <td>{formatDate(assignment.dateFrom)}</td>
+                                  <td>{formatDate(assignment.dateTo)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <StatusState tone="info" message="Для цієї групи план ще не призначено." />
+                      )}
                     </div>
+                  ) : null}
+                </section>
 
-                    <PaginationControls
-                      page={composition.page}
-                      pageSize={composition.pageSize}
-                      totalCount={composition.totalCount}
-                      onPageChange={setCompositionPage}
-                      onPageSizeChange={(nextPageSize) => {
-                        setCompositionPageSize(nextPageSize)
-                        setCompositionPage(1)
-                      }}
-                    />
-                  </>
-                ) : null}
-              </>
+                <section className="panel panel--inner">
+                  <h3>Склад групи</h3>
+                  {isCompositionLoading ? <Spinner label="Завантаження складу..." /> : null}
+                  {!isCompositionLoading && composition && composition.items.length === 0 ? (
+                    <StatusState tone="info" message="Для обраної групи склад не знайдено." />
+                  ) : null}
+
+                  {!isCompositionLoading && composition && composition.items.length > 0 ? (
+                    <>
+                      <div className="table-wrap table-wrap--compact">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>ПІБ</th>
+                              <th>Email</th>
+                              <th>Підгрупа</th>
+                              <th>З</th>
+                              <th>До</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {composition.items.map((member) => (
+                              <tr key={`${member.studentId}-${member.dateFrom}`}>
+                                <td>
+                                  {member.lastName} {member.firstName}
+                                </td>
+                                <td>{member.email ?? "—"}</td>
+                                <td>{member.subgroupName ?? "—"}</td>
+                                <td>{formatDate(member.dateFrom)}</td>
+                                <td>{formatDate(member.dateTo)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <PaginationControls
+                        page={composition.page}
+                        pageSize={composition.pageSize}
+                        totalCount={composition.totalCount}
+                        onPageChange={setCompositionPage}
+                        onPageSizeChange={(nextPageSize) => {
+                          setCompositionPageSize(nextPageSize)
+                          setCompositionPage(1)
+                        }}
+                      />
+                    </>
+                  ) : null}
+                </section>
+              </div>
             ) : (
               <StatusState tone="info" message="Оберіть групу у списку ліворуч." />
             )}
           </section>
         </div>
       ) : null}
+
+      {message ? <StatusState tone="info" message={message} /> : null}
     </div>
   )
 }

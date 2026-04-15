@@ -52,25 +52,38 @@ public class MovementService : IMovementService
             ?? throw new NotFoundException(nameof(StudentGroupEnrollment), dto.EnrollmentId);
 
         if (enrollment.StudentId != studentId)
-        {
             throw new DomainException($"Enrollment {dto.EnrollmentId} does not belong to student {studentId}.");
-        }
 
         if (enrollment.DateTo.HasValue)
-        {
             throw new DomainException($"Enrollment {dto.EnrollmentId} is already closed. Cannot add academic leave.");
-        }
+
+        if (dto.EndDate.HasValue && dto.EndDate.Value < dto.StartDate)
+            throw new DomainException("EndDate cannot be before StartDate.");
 
         var openLeave = await _unitOfWork.AcademicLeaves.GetOpenByEnrollmentIdAsync(dto.EnrollmentId, ct);
-
         if (openLeave is not null)
-        {
             throw new DomainException($"Enrollment {dto.EnrollmentId} already has an open academic leave (leave #{openLeave.LeaveId}).");
-        }
 
         var leave = dto.ToEntity();
         var created = _unitOfWork.AcademicLeaves.Add(leave);
         await _unitOfWork.SaveChangesAsync(ct);
         return created.ToDto();
+    }
+
+    public async Task<AcademicLeaveDto> CloseLeaveAsync(int leaveId, CloseAcademicLeaveDto dto, CancellationToken ct = default)
+    {
+        var leave = await _unitOfWork.AcademicLeaves.GetByIdAsync(leaveId, ct)
+            ?? throw new NotFoundException(nameof(AcademicLeave), leaveId);
+
+        if (leave.EndDate.HasValue)
+            throw new DomainException($"Leave {leaveId} is already closed.");
+
+        if (dto.EndDate < leave.StartDate)
+            throw new DomainException("EndDate cannot be before the leave's StartDate.");
+
+        leave.EndDate = dto.EndDate;
+        _unitOfWork.AcademicLeaves.Update(leave);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return leave.ToDto();
     }
 }

@@ -15,6 +15,6 @@ export function formatNullable(value: string | null | undefined): string {
   return value && value.trim() ? value : "—"
 }
 
-export function fullName(firstName: string, lastName: string): string {
-  return `${lastName} ${firstName}`
+export function fullName(firstName: string, lastName: string, patronymic?: string | null): string {
+  return [lastName, firstName, patronymic].filter((value) => value && value.trim()).join(" ")
 }

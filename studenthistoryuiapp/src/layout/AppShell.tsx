@@ -28,7 +28,10 @@ export function AppShell({
           <p>{areaSubtitle}</p>
         </div>
 
-        <nav className="sidebar__menu" aria-label="Головне меню">
+        <nav
+          className="sidebar__menu"
+          aria-label="\u0413\u043E\u043B\u043E\u0432\u043D\u0435 \u043C\u0435\u043D\u044E"
+        >
           {menuItems.map((item) => (
             <button
               key={item.path}

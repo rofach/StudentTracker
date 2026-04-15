@@ -34,6 +34,7 @@ public class UniversityDbContext : DbContext
             e.Property(s => s.StudentId).HasColumnName("student_id").UseIdentityColumn();
             e.Property(s => s.FirstName).HasColumnName("first_name").HasMaxLength(50).IsRequired();
             e.Property(s => s.LastName).HasColumnName("last_name").HasMaxLength(50).IsRequired();
+            e.Property(s => s.Patronymic).HasColumnName("patronymic").HasMaxLength(50);
             e.Property(s => s.BirthDate).HasColumnName("birth_date");
             e.Property(s => s.Email).HasColumnName("email").HasMaxLength(100);
             e.Property(s => s.Phone).HasColumnName("phone").HasMaxLength(20);

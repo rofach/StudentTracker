@@ -23,8 +23,7 @@ public class EnrollmentService : IEnrollmentService
         if (dto.SubgroupId.HasValue && !group.Subgroups.Any(sg => sg.SubgroupId == dto.SubgroupId.Value))
             throw new DomainException($"Subgroup {dto.SubgroupId.Value} does not belong to Group {dto.GroupId}.");
 
-        var hasOverlap = await _uow.Enrollments.HasOverlapAsync(dto.StudentId, dto.DateFrom, null, null, ct);
-        if (hasOverlap)
+        if (await _uow.Enrollments.HasOverlapAsync(dto.StudentId, dto.DateFrom, null, null, ct))
             throw new EnrollmentOverlapException(dto.StudentId, dto.DateFrom, null);
 
         var enrollment = new StudentGroupEnrollment
@@ -40,7 +39,6 @@ public class EnrollmentService : IEnrollmentService
         _uow.Enrollments.Add(enrollment);
         await _uow.SaveChangesAsync(ct);
 
-        // Generate course enrollments from group's active plan
         var activePlan = await _uow.GroupPlanAssignments.GetActiveOnDateAsync(dto.GroupId, dto.DateFrom, ct);
         if (activePlan is not null)
         {
@@ -79,15 +77,15 @@ public class EnrollmentService : IEnrollmentService
 
         var current = await _uow.Enrollments.GetActiveByStudentIdAsync(studentId, ct)
             ?? throw new DomainException($"Student {studentId} has no active enrollment to move from.");
-        if (dto.MoveDate < current.DateFrom)
+        
+        if (dto.MoveDate <= current.DateFrom)
             throw new DomainException("Move date cannot be before the current enrollment's start date.");
 
-        // Preserve non-Planned course enrollments; remove Planned ones from old enrollment
         var oldCourses = (await _uow.StudyPlans.GetCourseEnrollmentsByEnrollmentIdAsync(current.EnrollmentId, ct)).ToList();
         var toRemove = oldCourses.Where(ce => ce.Status == CourseStatus.Planned).ToList();
         _uow.StudyPlans.RemoveCourseEnrollments(toRemove);
 
-        current.DateTo = dto.MoveDate;
+        current.DateTo = dto.MoveDate.AddDays(-1);
         current.ReasonEnd = dto.ReasonEnd;
         _uow.Enrollments.Update(current);
 
@@ -104,11 +102,9 @@ public class EnrollmentService : IEnrollmentService
         _uow.Enrollments.Add(newEnrollment);
         await _uow.SaveChangesAsync(ct);
 
-        // Generate new Planned courses from new group's active plan
         var activePlan = await _uow.GroupPlanAssignments.GetActiveOnDateAsync(dto.NewGroupId, dto.MoveDate, ct);
         if (activePlan is not null)
         {
-            // Compute already-completed discipline IDs to avoid duplicating them
             var completedDisciplineIds = oldCourses
                 .Where(ce => ce.Status != CourseStatus.Planned)
                 .Select(ce => ce.DisciplineId)

@@ -13,8 +13,6 @@ public class StudyPlanService : IStudyPlanService
     private readonly IUnitOfWork _uow;
     public StudyPlanService(IUnitOfWork uow) => _uow = uow;
 
-    // ── Study plan CRUD ────────────────────────────────────────────────────────
-
     public async Task<IEnumerable<StudyPlanDto>> GetAllPlansAsync(CancellationToken ct = default)
     {
         var plans = await _uow.StudyPlans.GetAllPlansAsync(ct);
@@ -56,8 +54,6 @@ public class StudyPlanService : IStudyPlanService
         _uow.StudyPlans.DeletePlan(plan);
         await _uow.SaveChangesAsync(ct);
     }
-
-    // ── Plan disciplines ───────────────────────────────────────────────────────
 
     public async Task<IEnumerable<PlanDisciplineDto>> GetPlanDisciplinesAsync(int planId, CancellationToken ct = default)
     {
@@ -104,12 +100,13 @@ public class StudyPlanService : IStudyPlanService
         var pd = await _uow.StudyPlans.GetPlanDisciplineAsync(planId, disciplineId, ct)
             ?? throw new NotFoundException("PlanDiscipline", $"plan={planId}, discipline={disciplineId}");
         if (await _uow.StudyPlans.PlanDisciplineIsUsedAsync(planId, disciplineId, ct))
-            throw new DomainException($"Cannot remove discipline {disciplineId} from plan {planId}: students have non-planned course enrollments for it.");
+            throw new DomainException(
+                $"Cannot remove discipline {disciplineId} from plan {planId}: " +
+                "students already have completed, in-progress, or retake records for it.");
+        await _uow.StudyPlans.RemovePlannedCourseEnrollmentsForDisciplineAsync(planId, disciplineId, ct);
         _uow.StudyPlans.DeletePlanDiscipline(pd);
         await _uow.SaveChangesAsync(ct);
     }
-
-    // ── Group plan assignments ─────────────────────────────────────────────────
 
     public async Task<IEnumerable<GroupPlanAssignmentDto>> GetGroupPlanHistoryAsync(int groupId, CancellationToken ct = default)
     {
@@ -121,7 +118,7 @@ public class StudyPlanService : IStudyPlanService
     {
         _ = await _uow.Groups.GetByIdAsync(groupId, ct)
             ?? throw new NotFoundException(nameof(StudyGroup), groupId);
-        _ = await _uow.StudyPlans.GetPlanWithDisciplinesAsync(dto.PlanId, ct)
+        var plan = await _uow.StudyPlans.GetPlanWithDisciplinesAsync(dto.PlanId, ct)
             ?? throw new NotFoundException(nameof(StudyPlan), dto.PlanId);
 
         if (await _uow.GroupPlanAssignments.HasOverlapAsync(groupId, dto.DateFrom, null, null, ct))
@@ -136,6 +133,24 @@ public class StudyPlanService : IStudyPlanService
         _uow.GroupPlanAssignments.Add(assignment);
         await _uow.SaveChangesAsync(ct);
 
+        var activeEnrollments = await _uow.Enrollments.GetActiveByGroupIdOnDateAsync(groupId, dto.DateFrom, ct);
+        foreach (var enrollment in activeEnrollments)
+        {
+            var existingDisciplineIds = (await _uow.StudyPlans
+                    .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct))
+                .Select(ce => ce.DisciplineId)
+                .ToHashSet();
+
+            var newCourses = GenerateCourseEnrollments(
+                    enrollment.EnrollmentId, assignment.GroupPlanAssignmentId, dto.DateFrom, plan)
+                .Where(ce => !existingDisciplineIds.Contains(ce.DisciplineId))
+                .ToList();
+
+            if (newCourses.Count > 0)
+                _uow.StudyPlans.AddCourseEnrollments(newCourses);
+        }
+
+        await _uow.SaveChangesAsync(ct);
         return (await _uow.GroupPlanAssignments.GetByIdAsync(assignment.GroupPlanAssignmentId, ct))!.ToDto();
     }
 
@@ -147,38 +162,47 @@ public class StudyPlanService : IStudyPlanService
         var newPlan = await _uow.StudyPlans.GetPlanWithDisciplinesAsync(dto.NewPlanId, ct)
             ?? throw new NotFoundException(nameof(StudyPlan), dto.NewPlanId);
 
-        // Close the currently open assignment
         var current = (await _uow.GroupPlanAssignments.GetByGroupIdAsync(groupId, ct))
             .FirstOrDefault(a => a.DateTo == null);
+        
         if (current is not null)
         {
-            if (dto.EffectiveFrom <= current.DateFrom)
+            if (dto.NewPlanDateFrom <= current.DateFrom)
                 throw new DomainException("EffectiveFrom must be after the current assignment's start date.");
-            current.DateTo = dto.EffectiveFrom.AddDays(-1);
+            current.DateTo = dto.NewPlanDateFrom.AddDays(-1);
             _uow.GroupPlanAssignments.Update(current);
         }
 
-        // Create new assignment
         var newAssignment = new GroupPlanAssignment
         {
             GroupId = groupId,
             PlanId = dto.NewPlanId,
-            DateFrom = dto.EffectiveFrom
+            DateFrom = dto.NewPlanDateFrom
         };
         _uow.GroupPlanAssignments.Add(newAssignment);
         await _uow.SaveChangesAsync(ct);
 
-        // Propagate: update Planned SCEs for active students in this group
-        var activeEnrollments = await _uow.Enrollments.GetActiveByGroupIdAsync(groupId, ct);
+        var activeEnrollments = await _uow.Enrollments.GetActiveByGroupIdOnDateAsync(groupId, dto.NewPlanDateFrom, ct);
         foreach (var enrollment in activeEnrollments)
         {
-            var planned = (await _uow.StudyPlans.GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct))
-                .Where(ce => ce.Status == CourseStatus.Planned)
-                .ToList();
+            var allCourses = (await _uow.StudyPlans
+                .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct)).ToList();
+
+            var planned = allCourses.Where(ce => ce.Status == CourseStatus.Planned).ToList();
             _uow.StudyPlans.RemoveCourseEnrollments(planned);
 
-            var newCourses = GenerateCourseEnrollments(enrollment.EnrollmentId, newAssignment.GroupPlanAssignmentId, dto.EffectiveFrom, newPlan);
-            _uow.StudyPlans.AddCourseEnrollments(newCourses);
+            var progressedDisciplineIds = allCourses
+                .Where(ce => ce.Status != CourseStatus.Planned)
+                .Select(ce => ce.DisciplineId)
+                .ToHashSet();
+
+            var newCourses = GenerateCourseEnrollments(
+                    enrollment.EnrollmentId, newAssignment.GroupPlanAssignmentId, dto.NewPlanDateFrom, newPlan)
+                .Where(ce => !progressedDisciplineIds.Contains(ce.DisciplineId))
+                .ToList();
+
+            if (newCourses.Count > 0)
+                _uow.StudyPlans.AddCourseEnrollments(newCourses);
         }
 
         await _uow.SaveChangesAsync(ct);

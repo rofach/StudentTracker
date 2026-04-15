@@ -3,12 +3,13 @@ import { getStudentDetails } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
+import type { StudentDetailDto } from "../../types/api"
+import { fullName } from "../../utils/format"
+import { formatStudentStatus } from "../../utils/status"
 import { StudentClassmatesPage } from "../student/StudentClassmatesPage"
 import { StudentHistoryPage } from "../student/StudentHistoryPage"
 import { StudentOverviewPage } from "../student/StudentOverviewPage"
 import { StudentSubjectsPage } from "../student/StudentSubjectsPage"
-import type { StudentDetailDto } from "../../types/api"
-import { formatStudentStatus } from "../../utils/status"
 
 type StudentSection = "overview" | "subjects" | "classmates" | "history"
 
@@ -80,7 +81,7 @@ export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPa
   return (
     <div className="page-stack">
       <PageHeader
-        title={`${student.lastName} ${student.firstName}`}
+        title={fullName(student.firstName, student.lastName, student.patronymic)}
         description="Перегляд повної картки студента."
         actions={
           <div className="inline-actions">

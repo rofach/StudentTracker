@@ -1,18 +1,18 @@
 import type { AppArea, AppRoute, NavItem } from "../types/navigation"
 
 export const STUDENT_MENU: NavItem[] = [
-  { path: "/student/overview", label: "Огляд" },
-  { path: "/student/subjects", label: "Предмети" },
-  { path: "/student/classmates", label: "Одногрупники" },
-  { path: "/student/history", label: "Історія" },
+  { path: "/student/overview", label: "\u041E\u0433\u043B\u044F\u0434" },
+  { path: "/student/subjects", label: "\u041F\u0440\u0435\u0434\u043C\u0435\u0442\u0438" },
+  { path: "/student/classmates", label: "\u041E\u0434\u043D\u043E\u0433\u0440\u0443\u043F\u043D\u0438\u043A\u0438" },
+  { path: "/student/history", label: "\u0406\u0441\u0442\u043E\u0440\u0456\u044F" },
 ]
 
 export const ADMIN_MENU: NavItem[] = [
-  { path: "/admin/students", label: "Студенти" },
-  { path: "/admin/groups", label: "Групи" },
-  { path: "/admin/study-plans", label: "Навчальні плани" },
-  { path: "/admin/disciplines", label: "Предмети" },
-  { path: "/admin/structure", label: "Структура" },
+  { path: "/admin/students", label: "\u0421\u0442\u0443\u0434\u0435\u043D\u0442\u0438" },
+  { path: "/admin/groups", label: "\u0413\u0440\u0443\u043F\u0438" },
+  { path: "/admin/study-plans", label: "\u041D\u0430\u0432\u0447\u0430\u043B\u044C\u043D\u0456 \u043F\u043B\u0430\u043D\u0438" },
+  { path: "/admin/disciplines", label: "\u041F\u0440\u0435\u0434\u043C\u0435\u0442\u0438" },
+  { path: "/admin/structure", label: "\u0421\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u0430" },
 ]
 
 export function normalizePath(pathname: string): string {
