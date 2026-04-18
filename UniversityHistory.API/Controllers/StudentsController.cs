@@ -140,6 +140,35 @@ public class StudentsController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:guid}/transfer-preview")]
+    public async Task<IActionResult> TransferPreview(Guid id, [FromBody] TransferPreviewRequestDto dto, CancellationToken ct)
+    {
+        var result = await _enrollmentService.PreviewTransferAsync(id, dto, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/group-transfers")]
+    public async Task<IActionResult> GetGroupTransfers(Guid id, CancellationToken ct)
+    {
+        var result = await _enrollmentService.GetGroupTransfersAsync(id, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/group-transfers/{transferId:guid}")]
+    public async Task<IActionResult> GetGroupTransferDetail(Guid id, Guid transferId, CancellationToken ct)
+    {
+        var result = await _enrollmentService.GetGroupTransferDetailAsync(id, transferId, ct);
+        return Ok(result);
+    }
+
+    [HttpPatch("{id:guid}/group-transfers/{transferId:guid}/difference-items/{itemId:guid}")]
+    public async Task<IActionResult> UpdateDifferenceItem(
+        Guid id, Guid transferId, Guid itemId, [FromBody] UpdateDifferenceItemDto dto, CancellationToken ct)
+    {
+        var result = await _enrollmentService.UpdateDifferenceItemAsync(id, transferId, itemId, dto, ct);
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}/grades")]
     public async Task<IActionResult> GetGrades(Guid id, CancellationToken ct,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)

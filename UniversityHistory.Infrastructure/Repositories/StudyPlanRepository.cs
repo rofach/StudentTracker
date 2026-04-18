@@ -14,7 +14,6 @@ public class StudyPlanRepository : IStudyPlanRepository
         _db = db;
     }
 
-
     public StudyPlan AddPlan(StudyPlan plan) { _db.StudyPlans.Add(plan); return plan; }
     public void UpdatePlan(StudyPlan plan) => _db.StudyPlans.Update(plan);
     public void DeletePlan(StudyPlan plan) => _db.StudyPlans.Remove(plan);
@@ -71,19 +70,20 @@ public class StudyPlanRepository : IStudyPlanRepository
         _db.StudentCourseEnrollments.AddRange(enrollments);
     }
 
+    public void RemoveCourseEnrollments(IEnumerable<StudentCourseEnrollment> enrollments)
+    {
+        _db.StudentCourseEnrollments.RemoveRange(enrollments);
+    }
+
     public async Task<IEnumerable<StudentCourseEnrollment>> GetCourseEnrollmentsByEnrollmentIdAsync(
         Guid enrollmentId, CancellationToken ct = default)
     {
         return await _db.StudentCourseEnrollments
             .Include(ce => ce.PlanDiscipline)
                 .ThenInclude(pd => pd.Discipline)
+            .Include(ce => ce.GradeRecords)
             .Where(ce => ce.EnrollmentId == enrollmentId)
             .ToListAsync(ct);
-    }
-
-    public void RemoveCourseEnrollments(IEnumerable<StudentCourseEnrollment> enrollments)
-    {
-        _db.StudentCourseEnrollments.RemoveRange(enrollments);
     }
 
     public async Task RemovePlannedCourseEnrollmentsForDisciplineAsync(
@@ -99,4 +99,3 @@ public class StudyPlanRepository : IStudyPlanRepository
             _db.StudentCourseEnrollments.RemoveRange(rows);
     }
 }
-

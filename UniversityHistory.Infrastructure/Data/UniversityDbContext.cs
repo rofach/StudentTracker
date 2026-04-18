@@ -24,6 +24,8 @@ public class UniversityDbContext : DbContext
     public DbSet<StudentSubgroupEnrollment> StudentSubgroupEnrollments => Set<StudentSubgroupEnrollment>();
     public DbSet<AcademicUnit> AcademicUnits => Set<AcademicUnit>();
     public DbSet<Department> Departments => Set<Department>();
+    public DbSet<StudentGroupTransfer> StudentGroupTransfers => Set<StudentGroupTransfer>();
+    public DbSet<AcademicDifferenceItem> AcademicDifferenceItems => Set<AcademicDifferenceItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -288,6 +290,47 @@ public class UniversityDbContext : DbContext
             e.HasIndex(gr => gr.CourseEnrollmentId).IsUnique();
             e.HasOne(gr => gr.CourseEnrollment).WithMany(ce => ce.GradeRecords)
                 .HasForeignKey(gr => gr.CourseEnrollmentId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<StudentGroupTransfer>(e =>
+        {
+            e.ToTable("Student_Group_Transfer");
+            e.HasKey(t => t.TransferId);
+            e.Property(t => t.TransferId).HasColumnName("transfer_id");
+            e.Property(t => t.OldEnrollmentId).HasColumnName("old_enrollment_id");
+            e.Property(t => t.NewEnrollmentId).HasColumnName("new_enrollment_id");
+            e.Property(t => t.TransferDate).HasColumnName("transfer_date").IsRequired();
+            e.Property(t => t.Reason).HasColumnName("reason").HasMaxLength(200).IsRequired();
+            e.HasOne(t => t.OldEnrollment).WithMany()
+                .HasForeignKey(t => t.OldEnrollmentId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(t => t.NewEnrollment).WithMany()
+                .HasForeignKey(t => t.NewEnrollmentId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(t => t.OldEnrollmentId).HasDatabaseName("IX_StudentGroupTransfer_OldEnrollmentId");
+            e.HasIndex(t => t.NewEnrollmentId).HasDatabaseName("IX_StudentGroupTransfer_NewEnrollmentId");
+        });
+
+        modelBuilder.Entity<AcademicDifferenceItem>(e =>
+        {
+            e.ToTable("Academic_Difference_Item");
+            e.HasKey(d => d.DifferenceItemId);
+            e.Property(d => d.DifferenceItemId).HasColumnName("difference_item_id");
+            e.Property(d => d.TransferId).HasColumnName("transfer_id");
+            e.Property(d => d.PlanDisciplineId).HasColumnName("plan_discipline_id");
+            e.Property(d => d.Status)
+                .HasColumnName("status")
+                .HasMaxLength(20)
+                .HasConversion<string>()
+                .HasDefaultValueSql("'Pending'");
+            e.ToTable(t => t.HasCheckConstraint(
+                "chk_diff_item_status",
+                "status IN ('Pending','Completed','Waived')"));
+            e.Property(d => d.Notes).HasColumnName("notes").HasMaxLength(500);
+            e.HasOne(d => d.Transfer).WithMany(t => t.DifferenceItems)
+                .HasForeignKey(d => d.TransferId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(d => d.PlanDiscipline).WithMany()
+                .HasForeignKey(d => d.PlanDisciplineId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(d => new { d.TransferId, d.PlanDisciplineId }).IsUnique()
+                .HasDatabaseName("UX_AcademicDifferenceItem_TransferId_PlanDisciplineId");
         });
 
         modelBuilder.Seed();

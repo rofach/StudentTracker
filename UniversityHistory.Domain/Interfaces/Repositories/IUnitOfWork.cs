@@ -14,6 +14,7 @@ public interface IUnitOfWork
     IAcademicUnitRepository AcademicUnits { get; }
     IDepartmentRepository Departments { get; }
     IGroupPlanAssignmentRepository GroupPlanAssignments { get; }
+    IStudentGroupTransferRepository GroupTransfers { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

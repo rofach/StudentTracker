@@ -85,4 +85,53 @@ public record AssignSubgroupDto(Guid SubgroupId);
 
 public record MoveStudentToSubgroupDto(Guid NewSubgroupId, DateOnly MoveDate, string Reason);
 
+public record TransferPreviewRequestDto(Guid NewGroupId, DateOnly MoveDate);
 
+public record TransferPreviewDisciplineDto(
+    Guid DisciplineId,
+    string DisciplineName,
+    int SemesterNo
+);
+
+public record TransferPreviewDto(
+    Guid? CurrentPlanId,
+    string? CurrentPlanName,
+    Guid? TargetPlanId,
+    string? TargetPlanName,
+    IEnumerable<TransferPreviewDisciplineDto> DisciplinesToKeep,
+    IEnumerable<TransferPreviewDisciplineDto> PlannedToRemove,
+    IEnumerable<TransferPreviewDisciplineDto> NewDisciplinesToAdd
+);
+
+public record AcademicDifferenceItemDto(
+    Guid DifferenceItemId,
+    Guid TransferId,
+    Guid PlanDisciplineId,
+    string DisciplineName,
+    int SemesterNo,
+    string Status,
+    string? Notes
+);
+
+public record UpdateDifferenceItemDto(string Status, string? Notes);
+
+public record StudentGroupTransferDto(
+    Guid TransferId,
+    Guid StudentId,
+    Guid OldEnrollmentId,
+    Guid NewEnrollmentId,
+    DateOnly TransferDate,
+    string Reason
+);
+
+public record StudentGroupTransferDetailDto(
+    Guid TransferId,
+    Guid StudentId,
+    Guid OldEnrollmentId,
+    string OldGroupCode,
+    Guid NewEnrollmentId,
+    string NewGroupCode,
+    DateOnly TransferDate,
+    string Reason,
+    IEnumerable<AcademicDifferenceItemDto> DifferenceItems
+);

@@ -20,7 +20,9 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
     public async Task<GroupPlanAssignment?> GetActiveOnDateAsync(Guid groupId, DateOnly date, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments
-            .Include(a => a.Plan).ThenInclude(p => p.PlanDisciplines)
+            .Include(a => a.Plan)
+                .ThenInclude(p => p.PlanDisciplines)
+                    .ThenInclude(pd => pd.Discipline)
             .Where(a => a.GroupId == groupId
                      && a.DateFrom <= date
                      && (a.DateTo == null || a.DateTo >= date))

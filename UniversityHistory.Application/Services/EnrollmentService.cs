@@ -95,8 +95,16 @@ public class EnrollmentService : IEnrollmentService
         if (dto.MoveDate <= current.DateFrom)
             throw new DomainException("Move date cannot be before the current enrollment's start date.");
 
-        var oldCourses = (await _unitOfWork.StudyPlans.GetCourseEnrollmentsByEnrollmentIdAsync(current.EnrollmentId, ct)).ToList();
-        var toRemove = oldCourses.Where(ce => ce.Status == CourseStatus.Planned).ToList();
+        var activePlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(dto.NewGroupId, dto.MoveDate, ct)
+            ?? throw new DomainException("Target group has no active study plan on the transfer date.");
+
+        var oldCourses = (await _unitOfWork.StudyPlans
+            .GetCourseEnrollmentsByEnrollmentIdAsync(current.EnrollmentId, ct)).ToList();
+        var coveredDisciplineIds = await GetCoveredDisciplineIdsAsync(studentId, ct);
+
+        var toRemove = oldCourses
+            .Where(ce => ce.Status == CourseStatus.Planned && !ce.GradeRecords.Any())
+            .ToList();
         _unitOfWork.StudyPlans.RemoveCourseEnrollments(toRemove);
 
         var openSubgroupEnrollment = await _unitOfWork.SubgroupEnrollments
@@ -124,25 +132,178 @@ public class EnrollmentService : IEnrollmentService
         _unitOfWork.Enrollments.Add(newEnrollment);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        var activePlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(dto.NewGroupId, dto.MoveDate, ct);
-        if (activePlan is not null)
-        {
-            var completedDisciplineIds = oldCourses
-                .Where(ce => ce.Status != CourseStatus.Planned)
-                .Select(ce => ce.PlanDiscipline.DisciplineId)
-                .ToHashSet();
+        var newCourses = StudyPlanService.GenerateCourseEnrollments(
+                newEnrollment.EnrollmentId, activePlan.GroupPlanAssignmentId, dto.MoveDate, activePlan.Plan)
+            .Where(ce => !coveredDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
+            .ToList();
+        _unitOfWork.StudyPlans.AddCourseEnrollments(newCourses);
 
-            var newCourses = StudyPlanService.GenerateCourseEnrollments(
-                    newEnrollment.EnrollmentId, activePlan.GroupPlanAssignmentId, dto.MoveDate, activePlan.Plan)
-                .Where(ce => !completedDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
-                .ToList();
-            _unitOfWork.StudyPlans.AddCourseEnrollments(newCourses);
+        var groupTransfer = new StudentGroupTransfer
+        {
+            OldEnrollmentId = current.EnrollmentId,
+            NewEnrollmentId = newEnrollment.EnrollmentId,
+            TransferDate = dto.MoveDate,
+            Reason = dto.ReasonStart
+        };
+        _unitOfWork.GroupTransfers.Add(groupTransfer);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        var differenceItems = activePlan.Plan.PlanDisciplines
+            .Where(pd => !coveredDisciplineIds.Contains(pd.DisciplineId))
+            .Select(pd => new AcademicDifferenceItem
+            {
+                TransferId = groupTransfer.TransferId,
+                PlanDisciplineId = pd.PlanDisciplineId,
+                Status = DifferenceItemStatus.Pending
+            })
+            .ToList();
+
+        if (differenceItems.Count > 0)
+        {
+            _unitOfWork.GroupTransfers.AddDifferenceItems(differenceItems);
         }
 
         if (dto.NewSubgroupId.HasValue)
             OpenSubgroupEnrollment(newEnrollment.EnrollmentId, dto.NewSubgroupId.Value, dto.MoveDate, dto.ReasonStart);
 
         await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    public async Task<TransferPreviewDto> PreviewTransferAsync(
+        Guid studentId, TransferPreviewRequestDto dto, CancellationToken ct = default)
+    {
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        var current = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, ct)
+            ?? throw new DomainException($"Student {studentId} has no active enrollment.");
+
+        if (dto.MoveDate <= current.DateFrom)
+            throw new DomainException("Move date cannot be before the current enrollment's start date.");
+
+        _ = await _unitOfWork.Groups.GetByIdAsync(dto.NewGroupId, ct)
+            ?? throw new NotFoundException(nameof(StudyGroup), dto.NewGroupId);
+
+        var oldCourses = await GetStudentCourseHistoryAsync(studentId, ct);
+
+        var coveredDisciplineIds = GetCoveredDisciplineIds(oldCourses);
+
+        var plannedToRemove = oldCourses
+            .Where(ce => ce.EnrollmentId == current.EnrollmentId
+                      && ce.Status == CourseStatus.Planned
+                      && !ce.GradeRecords.Any())
+            .Select(ce => new TransferPreviewDisciplineDto(
+                ce.PlanDiscipline.DisciplineId,
+                ce.PlanDiscipline.Discipline.DisciplineName,
+                ce.PlanDiscipline.SemesterNo))
+            .ToList();
+
+        var keptCourses = oldCourses
+            .Where(ce => coveredDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
+            .Select(ce => new TransferPreviewDisciplineDto(
+                ce.PlanDiscipline.DisciplineId,
+                ce.PlanDiscipline.Discipline.DisciplineName,
+                ce.PlanDiscipline.SemesterNo))
+            .DistinctBy(d => d.DisciplineId)
+            .ToList();
+
+        var currentPlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(
+            current.GroupId, dto.MoveDate, ct);
+
+        var targetPlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(
+            dto.NewGroupId, dto.MoveDate, ct)
+            ?? throw new DomainException("Target group has no active study plan on the transfer date.");
+
+        var newToAdd = targetPlan.Plan.PlanDisciplines
+            .Where(pd => !coveredDisciplineIds.Contains(pd.DisciplineId))
+            .Select(pd => new TransferPreviewDisciplineDto(
+                pd.DisciplineId,
+                pd.Discipline.DisciplineName,
+                pd.SemesterNo))
+            .ToList();
+
+        return new TransferPreviewDto(
+            currentPlan?.PlanId,
+            currentPlan?.Plan.PlanName,
+            targetPlan?.PlanId,
+            targetPlan?.Plan.PlanName,
+            keptCourses,
+            plannedToRemove,
+            newToAdd);
+    }
+
+    public async Task<IEnumerable<StudentGroupTransferDto>> GetGroupTransfersAsync(
+        Guid studentId, CancellationToken ct = default)
+    {
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        var transfers = await _unitOfWork.GroupTransfers.GetByStudentIdAsync(studentId, ct);
+        return transfers.Select(t => new StudentGroupTransferDto(
+            t.TransferId,
+            t.OldEnrollment.StudentId,
+            t.OldEnrollmentId,
+            t.NewEnrollmentId,
+            t.TransferDate,
+            t.Reason));
+    }
+
+    public async Task<StudentGroupTransferDetailDto> GetGroupTransferDetailAsync(
+        Guid studentId, Guid transferId, CancellationToken ct = default)
+    {
+        var transfer = await _unitOfWork.GroupTransfers.GetByIdAsync(transferId, ct)
+            ?? throw new NotFoundException(nameof(StudentGroupTransfer), transferId);
+
+        if (transfer.OldEnrollment.StudentId != studentId)
+            throw new DomainException($"Transfer {transferId} does not belong to student {studentId}.");
+
+        return new StudentGroupTransferDetailDto(
+            transfer.TransferId,
+            transfer.OldEnrollment.StudentId,
+            transfer.OldEnrollmentId,
+            transfer.OldEnrollment.Group.GroupCode,
+            transfer.NewEnrollmentId,
+            transfer.NewEnrollment.Group.GroupCode,
+            transfer.TransferDate,
+            transfer.Reason,
+            transfer.DifferenceItems.Select(d => new AcademicDifferenceItemDto(
+                d.DifferenceItemId,
+                d.TransferId,
+                d.PlanDisciplineId,
+                d.PlanDiscipline.Discipline.DisciplineName,
+                d.PlanDiscipline.SemesterNo,
+                d.Status.ToString(),
+                d.Notes)));
+    }
+
+    public async Task<AcademicDifferenceItemDto> UpdateDifferenceItemAsync(
+        Guid studentId, Guid transferId, Guid itemId, UpdateDifferenceItemDto dto, CancellationToken ct = default)
+    {
+        var item = await _unitOfWork.GroupTransfers.GetDifferenceItemByIdAsync(itemId, ct)
+            ?? throw new NotFoundException(nameof(AcademicDifferenceItem), itemId);
+
+        if (item.TransferId != transferId)
+            throw new DomainException($"Difference item {itemId} does not belong to transfer {transferId}.");
+
+        if (item.Transfer.OldEnrollment.StudentId != studentId)
+            throw new DomainException($"Transfer {transferId} does not belong to student {studentId}.");
+
+        if (!Enum.TryParse<DifferenceItemStatus>(dto.Status, ignoreCase: true, out var newStatus))
+            throw new DomainException($"Invalid status '{dto.Status}'. Valid values: Pending, Completed, Waived.");
+
+        item.Status = newStatus;
+        item.Notes = dto.Notes;
+        _unitOfWork.GroupTransfers.UpdateDifferenceItem(item);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return new AcademicDifferenceItemDto(
+            item.DifferenceItemId,
+            item.TransferId,
+            item.PlanDisciplineId,
+            item.PlanDiscipline.Discipline.DisciplineName,
+            item.PlanDiscipline.SemesterNo,
+            item.Status.ToString(),
+            item.Notes);
     }
 
     public async Task AssignSubgroupAsync(Guid enrollmentId, AssignSubgroupDto dto, CancellationToken ct = default)
@@ -201,6 +362,35 @@ public class EnrollmentService : IEnrollmentService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
+    private static HashSet<Guid> GetCoveredDisciplineIds(List<StudentCourseEnrollment> courses)
+    {
+        return courses
+            .Where(ce => ce.Status != CourseStatus.Planned || ce.GradeRecords.Any())
+            .Select(ce => ce.PlanDiscipline.DisciplineId)
+            .ToHashSet();
+    }
+
+    private async Task<HashSet<Guid>> GetCoveredDisciplineIdsAsync(Guid studentId, CancellationToken ct)
+    {
+        var courses = await GetStudentCourseHistoryAsync(studentId, ct);
+        return GetCoveredDisciplineIds(courses);
+    }
+
+    private async Task<List<StudentCourseEnrollment>> GetStudentCourseHistoryAsync(Guid studentId, CancellationToken ct)
+    {
+        var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
+        var courses = new List<StudentCourseEnrollment>();
+
+        foreach (var enrollment in enrollments)
+        {
+            var enrollmentCourses = await _unitOfWork.StudyPlans
+                .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct);
+            courses.AddRange(enrollmentCourses);
+        }
+
+        return courses;
+    }
+
     private void OpenSubgroupEnrollment(Guid enrollmentId, Guid subgroupId, DateOnly dateFrom, string reason)
     {
         _unitOfWork.SubgroupEnrollments.Add(new StudentSubgroupEnrollment
@@ -212,5 +402,4 @@ public class EnrollmentService : IEnrollmentService
             Reason = reason
         });
     }
-
 }
