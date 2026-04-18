@@ -16,7 +16,7 @@ public class UnitOfWork : IUnitOfWork
         IExternalTransferRepository externalTransfers,
         IStudyPlanRepository studyPlans,
         IGradeRepository grades,
-        ISubgroupAssignmentRepository subgroupAssignments,
+        IStudentSubgroupEnrollmentRepository subgroupEnrollments,
         IDisciplineRepository disciplines,
         IAcademicUnitRepository academicUnits,
         IDepartmentRepository departments,
@@ -30,7 +30,7 @@ public class UnitOfWork : IUnitOfWork
         ExternalTransfers = externalTransfers;
         StudyPlans = studyPlans;
         Grades = grades;
-        SubgroupAssignments = subgroupAssignments;
+        SubgroupEnrollments = subgroupEnrollments;
         Disciplines = disciplines;
         AcademicUnits = academicUnits;
         Departments = departments;
@@ -44,7 +44,7 @@ public class UnitOfWork : IUnitOfWork
     public IExternalTransferRepository ExternalTransfers { get; }
     public IStudyPlanRepository StudyPlans { get; }
     public IGradeRepository Grades { get; }
-    public ISubgroupAssignmentRepository SubgroupAssignments { get; }
+    public IStudentSubgroupEnrollmentRepository SubgroupEnrollments { get; }
     public IDisciplineRepository Disciplines { get; }
     public IAcademicUnitRepository AcademicUnits { get; }
     public IDepartmentRepository Departments { get; }
@@ -53,4 +53,3 @@ public class UnitOfWork : IUnitOfWork
     public Task<int> SaveChangesAsync(CancellationToken ct = default) =>
         _db.SaveChangesAsync(ct);
 }
-

@@ -62,14 +62,14 @@ public class StudyPlansController : ControllerBase
         return CreatedAtAction(nameof(GetDisciplines), new { id }, result);
     }
 
-    [HttpPut("{id:guid}/disciplines/{disciplineId:int}")]
+    [HttpPut("{id:guid}/disciplines/{disciplineId:guid}")]
     public async Task<IActionResult> UpdateDiscipline(Guid id, Guid disciplineId, [FromBody] UpdatePlanDisciplineDto dto, CancellationToken ct)
     {
         var result = await _service.UpdatePlanDisciplineAsync(id, disciplineId, dto, ct);
         return Ok(result);
     }
 
-    [HttpDelete("{id:guid}/disciplines/{disciplineId:int}")]
+    [HttpDelete("{id:guid}/disciplines/{disciplineId:guid}")]
     public async Task<IActionResult> DeleteDiscipline(Guid id, Guid disciplineId, CancellationToken ct)
     {
         await _service.DeletePlanDisciplineAsync(id, disciplineId, ct);

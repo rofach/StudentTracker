@@ -64,13 +64,8 @@ public class GradeService : IGradeService
 
     private static int ResolveSemesterNo(GradeRecord grade)
     {
-        var semesterNo = grade.CourseEnrollment.GroupPlanAssignment.Plan.PlanDisciplines
-            .SingleOrDefault(pd => pd.DisciplineId == grade.CourseEnrollment.DisciplineId)
-            ?.SemesterNo;
-
-        return semesterNo ?? throw new DomainException(
-            $"No semester mapping found in plan {grade.CourseEnrollment.GroupPlanAssignment.PlanId} " +
-            $"for discipline {grade.CourseEnrollment.DisciplineId}.");
+        return grade.CourseEnrollment.PlanDiscipline?.SemesterNo ?? throw new DomainException(
+            $"No semester mapping found for plan discipline {grade.CourseEnrollment.PlanDisciplineId}.");
     }
 }
 

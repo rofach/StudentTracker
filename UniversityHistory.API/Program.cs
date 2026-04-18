@@ -32,7 +32,7 @@ builder.Services.AddScoped<IAcademicLeaveRepository, AcademicLeaveRepository>();
 builder.Services.AddScoped<IExternalTransferRepository, ExternalTransferRepository>();
 builder.Services.AddScoped<IStudyPlanRepository, StudyPlanRepository>();
 builder.Services.AddScoped<IGradeRepository, GradeRepository>();
-builder.Services.AddScoped<ISubgroupAssignmentRepository, SubgroupAssignmentRepository>();
+builder.Services.AddScoped<IStudentSubgroupEnrollmentRepository, StudentSubgroupEnrollmentRepository>();
 builder.Services.AddScoped<IDisciplineRepository, DisciplineRepository>();
 builder.Services.AddScoped<IAcademicUnitRepository, AcademicUnitRepository>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();

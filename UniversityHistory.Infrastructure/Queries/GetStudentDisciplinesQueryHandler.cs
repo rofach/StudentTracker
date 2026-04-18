@@ -21,7 +21,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
 
         var rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
             SELECT DISTINCT
-                ce.discipline_id                                                        AS DisciplineId,
+                pd.discipline_id                                                        AS DisciplineId,
                 d.discipline_name                                                       AS DisciplineName,
                 pd.semester_no                                                          AS SemesterNo,
                 ce.academic_year_start                                                  AS AcademicYearStart,
@@ -34,23 +34,22 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
                         FROM Grade_Record gr
                         JOIN Student_Course_Enrollment ce_inner
                             ON ce_inner.course_enrollment_id = gr.course_enrollment_id
+                        JOIN Plan_Disciplines pd_inner
+                            ON pd_inner.plan_discipline_id = ce_inner.plan_discipline_id
                         JOIN Student_Group_Enrollment e_inner
                             ON e_inner.enrollment_id = ce_inner.enrollment_id
                         WHERE e_inner.student_id = {studentId}
-                          AND ce_inner.discipline_id = ce.discipline_id
+                          AND pd_inner.discipline_id = pd.discipline_id
                     ) THEN 1
                     ELSE 0
                 END AS bit)                                                             AS HasGrade
             FROM Student_Course_Enrollment ce
             JOIN Student_Group_Enrollment e
                 ON e.enrollment_id = ce.enrollment_id
-            JOIN Group_Plan_Assignment gpa
-                ON gpa.group_plan_assignment_id = ce.group_plan_assignment_id
             JOIN Plan_Disciplines pd
-                ON pd.plan_id = gpa.plan_id
-               AND pd.discipline_id = ce.discipline_id
+                ON pd.plan_discipline_id = ce.plan_discipline_id
             JOIN Discipline d
-                ON d.discipline_id = ce.discipline_id
+                ON d.discipline_id = pd.discipline_id
             WHERE e.student_id = {studentId}
             ORDER BY pd.semester_no, d.discipline_name
             """)

@@ -47,36 +47,36 @@ public static class ModelBuilderExtensions
 
         var planDisciplines = new[]
         {
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(1), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(2), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(3), SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(5), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(4), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(6), SemesterNo = 3, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(7), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(12), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(8), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(10), SemesterNo = 5, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(1), DisciplineId = Id(9), SemesterNo = 5, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(101), PlanId = Id(1), DisciplineId = Id(1), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(102), PlanId = Id(1), DisciplineId = Id(2), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(103), PlanId = Id(1), DisciplineId = Id(3), SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(104), PlanId = Id(1), DisciplineId = Id(5), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(105), PlanId = Id(1), DisciplineId = Id(4), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(106), PlanId = Id(1), DisciplineId = Id(6), SemesterNo = 3, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(107), PlanId = Id(1), DisciplineId = Id(7), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(108), PlanId = Id(1), DisciplineId = Id(12), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(109), PlanId = Id(1), DisciplineId = Id(8), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(110), PlanId = Id(1), DisciplineId = Id(10), SemesterNo = 5, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(111), PlanId = Id(1), DisciplineId = Id(9), SemesterNo = 5, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
 
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(1), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(2), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(3), SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(5), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(6), SemesterNo = 2, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(7), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(10), SemesterNo = 3, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(8), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(2), DisciplineId = Id(9), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(112), PlanId = Id(2), DisciplineId = Id(1), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(113), PlanId = Id(2), DisciplineId = Id(2), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(114), PlanId = Id(2), DisciplineId = Id(3), SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(115), PlanId = Id(2), DisciplineId = Id(5), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(116), PlanId = Id(2), DisciplineId = Id(6), SemesterNo = 2, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(117), PlanId = Id(2), DisciplineId = Id(7), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(118), PlanId = Id(2), DisciplineId = Id(10), SemesterNo = 3, ControlType = ControlType.Coursework, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(119), PlanId = Id(2), DisciplineId = Id(8), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(120), PlanId = Id(2), DisciplineId = Id(9), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
 
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(1), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(2), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(5), SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(11), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(4), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(8), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(9), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
-            new PlanDiscipline { PlanId = Id(3), DisciplineId = Id(7), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m }
+            new PlanDiscipline { PlanDisciplineId = Id(121), PlanId = Id(3), DisciplineId = Id(1), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(122), PlanId = Id(3), DisciplineId = Id(2), SemesterNo = 1, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(123), PlanId = Id(3), DisciplineId = Id(5), SemesterNo = 1, ControlType = ControlType.Credit, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(124), PlanId = Id(3), DisciplineId = Id(11), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(125), PlanId = Id(3), DisciplineId = Id(4), SemesterNo = 2, ControlType = ControlType.Exam, Hours = 180, Credits = 6.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(126), PlanId = Id(3), DisciplineId = Id(8), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(127), PlanId = Id(3), DisciplineId = Id(9), SemesterNo = 3, ControlType = ControlType.Exam, Hours = 120, Credits = 4.0m },
+            new PlanDiscipline { PlanDisciplineId = Id(128), PlanId = Id(3), DisciplineId = Id(7), SemesterNo = 4, ControlType = ControlType.Exam, Hours = 150, Credits = 5.0m }
         };
 
         var academicUnits = new[]
@@ -180,32 +180,32 @@ public static class ModelBuilderExtensions
             new StudentGroupEnrollment { EnrollmentId = Id(26), StudentId = Id(24), GroupId = Id(4), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, ReasonStart = "Вступ", ReasonEnd = null }
         };
 
-        var subgroupAssignments = new[]
+        var subgroupEnrollments = new[]
         {
-            new StudentSubgroupAssignment { EnrollmentId = Id(1), SubgroupId = Id(1) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(2), SubgroupId = Id(3) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(3), SubgroupId = Id(2) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(4), SubgroupId = Id(4) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(5), SubgroupId = Id(5) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(7), SubgroupId = Id(6) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(8), SubgroupId = Id(5) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(9), SubgroupId = Id(6) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(10), SubgroupId = Id(5) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(11), SubgroupId = Id(7) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(12), SubgroupId = Id(8) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(13), SubgroupId = Id(9) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(14), SubgroupId = Id(1) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(15), SubgroupId = Id(10) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(17), SubgroupId = Id(8) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(18), SubgroupId = Id(3) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(19), SubgroupId = Id(6) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(20), SubgroupId = Id(9) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(21), SubgroupId = Id(6) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(22), SubgroupId = Id(7) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(23), SubgroupId = Id(11) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(24), SubgroupId = Id(12) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(25), SubgroupId = Id(11) },
-            new StudentSubgroupAssignment { EnrollmentId = Id(26), SubgroupId = Id(8) }
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(301), EnrollmentId = Id(1), SubgroupId = Id(1), DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2022, 8, 31), Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(302), EnrollmentId = Id(2), SubgroupId = Id(3), DateFrom = new DateOnly(2022, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(303), EnrollmentId = Id(3), SubgroupId = Id(2), DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30), Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(304), EnrollmentId = Id(4), SubgroupId = Id(4), DateFrom = new DateOnly(2022, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(305), EnrollmentId = Id(5), SubgroupId = Id(5), DateFrom = new DateOnly(2023, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(306), EnrollmentId = Id(7), SubgroupId = Id(6), DateFrom = new DateOnly(2023, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(307), EnrollmentId = Id(8), SubgroupId = Id(5), DateFrom = new DateOnly(2023, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(308), EnrollmentId = Id(9), SubgroupId = Id(6), DateFrom = new DateOnly(2023, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(309), EnrollmentId = Id(10), SubgroupId = Id(5), DateFrom = new DateOnly(2023, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(310), EnrollmentId = Id(11), SubgroupId = Id(7), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(311), EnrollmentId = Id(12), SubgroupId = Id(8), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(312), EnrollmentId = Id(13), SubgroupId = Id(9), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(313), EnrollmentId = Id(14), SubgroupId = Id(1), DateFrom = new DateOnly(2021, 9, 1), DateTo = new DateOnly(2025, 6, 30), Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(314), EnrollmentId = Id(15), SubgroupId = Id(10), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(315), EnrollmentId = Id(17), SubgroupId = Id(8), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(316), EnrollmentId = Id(18), SubgroupId = Id(3), DateFrom = new DateOnly(2022, 9, 1), DateTo = new DateOnly(2024, 8, 31), Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(317), EnrollmentId = Id(19), SubgroupId = Id(6), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(318), EnrollmentId = Id(20), SubgroupId = Id(9), DateFrom = new DateOnly(2024, 9, 1), DateTo = new DateOnly(2025, 2, 1), Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(319), EnrollmentId = Id(21), SubgroupId = Id(6), DateFrom = new DateOnly(2023, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(320), EnrollmentId = Id(22), SubgroupId = Id(7), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(321), EnrollmentId = Id(23), SubgroupId = Id(11), DateFrom = new DateOnly(2025, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(322), EnrollmentId = Id(24), SubgroupId = Id(12), DateFrom = new DateOnly(2025, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(323), EnrollmentId = Id(25), SubgroupId = Id(11), DateFrom = new DateOnly(2025, 9, 1), DateTo = null, Reason = "Первинне призначення" },
+            new StudentSubgroupEnrollment { SubgroupEnrollmentId = Id(324), EnrollmentId = Id(26), SubgroupId = Id(8), DateFrom = new DateOnly(2024, 9, 1), DateTo = null, Reason = "Первинне призначення" }
         };
 
         var academicLeaves = new[]
@@ -214,6 +214,8 @@ public static class ModelBuilderExtensions
             new AcademicLeave { LeaveId = Id(2), EnrollmentId = Id(20), StartDate = new DateOnly(2025, 2, 2), EndDate = null, Reason = "Сімейні обставини" },
             new AcademicLeave { LeaveId = Id(3), EnrollmentId = Id(9), StartDate = new DateOnly(2024, 11, 4), EndDate = new DateOnly(2025, 1, 20), Reason = "Програма академічної мобільності" }
         };
+
+        academicLeaves[2].ReturnReason = "РџРѕРІРµСЂРЅРµРЅРЅСЏ РїС–СЃР»СЏ Р·Р°РІРµСЂС€РµРЅРЅСЏ РїСЂРѕРіСЂР°РјРё";
 
         var externalTransfers = new[]
         {
@@ -237,6 +239,10 @@ public static class ModelBuilderExtensions
         var gradeRecords = new List<GradeRecord>();
         int nextCourseEnrollmentId = 1;
         int nextGradeId = 1;
+        var planIdByAssignmentId = groupPlanAssignments.ToDictionary(a => a.GroupPlanAssignmentId, a => a.PlanId);
+        var planDisciplineIdByPlanAndDiscipline = planDisciplines.ToDictionary(
+            pd => (pd.PlanId, pd.DisciplineId),
+            pd => pd.PlanDisciplineId);
 
         DateOnly BuildAssessmentDate(int academicYearStart, Guid disciplineId)
         {
@@ -246,12 +252,14 @@ public static class ModelBuilderExtensions
         void AddCourse(Guid enrollmentId, Guid gpaId, Guid disciplineId, int academicYearStart, CourseStatus status, string? gradeValue = null)
         {
             var ceId = nextCourseEnrollmentId++;
+            var planId = planIdByAssignmentId[gpaId];
+            var planDisciplineId = planDisciplineIdByPlanAndDiscipline[(planId, disciplineId)];
             courseEnrollments.Add(new StudentCourseEnrollment
             {
                 CourseEnrollmentId = Id(ceId),
                 EnrollmentId = enrollmentId,
                 GroupPlanAssignmentId = gpaId,
-                DisciplineId = disciplineId,
+                PlanDisciplineId = planDisciplineId,
                 AcademicYearStart = academicYearStart,
                 Status = status
             });
@@ -382,7 +390,7 @@ public static class ModelBuilderExtensions
             (Id(2), CourseStatus.Completed, "90"),
             (Id(5), CourseStatus.Completed, "88"));
         AddCourses(Id(13), Id(5), 2025,
-            (Id(11), CourseStatus.InProgress, null));
+            (Id(6), CourseStatus.InProgress, null));
 
         AddCourses(Id(14), Id(1), 2021,
             (Id(1), CourseStatus.Completed, "97"),
@@ -478,7 +486,7 @@ public static class ModelBuilderExtensions
         modelBuilder.Entity<Subgroup>().HasData(subgroups);
         modelBuilder.Entity<Student>().HasData(students);
         modelBuilder.Entity<StudentGroupEnrollment>().HasData(enrollments);
-        modelBuilder.Entity<StudentSubgroupAssignment>().HasData(subgroupAssignments);
+        modelBuilder.Entity<StudentSubgroupEnrollment>().HasData(subgroupEnrollments);
         modelBuilder.Entity<AcademicLeave>().HasData(academicLeaves);
         modelBuilder.Entity<ExternalTransfer>().HasData(externalTransfers);
         modelBuilder.Entity<GroupPlanAssignment>().HasData(groupPlanAssignments);

@@ -77,4 +77,20 @@ public class AssignSubgroupDtoValidator : AppValidator<AssignSubgroupDto>
     }
 }
 
+public class MoveStudentToSubgroupDtoValidator : AppValidator<MoveStudentToSubgroupDto>
+{
+    public MoveStudentToSubgroupDtoValidator()
+    {
+        RuleFor(x => x.NewSubgroupId)
+            .NotEmpty();
+
+        RuleFor(x => x.MoveDate)
+            .NotDefaultDate();
+
+        RuleFor(x => x.Reason)
+            .NotEmpty()
+            .MaximumLength(200);
+    }
+}
+
 

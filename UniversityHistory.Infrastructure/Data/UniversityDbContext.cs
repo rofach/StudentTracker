@@ -21,7 +21,7 @@ public class UniversityDbContext : DbContext
     public DbSet<GroupPlanAssignment> GroupPlanAssignments => Set<GroupPlanAssignment>();
     public DbSet<StudentCourseEnrollment> StudentCourseEnrollments => Set<StudentCourseEnrollment>();
     public DbSet<GradeRecord> GradeRecords => Set<GradeRecord>();
-    public DbSet<StudentSubgroupAssignment> StudentSubgroupAssignments => Set<StudentSubgroupAssignment>();
+    public DbSet<StudentSubgroupEnrollment> StudentSubgroupEnrollments => Set<StudentSubgroupEnrollment>();
     public DbSet<AcademicUnit> AcademicUnits => Set<AcademicUnit>();
     public DbSet<Department> Departments => Set<Department>();
 
@@ -133,9 +133,11 @@ public class UniversityDbContext : DbContext
         modelBuilder.Entity<PlanDiscipline>(e =>
         {
             e.ToTable("Plan_Disciplines");
-            e.HasKey(pd => new { pd.PlanId, pd.DisciplineId });
+            e.HasKey(pd => pd.PlanDisciplineId);
+            e.Property(pd => pd.PlanDisciplineId).HasColumnName("plan_discipline_id");
             e.Property(pd => pd.PlanId).HasColumnName("plan_id");
             e.Property(pd => pd.DisciplineId).HasColumnName("discipline_id");
+            e.HasIndex(pd => new { pd.PlanId, pd.DisciplineId }).IsUnique();
             e.Property(pd => pd.SemesterNo).HasColumnName("semester_no").IsRequired();
             e.Property(pd => pd.ControlType)
                 .HasColumnName("control_type")
@@ -172,16 +174,28 @@ public class UniversityDbContext : DbContext
                 .HasDatabaseName("IX_Enrollment_GroupId_DateFrom");
         });
 
-        modelBuilder.Entity<StudentSubgroupAssignment>(e =>
+        modelBuilder.Entity<StudentSubgroupEnrollment>(e =>
         {
-            e.ToTable("Student_Subgroup_Assignment");
-            e.HasKey(sa => sa.EnrollmentId);
-            e.Property(sa => sa.EnrollmentId).HasColumnName("enrollment_id");
-            e.Property(sa => sa.SubgroupId).HasColumnName("subgroup_id");
-            e.HasOne(sa => sa.Enrollment).WithOne(en => en.SubgroupAssignment)
-                .HasForeignKey<StudentSubgroupAssignment>(sa => sa.EnrollmentId).OnDelete(DeleteBehavior.Cascade);
-            e.HasOne(sa => sa.Subgroup).WithMany(s => s.SubgroupAssignments)
-                .HasForeignKey(sa => sa.SubgroupId).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable("Student_Subgroup_Enrollment");
+            e.HasKey(se => se.SubgroupEnrollmentId);
+            e.Property(se => se.SubgroupEnrollmentId).HasColumnName("subgroup_enrollment_id");
+            e.Property(se => se.EnrollmentId).HasColumnName("enrollment_id");
+            e.Property(se => se.SubgroupId).HasColumnName("subgroup_id");
+            e.Property(se => se.DateFrom).HasColumnName("date_from").IsRequired();
+            e.Property(se => se.DateTo).HasColumnName("date_to");
+            e.Property(se => se.Reason).HasColumnName("reason").HasMaxLength(200).IsRequired();
+            e.HasOne(se => se.Enrollment).WithMany(en => en.SubgroupEnrollments)
+                .HasForeignKey(se => se.EnrollmentId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(se => se.Subgroup).WithMany(s => s.SubgroupEnrollments)
+                .HasForeignKey(se => se.SubgroupId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(se => new { se.EnrollmentId, se.DateFrom })
+                .HasDatabaseName("IX_StudentSubgroupEnrollment_EnrollmentId_DateFrom");
+            e.HasIndex(se => se.SubgroupId)
+                .HasDatabaseName("IX_StudentSubgroupEnrollment_SubgroupId");
+            e.HasIndex(se => se.EnrollmentId)
+                .IsUnique()
+                .HasFilter("[date_to] IS NULL")
+                .HasDatabaseName("UX_StudentSubgroupEnrollment_Open");
         });
 
         modelBuilder.Entity<AcademicLeave>(e =>
@@ -245,7 +259,7 @@ public class UniversityDbContext : DbContext
             e.Property(ce => ce.CourseEnrollmentId).HasColumnName("course_enrollment_id");
             e.Property(ce => ce.EnrollmentId).HasColumnName("enrollment_id");
             e.Property(ce => ce.GroupPlanAssignmentId).HasColumnName("group_plan_assignment_id");
-            e.Property(ce => ce.DisciplineId).HasColumnName("discipline_id");
+            e.Property(ce => ce.PlanDisciplineId).HasColumnName("plan_discipline_id");
             e.Property(ce => ce.AcademicYearStart).HasColumnName("academic_year_start").IsRequired();
             e.Property(ce => ce.Status)
                 .HasColumnName("status")
@@ -259,8 +273,8 @@ public class UniversityDbContext : DbContext
                 .HasForeignKey(ce => ce.EnrollmentId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(ce => ce.GroupPlanAssignment).WithMany(a => a.StudentCourseEnrollments)
                 .HasForeignKey(ce => ce.GroupPlanAssignmentId).OnDelete(DeleteBehavior.Restrict);
-            e.HasOne(ce => ce.Discipline).WithMany(d => d.CourseEnrollments)
-                .HasForeignKey(ce => ce.DisciplineId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(ce => ce.PlanDiscipline).WithMany(pd => pd.CourseEnrollments)
+                .HasForeignKey(ce => ce.PlanDisciplineId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<GradeRecord>(e =>

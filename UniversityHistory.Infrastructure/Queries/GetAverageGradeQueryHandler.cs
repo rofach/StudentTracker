@@ -28,12 +28,10 @@ public class GetAverageGradeQueryHandler : IGetAverageGradeQueryHandler
             FROM Grade_Record gr
             JOIN Student_Course_Enrollment ce  ON ce.course_enrollment_id = gr.course_enrollment_id
             JOIN Student_Group_Enrollment  e   ON e.enrollment_id         = ce.enrollment_id
-            JOIN Group_Plan_Assignment     gpa ON gpa.group_plan_assignment_id = ce.group_plan_assignment_id
-            JOIN Plan_Disciplines          pd  ON pd.plan_id              = gpa.plan_id
-                                               AND pd.discipline_id       = ce.discipline_id
+            JOIN Plan_Disciplines          pd  ON pd.plan_discipline_id   = ce.plan_discipline_id
             WHERE e.student_id                   = {studentId}
               AND ({semesterNo}   IS NULL OR pd.semester_no         = {semesterNo})
-              AND ({disciplineId} IS NULL OR ce.discipline_id       = {disciplineId})
+              AND ({disciplineId} IS NULL OR pd.discipline_id       = {disciplineId})
               AND ({academicYear} IS NULL OR ce.academic_year_start = {academicYear})
               AND TRY_CAST(gr.grade_value AS DECIMAL(10,2)) IS NOT NULL
             """)

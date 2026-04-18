@@ -9,7 +9,7 @@ public interface IUnitOfWork
     IExternalTransferRepository ExternalTransfers { get; }
     IStudyPlanRepository StudyPlans { get; }
     IGradeRepository Grades { get; }
-    ISubgroupAssignmentRepository SubgroupAssignments { get; }
+    IStudentSubgroupEnrollmentRepository SubgroupEnrollments { get; }
     IDisciplineRepository Disciplines { get; }
     IAcademicUnitRepository AcademicUnits { get; }
     IDepartmentRepository Departments { get; }

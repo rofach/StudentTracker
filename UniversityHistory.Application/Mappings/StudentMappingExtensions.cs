@@ -34,6 +34,8 @@ public static class StudentMappingExtensions
 
     public static EnrollmentSummaryDto ToDto(this StudentGroupEnrollment enrollment)
     {
+        var currentSubgroup = enrollment.SubgroupEnrollments
+            .FirstOrDefault(se => se.DateTo == null);
         return new EnrollmentSummaryDto(
             enrollment.EnrollmentId,
             enrollment.GroupId,
@@ -42,8 +44,8 @@ public static class StudentMappingExtensions
             enrollment.Group.Department.AcademicUnit.Name,
             enrollment.DateFrom,
             enrollment.DateTo,
-            enrollment.SubgroupAssignment?.SubgroupId,
-            enrollment.SubgroupAssignment?.Subgroup.SubgroupName);
+            currentSubgroup?.SubgroupId,
+            currentSubgroup?.Subgroup.SubgroupName);
     }
 
     public static StudentDetailDto ToDto(

@@ -16,12 +16,12 @@ public class EnrollmentRepository : IEnrollmentRepository
 
     public async Task<StudentGroupEnrollment?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-       return  await _db.StudentGroupEnrollments
+        return await _db.StudentGroupEnrollments
             .Include(e => e.Student)
             .Include(e => e.Group)
                 .ThenInclude(g => g.Subgroups)
-            .Include(e => e.SubgroupAssignment!)
-                .ThenInclude(sa => sa.Subgroup)
+            .Include(e => e.SubgroupEnrollments)
+                .ThenInclude(se => se.Subgroup)
             .FirstOrDefaultAsync(e => e.EnrollmentId == id, ct);
     }
 
@@ -30,8 +30,8 @@ public class EnrollmentRepository : IEnrollmentRepository
         return await _db.StudentGroupEnrollments
             .Include(e => e.Group)
                 .ThenInclude(g => g.Subgroups)
-            .Include(e => e.SubgroupAssignment!)
-                .ThenInclude(sa => sa.Subgroup)
+            .Include(e => e.SubgroupEnrollments)
+                .ThenInclude(se => se.Subgroup)
             .FirstOrDefaultAsync(e => e.StudentId == studentId && e.DateTo == null, ct);
     }
 
@@ -42,8 +42,8 @@ public class EnrollmentRepository : IEnrollmentRepository
             .Include(e => e.Group)
                 .ThenInclude(g => g.Department)
                     .ThenInclude(d => d.AcademicUnit)
-            .Include(e => e.SubgroupAssignment!)
-                .ThenInclude(sa => sa.Subgroup)
+            .Include(e => e.SubgroupEnrollments)
+                .ThenInclude(se => se.Subgroup)
             .Where(e => e.StudentId == studentId)
             .OrderBy(e => e.DateFrom)
             .ToListAsync(ct);
@@ -55,8 +55,8 @@ public class EnrollmentRepository : IEnrollmentRepository
         return await _db.StudentGroupEnrollments
             .AsNoTracking()
             .Include(e => e.Student)
-            .Include(e => e.SubgroupAssignment!)
-                .ThenInclude(sa => sa.Subgroup)
+            .Include(e => e.SubgroupEnrollments)
+                .ThenInclude(se => se.Subgroup)
             .Where(e => e.GroupId == groupId
                      && e.DateFrom <= date
                      && (e.DateTo == null || e.DateTo >= date))
@@ -116,4 +116,3 @@ public class EnrollmentRepository : IEnrollmentRepository
         _db.StudentGroupEnrollments.Update(enrollment);
     }
 }
-

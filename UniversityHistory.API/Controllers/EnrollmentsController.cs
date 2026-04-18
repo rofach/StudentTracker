@@ -35,5 +35,13 @@ public class EnrollmentsController : ControllerBase
         await _enrollmentService.AssignSubgroupAsync(id, dto, ct);
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/subgroup-move")]
+    public async Task<IActionResult> MoveSubgroup(Guid id, [FromBody] MoveStudentToSubgroupDto dto, CancellationToken ct)
+    {
+        await _enrollmentService.MoveSubgroupAsync(id, dto, ct);
+        return NoContent();
+    }
 }
+
 

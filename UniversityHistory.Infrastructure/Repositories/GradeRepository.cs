@@ -15,11 +15,10 @@ public class GradeRepository : IGradeRepository
     {
         var query = _db.GradeRecords.AsNoTracking()
             .Include(g => g.CourseEnrollment)
-                .ThenInclude(ce => ce.Discipline)
+                .ThenInclude(ce => ce.PlanDiscipline)
+                    .ThenInclude(pd => pd.Discipline)
             .Include(g => g.CourseEnrollment)
-                .ThenInclude(ce => ce.GroupPlanAssignment)
-                    .ThenInclude(a => a.Plan)
-                        .ThenInclude(p => p.PlanDisciplines)
+                .ThenInclude(ce => ce.PlanDiscipline)
             .Where(g => g.CourseEnrollment.Enrollment.StudentId == studentId);
 
         var count = await query.CountAsync(ct);

@@ -4,6 +4,7 @@ namespace UniversityHistory.Domain.Entities;
 
 public class PlanDiscipline
 {
+    public Guid PlanDisciplineId { get; set; }
     public Guid PlanId { get; set; }
     public Guid DisciplineId { get; set; }
     public int SemesterNo { get; set; }
@@ -13,5 +14,6 @@ public class PlanDiscipline
 
     public StudyPlan Plan { get; set; } = null!;
     public Discipline Discipline { get; set; } = null!;
+    public ICollection<StudentCourseEnrollment> CourseEnrollments { get; set; } = new List<StudentCourseEnrollment>();
 }
 

@@ -61,8 +61,8 @@ public class StudyPlanRepository : IStudyPlanRepository
     public async Task<bool> PlanDisciplineIsUsedAsync(Guid planId, Guid disciplineId, CancellationToken ct = default)
     {
         return await _db.StudentCourseEnrollments
-            .AnyAsync(ce => ce.GroupPlanAssignment.PlanId == planId
-                         && ce.DisciplineId == disciplineId
+            .AnyAsync(ce => ce.PlanDiscipline.PlanId == planId
+                         && ce.PlanDiscipline.DisciplineId == disciplineId
                          && ce.Status != CourseStatus.Planned, ct);
     }
 
@@ -75,6 +75,8 @@ public class StudyPlanRepository : IStudyPlanRepository
         Guid enrollmentId, CancellationToken ct = default)
     {
         return await _db.StudentCourseEnrollments
+            .Include(ce => ce.PlanDiscipline)
+                .ThenInclude(pd => pd.Discipline)
             .Where(ce => ce.EnrollmentId == enrollmentId)
             .ToListAsync(ct);
     }
@@ -88,8 +90,8 @@ public class StudyPlanRepository : IStudyPlanRepository
         Guid planId, Guid disciplineId, CancellationToken ct = default)
     {
         var rows = await _db.StudentCourseEnrollments
-            .Where(ce => ce.GroupPlanAssignment.PlanId == planId
-                      && ce.DisciplineId == disciplineId
+            .Where(ce => ce.PlanDiscipline.PlanId == planId
+                      && ce.PlanDiscipline.DisciplineId == disciplineId
                       && ce.Status == CourseStatus.Planned)
             .ToListAsync(ct);
 

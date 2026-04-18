@@ -12,8 +12,7 @@ public class StudentGroupEnrollment
 
     public Student Student { get; set; } = null!;
     public StudyGroup Group { get; set; } = null!;
-    public StudentSubgroupAssignment? SubgroupAssignment { get; set; }
     public ICollection<AcademicLeave> AcademicLeaves { get; set; } = new List<AcademicLeave>();
     public ICollection<StudentCourseEnrollment> CourseEnrollments { get; set; } = new List<StudentCourseEnrollment>();
+    public ICollection<StudentSubgroupEnrollment> SubgroupEnrollments { get; set; } = new List<StudentSubgroupEnrollment>();
 }
-

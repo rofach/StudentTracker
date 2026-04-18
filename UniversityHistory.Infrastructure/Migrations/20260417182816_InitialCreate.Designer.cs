@@ -12,7 +12,7 @@ using UniversityHistory.Infrastructure.Data;
 namespace UniversityHistory.Infrastructure.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    [Migration("20260415142658_InitialCreate")]
+    [Migration("20260417182816_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -81,6 +81,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                             EndDate = new DateOnly(2025, 1, 20),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             Reason = "Програма академічної мобільності",
+                            ReturnReason = "РџРѕРІРµСЂРЅРµРЅРЅСЏ РїС–СЃР»СЏ Р·Р°РІРµСЂС€РµРЅРЅСЏ РїСЂРѕРіСЂР°РјРё",
                             StartDate = new DateOnly(2024, 11, 4)
                         });
                 });
@@ -1185,13 +1186,10 @@ namespace UniversityHistory.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.PlanDiscipline", b =>
                 {
-                    b.Property<Guid>("PlanId")
+                    b.Property<Guid>("PlanDisciplineId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("plan_id");
-
-                    b.Property<Guid>("DisciplineId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("discipline_id");
+                        .HasColumnName("plan_discipline_id");
 
                     b.Property<string>("ControlType")
                         .IsRequired()
@@ -1204,17 +1202,28 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("decimal(4,2)")
                         .HasColumnName("credits");
 
+                    b.Property<Guid>("DisciplineId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("discipline_id");
+
                     b.Property<int>("Hours")
                         .HasColumnType("int")
                         .HasColumnName("hours");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_id");
 
                     b.Property<int>("SemesterNo")
                         .HasColumnType("int")
                         .HasColumnName("semester_no");
 
-                    b.HasKey("PlanId", "DisciplineId");
+                    b.HasKey("PlanDisciplineId");
 
                     b.HasIndex("DisciplineId");
+
+                    b.HasIndex("PlanId", "DisciplineId")
+                        .IsUnique();
 
                     b.ToTable("Plan_Disciplines", null, t =>
                         {
@@ -1224,254 +1233,282 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000065-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000066-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 6.0m,
+                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             Hours = 180,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000067-0000-0000-0000-000000000000"),
                             ControlType = "Credit",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000068-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 2
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000069-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 6.0m,
+                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             Hours = 180,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 2
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             ControlType = "Coursework",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 3
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006b-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 3
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006c-0000-0000-0000-000000000000"),
+                            ControlType = "Exam",
+                            Credits = 4.0m,
                             DisciplineId = new Guid("0000000c-0000-0000-0000-000000000000"),
-                            ControlType = "Exam",
-                            Credits = 4.0m,
                             Hours = 120,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 4
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006d-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 4
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("0000000a-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006e-0000-0000-0000-000000000000"),
                             ControlType = "Coursework",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 5
                         },
                         new
                         {
-                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006f-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000001-0000-0000-0000-000000000000"),
                             SemesterNo = 5
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 6.0m,
+                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             Hours = 180,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
+                            ControlType = "Credit",
+                            Credits = 4.0m,
                             DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            ControlType = "Credit",
-                            Credits = 4.0m,
                             Hours = 120,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 2
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
+                            ControlType = "Coursework",
+                            Credits = 5.0m,
                             DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
-                            ControlType = "Coursework",
-                            Credits = 5.0m,
                             Hours = 150,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 2
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000075-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 3
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("0000000a-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000076-0000-0000-0000-000000000000"),
                             ControlType = "Coursework",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 3
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000077-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 4
                         },
                         new
                         {
-                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000078-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000002-0000-0000-0000-000000000000"),
                             SemesterNo = 4
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 6.0m,
+                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             Hours = 180,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007b-0000-0000-0000-000000000000"),
                             ControlType = "Credit",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 1
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007c-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 2
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007d-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 6.0m,
+                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             Hours = 180,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 2
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007e-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 3
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007f-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 4.0m,
+                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
                             Hours = 120,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 3
                         },
                         new
                         {
-                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000080-0000-0000-0000-000000000000"),
                             ControlType = "Exam",
                             Credits = 5.0m,
+                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             Hours = 150,
+                            PlanId = new Guid("00000003-0000-0000-0000-000000000000"),
                             SemesterNo = 4
                         });
                 });
@@ -1807,10 +1844,6 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("academic_year_start");
 
-                    b.Property<Guid>("DisciplineId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("discipline_id");
-
                     b.Property<Guid>("EnrollmentId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("enrollment_id");
@@ -1818,6 +1851,10 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Property<Guid>("GroupPlanAssignmentId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("group_plan_assignment_id");
+
+                    b.Property<Guid>("PlanDisciplineId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("plan_discipline_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1829,11 +1866,11 @@ namespace UniversityHistory.Infrastructure.Migrations
 
                     b.HasKey("CourseEnrollmentId");
 
-                    b.HasIndex("DisciplineId");
-
                     b.HasIndex("EnrollmentId");
 
                     b.HasIndex("GroupPlanAssignmentId");
+
+                    b.HasIndex("PlanDisciplineId");
 
                     b.ToTable("Student_Course_Enrollment", null, t =>
                         {
@@ -1845,1035 +1882,1035 @@ namespace UniversityHistory.Infrastructure.Migrations
                         {
                             CourseEnrollmentId = new Guid("00000001-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000065-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000066-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000067-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000068-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000069-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000006-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006b-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006c-0000-0000-0000-000000000000"),
                             Status = "Planned"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000065-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000066-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000067-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000068-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000000d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000069-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000000f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000010-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006c-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000011-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006d-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006e-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000013-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000009-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006f-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000014-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000065-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000066-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000016-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000067-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000017-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000068-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000018-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000069-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000019-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000001a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000001b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000001c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000001d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000001e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000001f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000006-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000020-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000006-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000021-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000006-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000022-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000006-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000023-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000024-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000025-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000026-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000027-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000028-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000029-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000002a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000002b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000002c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000002d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000075-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000002e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000002f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000030-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000031-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000032-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000076-0000-0000-0000-000000000000"),
                             Status = "Retake"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000033-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000034-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000035-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000036-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000037-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000038-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000039-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000003a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000003b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007c-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000003c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000003d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000003e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000003f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007c-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000040-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000d-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000041-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000d-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000042-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000d-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000043-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000d-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000044-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000065-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000045-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000066-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000046-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2021,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000067-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000047-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000068-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000048-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000069-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000049-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000004a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000004b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("0000000c-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006c-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000004c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000008-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006d-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000004d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000f-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000004e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000f-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000004f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000000f-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000050-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000010-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000051-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000010-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000052-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000010-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000053-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000010-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000054-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000011-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000055-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000011-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000056-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000011-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000057-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000011-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007c-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000058-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000065-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000059-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000066-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000005a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2022,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000067-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000005b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000068-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000005c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000004-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000069-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000005d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000005e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000007-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000006b-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000005f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000014-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000060-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000014-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000061-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000014-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Planned"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000062-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000070-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000063-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2023,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000071-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000064-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000003-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000072-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000065-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000073-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000066-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000006-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000074-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000067-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000016-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000068-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000016-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000069-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000016-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000006a-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000017-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000006b-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000017-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000006c-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000018-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000006d-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000018-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000006e-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000019-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("0000006f-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("00000019-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000006-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000070-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000001-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000001a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("00000079-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000071-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000002-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000001a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007a-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000072-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2024,
-                            DisciplineId = new Guid("00000005-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000001a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007b-0000-0000-0000-000000000000"),
                             Status = "Completed"
                         },
                         new
                         {
                             CourseEnrollmentId = new Guid("00000073-0000-0000-0000-000000000000"),
                             AcademicYearStart = 2025,
-                            DisciplineId = new Guid("0000000b-0000-0000-0000-000000000000"),
                             EnrollmentId = new Guid("0000001a-0000-0000-0000-000000000000"),
                             GroupPlanAssignmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            PlanDisciplineId = new Guid("0000007c-0000-0000-0000-000000000000"),
                             Status = "InProgress"
                         });
                 });
@@ -3146,141 +3183,239 @@ namespace UniversityHistory.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentSubgroupAssignment", b =>
+            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentSubgroupEnrollment", b =>
                 {
+                    b.Property<Guid>("SubgroupEnrollmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("subgroup_enrollment_id");
+
+                    b.Property<DateOnly>("DateFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("date_from");
+
+                    b.Property<DateOnly?>("DateTo")
+                        .HasColumnType("date")
+                        .HasColumnName("date_to");
+
                     b.Property<Guid>("EnrollmentId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("enrollment_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("reason");
 
                     b.Property<Guid>("SubgroupId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("subgroup_id");
 
-                    b.HasKey("EnrollmentId");
+                    b.HasKey("SubgroupEnrollmentId");
+
+                    b.HasIndex("EnrollmentId");
 
                     b.HasIndex("SubgroupId");
 
-                    b.ToTable("Student_Subgroup_Assignment", (string)null);
+                    b.ToTable("Student_Subgroup_Enrollment", (string)null);
 
                     b.HasData(
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000012d-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2021, 9, 1),
+                            DateTo = new DateOnly(2022, 8, 31),
                             EnrollmentId = new Guid("00000001-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000001-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000012e-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2022, 9, 1),
                             EnrollmentId = new Guid("00000002-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000003-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000012f-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2021, 9, 1),
+                            DateTo = new DateOnly(2025, 6, 30),
                             EnrollmentId = new Guid("00000003-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000002-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000130-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2022, 9, 1),
                             EnrollmentId = new Guid("00000004-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000004-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000131-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2023, 9, 1),
                             EnrollmentId = new Guid("00000005-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000005-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000132-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2023, 9, 1),
                             EnrollmentId = new Guid("00000007-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000006-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000133-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2023, 9, 1),
                             EnrollmentId = new Guid("00000008-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000005-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000134-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2023, 9, 1),
                             EnrollmentId = new Guid("00000009-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000006-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000135-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2023, 9, 1),
                             EnrollmentId = new Guid("0000000a-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000005-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000136-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("0000000b-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000007-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000137-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("0000000c-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000008-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000138-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("0000000d-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000009-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000139-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2021, 9, 1),
+                            DateTo = new DateOnly(2025, 6, 30),
                             EnrollmentId = new Guid("0000000e-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000001-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000013a-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("0000000f-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("0000000a-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000013b-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("00000011-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000008-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000013c-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2022, 9, 1),
+                            DateTo = new DateOnly(2024, 8, 31),
                             EnrollmentId = new Guid("00000012-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000003-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000013d-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("00000013-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000006-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000013e-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
+                            DateTo = new DateOnly(2025, 2, 1),
                             EnrollmentId = new Guid("00000014-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000009-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("0000013f-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2023, 9, 1),
                             EnrollmentId = new Guid("00000015-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000006-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000140-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("00000016-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000007-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000141-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2025, 9, 1),
                             EnrollmentId = new Guid("00000017-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("0000000b-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000142-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2025, 9, 1),
                             EnrollmentId = new Guid("00000018-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("0000000c-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000143-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2025, 9, 1),
                             EnrollmentId = new Guid("00000019-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("0000000b-0000-0000-0000-000000000000")
                         },
                         new
                         {
+                            SubgroupEnrollmentId = new Guid("00000144-0000-0000-0000-000000000000"),
+                            DateFrom = new DateOnly(2024, 9, 1),
                             EnrollmentId = new Guid("0000001a-0000-0000-0000-000000000000"),
+                            Reason = "Первинне призначення",
                             SubgroupId = new Guid("00000008-0000-0000-0000-000000000000")
                         });
                 });
@@ -3604,12 +3739,6 @@ namespace UniversityHistory.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentCourseEnrollment", b =>
                 {
-                    b.HasOne("UniversityHistory.Domain.Entities.Discipline", "Discipline")
-                        .WithMany("CourseEnrollments")
-                        .HasForeignKey("DisciplineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("UniversityHistory.Domain.Entities.StudentGroupEnrollment", "Enrollment")
                         .WithMany("CourseEnrollments")
                         .HasForeignKey("EnrollmentId")
@@ -3622,11 +3751,17 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Discipline");
+                    b.HasOne("UniversityHistory.Domain.Entities.PlanDiscipline", "PlanDiscipline")
+                        .WithMany("CourseEnrollments")
+                        .HasForeignKey("PlanDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Enrollment");
 
                     b.Navigation("GroupPlanAssignment");
+
+                    b.Navigation("PlanDiscipline");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentGroupEnrollment", b =>
@@ -3648,16 +3783,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentSubgroupAssignment", b =>
+            modelBuilder.Entity("UniversityHistory.Domain.Entities.StudentSubgroupEnrollment", b =>
                 {
                     b.HasOne("UniversityHistory.Domain.Entities.StudentGroupEnrollment", "Enrollment")
-                        .WithOne("SubgroupAssignment")
-                        .HasForeignKey("UniversityHistory.Domain.Entities.StudentSubgroupAssignment", "EnrollmentId")
+                        .WithMany("SubgroupEnrollments")
+                        .HasForeignKey("EnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("UniversityHistory.Domain.Entities.Subgroup", "Subgroup")
-                        .WithMany("SubgroupAssignments")
+                        .WithMany("SubgroupEnrollments")
                         .HasForeignKey("SubgroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -3701,8 +3836,6 @@ namespace UniversityHistory.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Discipline", b =>
                 {
-                    b.Navigation("CourseEnrollments");
-
                     b.Navigation("PlanDisciplines");
                 });
 
@@ -3714,6 +3847,11 @@ namespace UniversityHistory.Infrastructure.Migrations
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Institution", b =>
                 {
                     b.Navigation("Transfers");
+                });
+
+            modelBuilder.Entity("UniversityHistory.Domain.Entities.PlanDiscipline", b =>
+                {
+                    b.Navigation("CourseEnrollments");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Student", b =>
@@ -3734,7 +3872,7 @@ namespace UniversityHistory.Infrastructure.Migrations
 
                     b.Navigation("CourseEnrollments");
 
-                    b.Navigation("SubgroupAssignment");
+                    b.Navigation("SubgroupEnrollments");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.StudyGroup", b =>
@@ -3755,7 +3893,7 @@ namespace UniversityHistory.Infrastructure.Migrations
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.Subgroup", b =>
                 {
-                    b.Navigation("SubgroupAssignments");
+                    b.Navigation("SubgroupEnrollments");
                 });
 #pragma warning restore 612, 618
         }

@@ -14,6 +14,7 @@ public static class StudyPlanMappingExtensions
     public static PlanDiscipline ToEntity(this AddPlanDisciplineDto dto, Guid planId, Domain.Enums.ControlType controlType) =>
         new()
         {
+            PlanDisciplineId = Guid.NewGuid(),
             PlanId = planId,
             DisciplineId = dto.DisciplineId,
             SemesterNo = dto.SemesterNo,

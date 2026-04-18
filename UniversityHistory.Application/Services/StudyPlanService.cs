@@ -142,12 +142,12 @@ public class StudyPlanService : IStudyPlanService
 
             var existingDisciplineIds = (await _unitOfWork.StudyPlans
                     .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct))
-                .Select(ce => ce.DisciplineId)
+                .Select(ce => ce.PlanDiscipline.DisciplineId)
                 .ToHashSet();
 
             var newCourses = GenerateCourseEnrollments(
                     enrollment.EnrollmentId, assignment.GroupPlanAssignmentId, dto.DateFrom, plan)
-                .Where(ce => !existingDisciplineIds.Contains(ce.DisciplineId))
+                .Where(ce => !existingDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
                 .ToList();
 
             if (newCourses.Count > 0)
@@ -201,12 +201,12 @@ public class StudyPlanService : IStudyPlanService
 
             var progressedDisciplineIds = allCourses
                 .Where(ce => ce.Status != CourseStatus.Planned)
-                .Select(ce => ce.DisciplineId)
+                .Select(ce => ce.PlanDiscipline.DisciplineId)
                 .ToHashSet();
 
             var newCourses = GenerateCourseEnrollments(
                     enrollment.EnrollmentId, newAssignment.GroupPlanAssignmentId, dto.NewPlanDateFrom, newPlan)
-                .Where(ce => !progressedDisciplineIds.Contains(ce.DisciplineId))
+                .Where(ce => !progressedDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
                 .ToList();
 
             if (newCourses.Count > 0)
@@ -226,7 +226,7 @@ public class StudyPlanService : IStudyPlanService
             {
                 EnrollmentId = enrollmentId,
                 GroupPlanAssignmentId = groupPlanAssignmentId,
-                DisciplineId = pd.DisciplineId,
+                PlanDisciplineId = pd.PlanDisciplineId,
                 AcademicYearStart = CalculateAcademicYearStart(startDate, pd.SemesterNo),
                 Status = CourseStatus.Planned
             })

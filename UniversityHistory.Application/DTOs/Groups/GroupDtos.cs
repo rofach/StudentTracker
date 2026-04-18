@@ -83,3 +83,6 @@ public record MoveStudentDto(
 
 public record AssignSubgroupDto(Guid SubgroupId);
 
+public record MoveStudentToSubgroupDto(Guid NewSubgroupId, DateOnly MoveDate, string Reason);
+
+
