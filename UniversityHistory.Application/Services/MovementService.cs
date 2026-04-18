@@ -23,9 +23,10 @@ public class MovementService : IMovementService
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         var leaves = await _unitOfWork.AcademicLeaves.GetByStudentIdAsync(studentId, ct);
-        var transfers = await _unitOfWork.ExternalTransfers.GetByStudentIdAsync(studentId, ct);
+        var externalTransfers = await _unitOfWork.ExternalTransfers.GetByStudentIdAsync(studentId, ct);
+        var internalTransfers = await _unitOfWork.GroupTransfers.GetByStudentIdAsync(studentId, ct);
 
-        return leaves.ToDto(transfers);
+        return leaves.ToDto(externalTransfers, internalTransfers);
     }
 
     public async Task<ExternalTransferDto> CreateTransferAsync(Guid studentId, CreateTransferDto dto, CancellationToken ct = default)

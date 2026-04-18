@@ -52,9 +52,11 @@ public record StudentDetailDto(
     string? Email,
     string? Phone,
     string Status,
+    bool IsOnAcademicLeave,
     IEnumerable<EnrollmentSummaryDto> Enrollments,
     IEnumerable<GroupPlanAssignmentDto> Plans,
     IEnumerable<AcademicLeaveDto> Leaves,
-    IEnumerable<ExternalTransferDto> Transfers
+    IEnumerable<ExternalTransferDto> Transfers,
+    IEnumerable<StudentInternalTransferSummaryDto> InternalTransfers
 );
 

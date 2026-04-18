@@ -37,6 +37,8 @@ public record GroupStudentDto(
     string FirstName,
     string LastName,
     string? Email,
+    Guid? SubgroupId,
+    string? SubgroupName,
     DateOnly DateFrom,
     DateOnly? DateTo
 );
@@ -48,6 +50,8 @@ public record StudentCurrentGroupDto(
     string DepartmentName,
     string AcademicUnitName,
     string AcademicUnitType,
+    Guid? SubgroupId,
+    string? SubgroupName,
     DateOnly DateFrom,
     DateOnly? DateTo
 );
@@ -69,6 +73,8 @@ public record ClassmateDto(
     string LastName,
     Guid GroupId,
     string GroupCode,
+    Guid? SubgroupId,
+    string? SubgroupName,
     DateOnly SharedFrom,
     DateOnly? SharedTo
 );

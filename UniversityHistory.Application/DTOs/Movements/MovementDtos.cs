@@ -11,6 +11,20 @@ public record TimelineEventDto(
     string? AcademicUnitType
 );
 
+public record StudentInternalTransferSummaryDto(
+    Guid TransferId,
+    DateOnly TransferDate,
+    string Reason,
+    Guid OldEnrollmentId,
+    string OldGroupCode,
+    Guid NewEnrollmentId,
+    string NewGroupCode,
+    int DifferenceItemsTotal,
+    int DifferenceItemsPending,
+    int DifferenceItemsCompleted,
+    int DifferenceItemsWaived
+);
+
 public record AcademicLeaveDto(
     Guid LeaveId,
     DateOnly StartDate,
@@ -29,7 +43,8 @@ public record ExternalTransferDto(
 
 public record StudentMovementDto(
     IEnumerable<AcademicLeaveDto> Leaves,
-    IEnumerable<ExternalTransferDto> Transfers
+    IEnumerable<ExternalTransferDto> Transfers,
+    IEnumerable<StudentInternalTransferSummaryDto> InternalTransfers
 );
 
 public record CreateTransferDto(

@@ -54,13 +54,35 @@ public static class MovementMappingExtensions
             transfer.Notes);
     }
 
+    public static StudentInternalTransferSummaryDto ToSummaryDto(this StudentGroupTransfer transfer)
+    {
+        var differenceItems = transfer.DifferenceItems;
+
+        return new StudentInternalTransferSummaryDto(
+            transfer.TransferId,
+            transfer.TransferDate,
+            transfer.Reason,
+            transfer.OldEnrollmentId,
+            transfer.OldEnrollment.Group.GroupCode,
+            transfer.NewEnrollmentId,
+            transfer.NewEnrollment.Group.GroupCode,
+            differenceItems.Count,
+            differenceItems.Count(static item => item.Status == DifferenceItemStatus.Pending),
+            differenceItems.Count(static item => item.Status == DifferenceItemStatus.Completed),
+            differenceItems.Count(static item => item.Status == DifferenceItemStatus.Waived));
+    }
+
     public static StudentMovementDto ToDto(
         this IEnumerable<AcademicLeave> leaves,
-        IEnumerable<ExternalTransfer> transfers)
+        IEnumerable<ExternalTransfer> transfers,
+        IEnumerable<StudentGroupTransfer> internalTransfers)
     {
         return new StudentMovementDto(
             leaves.Select(static leave => leave.ToDto()),
-            transfers.Select(static transfer => transfer.ToDto()));
+            transfers.Select(static transfer => transfer.ToDto()),
+            internalTransfers
+                .Select(static transfer => transfer.ToSummaryDto())
+                .OrderByDescending(static transfer => transfer.TransferDate));
     }
 }
 

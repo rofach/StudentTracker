@@ -30,10 +30,23 @@ public class GetStudentsInGroupQueryHandler : IGetStudentsInGroupQueryHandler
                 s.first_name    AS FirstName,
                 s.last_name     AS LastName,
                 s.email         AS Email,
+                sse.subgroup_id   AS SubgroupId,
+                sse.subgroup_name AS SubgroupName,
                 e.date_from     AS DateFrom,
                 e.date_to       AS DateTo
             FROM Student_Group_Enrollment e
             JOIN Student s ON s.student_id = e.student_id
+            OUTER APPLY (
+                SELECT TOP 1
+                    se.subgroup_id   AS subgroup_id,
+                    sg.subgroup_name AS subgroup_name
+                FROM Student_Subgroup_Enrollment se
+                JOIN Subgroup sg ON sg.subgroup_id = se.subgroup_id
+                WHERE se.enrollment_id = e.enrollment_id
+                  AND se.date_from <= {date}
+                  AND (se.date_to IS NULL OR se.date_to >= {date})
+                ORDER BY se.date_from DESC, se.subgroup_enrollment_id DESC
+            ) sse
             WHERE e.group_id  = {groupId}
               AND e.date_from <= {date}
               AND (e.date_to IS NULL OR e.date_to >= {date})

@@ -114,7 +114,7 @@ public class StudentService : IStudentService
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
-        var movements   = await _movementService.GetMovementsAsync(studentId, ct);
+        var movements = await _movementService.GetMovementsAsync(studentId, ct);
 
         var plans = new List<GroupPlanAssignmentDto>();
         foreach (var enrollment in enrollments)
@@ -129,11 +129,17 @@ public class StudentService : IStudentService
             }
         }
 
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var isOnAcademicLeave = movements.Leaves.Any(
+            leave => leave.StartDate <= today && (!leave.EndDate.HasValue || leave.EndDate.Value >= today));
+
         return student.ToDto(
             enrollments.Select(static e => e.ToDto()),
             plans.DistinctBy(p => p.GroupPlanAssignmentId),
             movements.Leaves,
-            movements.Transfers);
+            movements.Transfers,
+            isOnAcademicLeave,
+            movements.InternalTransfers);
     }
 
     public Task<PagedResult<TimelineEventDto>> GetTimelineAsync(

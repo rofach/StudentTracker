@@ -34,8 +34,13 @@ public static class StudentMappingExtensions
 
     public static EnrollmentSummaryDto ToDto(this StudentGroupEnrollment enrollment)
     {
+        var targetDate = enrollment.DateTo ?? DateOnly.FromDateTime(DateTime.Today);
         var currentSubgroup = enrollment.SubgroupEnrollments
-            .FirstOrDefault(se => se.DateTo == null);
+            .Where(se => se.DateFrom <= targetDate && (!se.DateTo.HasValue || se.DateTo.Value >= targetDate))
+            .OrderByDescending(se => se.DateFrom)
+            .ThenByDescending(se => se.SubgroupEnrollmentId)
+            .FirstOrDefault();
+
         return new EnrollmentSummaryDto(
             enrollment.EnrollmentId,
             enrollment.GroupId,
@@ -53,7 +58,9 @@ public static class StudentMappingExtensions
         IEnumerable<EnrollmentSummaryDto> enrollments,
         IEnumerable<GroupPlanAssignmentDto> plans,
         IEnumerable<AcademicLeaveDto> leaves,
-        IEnumerable<ExternalTransferDto> transfers)
+        IEnumerable<ExternalTransferDto> transfers,
+        bool isOnAcademicLeave,
+        IEnumerable<StudentInternalTransferSummaryDto> internalTransfers)
     {
         return new StudentDetailDto(
             student.StudentId,
@@ -64,10 +71,12 @@ public static class StudentMappingExtensions
             student.Email,
             student.Phone,
             student.Status.ToString(),
+            isOnAcademicLeave,
             enrollments,
             plans,
             leaves,
-            transfers);
+            transfers,
+            internalTransfers);
     }
 }
 

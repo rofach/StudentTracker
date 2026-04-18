@@ -39,6 +39,7 @@ public class StudentGroupTransferRepository : IStudentGroupTransferRepository
             .AsNoTracking()
             .Include(t => t.OldEnrollment).ThenInclude(e => e.Group)
             .Include(t => t.NewEnrollment).ThenInclude(e => e.Group)
+            .Include(t => t.DifferenceItems)
             .Where(t => t.OldEnrollment.StudentId == studentId)
             .OrderByDescending(t => t.TransferDate)
             .ToListAsync(ct);
