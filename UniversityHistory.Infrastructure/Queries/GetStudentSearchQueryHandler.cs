@@ -24,6 +24,14 @@ public class GetStudentSearchQueryHandler : IGetStudentSearchQueryHandler
         var status = string.IsNullOrWhiteSpace(query.Status)
             ? null
             : query.Status.Trim();
+        var nameTokens = fullName?
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Take(3)
+            .ToArray() ?? [];
+
+        var token1 = nameTokens.ElementAtOrDefault(0);
+        var token2 = nameTokens.ElementAtOrDefault(1);
+        var token3 = nameTokens.ElementAtOrDefault(2);
 
         var rawQuery = _db.Database.SqlQuery<StudentDto>($"""
             SELECT
@@ -38,11 +46,22 @@ public class GetStudentSearchQueryHandler : IGetStudentSearchQueryHandler
             FROM Student s
             WHERE ({status} IS NULL OR s.status = {status})
               AND (
-                    {fullName} IS NULL
-                    OR CONCAT(s.last_name, N' ', s.first_name) LIKE N'%' + {fullName} + N'%'
-                    OR CONCAT(s.first_name, N' ', s.last_name) LIKE N'%' + {fullName} + N'%'
-                    OR CONCAT(s.last_name, N' ', s.first_name, N' ', ISNULL(s.patronymic, N'')) LIKE N'%' + {fullName} + N'%'
-                    OR CONCAT(s.first_name, N' ', ISNULL(s.patronymic, N''), N' ', s.last_name) LIKE N'%' + {fullName} + N'%'
+                    {token1} IS NULL
+                    OR s.last_name LIKE N'%' + {token1} + N'%'
+                    OR s.first_name LIKE N'%' + {token1} + N'%'
+                    OR ISNULL(s.patronymic, N'') LIKE N'%' + {token1} + N'%'
+                  )
+              AND (
+                    {token2} IS NULL
+                    OR s.last_name LIKE N'%' + {token2} + N'%'
+                    OR s.first_name LIKE N'%' + {token2} + N'%'
+                    OR ISNULL(s.patronymic, N'') LIKE N'%' + {token2} + N'%'
+                  )
+              AND (
+                    {token3} IS NULL
+                    OR s.last_name LIKE N'%' + {token3} + N'%'
+                    OR s.first_name LIKE N'%' + {token3} + N'%'
+                    OR ISNULL(s.patronymic, N'') LIKE N'%' + {token3} + N'%'
                   )
               AND (
                     {email} IS NULL

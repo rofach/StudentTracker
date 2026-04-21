@@ -21,6 +21,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
 
         var rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
             SELECT DISTINCT
+                ce.course_enrollment_id                                                  AS CourseEnrollmentId,
                 pd.discipline_id                                                        AS DisciplineId,
                 d.discipline_name                                                       AS DisciplineName,
                 pd.semester_no                                                          AS SemesterNo,
@@ -57,6 +58,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
 
         return rawItems
             .Select(item => new StudentDisciplineOptionDto(
+                item.CourseEnrollmentId,
                 item.DisciplineId,
                 item.DisciplineName,
                 item.SemesterNo,
@@ -68,6 +70,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
 
     private sealed class StudentDisciplineOptionRaw
     {
+        public Guid CourseEnrollmentId { get; set; }
         public Guid DisciplineId { get; set; }
         public string DisciplineName { get; set; } = string.Empty;
         public int SemesterNo { get; set; }

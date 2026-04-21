@@ -43,7 +43,7 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
     <div className="page-stack">
       <PageHeader
         title="Новий студент"
-        description="Створення базової картки студента."
+        description="Нова картка студента."
         actions={
           <button type="button" onClick={() => navigate("/admin/students")}>
             Назад до списку

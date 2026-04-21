@@ -1,12 +1,20 @@
+import "./StudentSubjectsPage.css"
 import { useDeferredValue, useEffect, useMemo, useState } from "react"
-import { getStudentAverageGrade, getStudentDisciplines, getStudentGrades } from "../../api/studentsApi"
+import {
+  getStudentAverageGrade,
+  getStudentDisciplines,
+  getStudentGrades,
+  upsertStudentGrade,
+} from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
+import { useToast } from "../../components/common/ToastCenter"
 import type { AverageGradeDto, EntityId, GradeDto, StudentDisciplineOptionDto } from "../../types/api"
 import { formatDate } from "../../utils/format"
 
 type StudentSubjectsPageProps = {
   studentId: EntityId
+  editable?: boolean
 }
 
 type SemesterOption = {
@@ -16,15 +24,21 @@ type SemesterOption = {
   academicYearLabel: string
 }
 
+type GradeDraft = {
+  gradeValue: string
+  assessmentDate: string
+}
+
 function buildSemesterKey(semesterNo: number, academicYearStart: number): string {
   return `${semesterNo}:${academicYearStart}`
 }
 
-function buildGradeKey(disciplineName: string, semesterNo: number, academicYearStart: number): string {
-  return `${disciplineName.trim().toLowerCase()}::${semesterNo}::${academicYearStart}`
+function todayValue(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
-export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
+export function StudentSubjectsPage({ studentId, editable = false }: StudentSubjectsPageProps) {
+  const { pushToast } = useToast()
   const [disciplines, setDisciplines] = useState<StudentDisciplineOptionDto[]>([])
   const [grades, setGrades] = useState<GradeDto[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -37,6 +51,8 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
   const [average, setAverage] = useState<AverageGradeDto | null>(null)
   const [isAverageLoading, setIsAverageLoading] = useState(false)
   const [averageMode, setAverageMode] = useState<"all" | "semester">("all")
+  const [drafts, setDrafts] = useState<Record<string, GradeDraft>>({})
+  const [savingCourseEnrollmentId, setSavingCourseEnrollmentId] = useState<EntityId | null>(null)
 
   useEffect(() => {
     let isActive = true
@@ -103,18 +119,35 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
   const gradeMap = useMemo(() => {
     const map = new Map<string, GradeDto>()
     for (const row of grades) {
-      map.set(buildGradeKey(row.disciplineName, row.semesterNo, row.academicYearStart), row)
+      map.set(row.courseEnrollmentId, row)
     }
     return map
   }, [grades])
+
+  useEffect(() => {
+    setDrafts((current) => {
+      const next = { ...current }
+
+      for (const row of disciplines) {
+        const grade = gradeMap.get(row.courseEnrollmentId)
+        if (!next[row.courseEnrollmentId]) {
+          next[row.courseEnrollmentId] = {
+            gradeValue: grade?.gradeValue ?? "",
+            assessmentDate: grade?.assessmentDate ?? todayValue(),
+          }
+        }
+      }
+
+      return next
+    })
+  }, [disciplines, gradeMap])
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = deferredSearchText.trim().toLowerCase()
 
     return disciplines.filter((row) => {
       const semesterMatches =
-        semesterFilter === "all" ||
-        buildSemesterKey(row.semesterNo, row.academicYearStart) === semesterFilter
+        semesterFilter === "all" || buildSemesterKey(row.semesterNo, row.academicYearStart) === semesterFilter
       const searchMatches =
         normalizedSearch.length === 0 || row.disciplineName.toLowerCase().includes(normalizedSearch)
 
@@ -152,10 +185,56 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
           : await getStudentAverageGrade(studentId, {})
 
       setAverage(result)
+      pushToast({ tone: "info", title: "Готово", message: "Середній бал оновлено." })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Не вдалося обчислити середній бал.")
+      const nextError = err instanceof Error ? err.message : "Не вдалося обчислити середній бал."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
     } finally {
       setIsAverageLoading(false)
+    }
+  }
+
+  const saveGrade = async (courseEnrollmentId: EntityId) => {
+    const draft = drafts[courseEnrollmentId]
+    if (!draft || draft.gradeValue.trim().length === 0) {
+      const nextError = "Вкажіть значення оцінки."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
+      return
+    }
+
+    setSavingCourseEnrollmentId(courseEnrollmentId)
+    setError(null)
+
+    try {
+      const updated = await upsertStudentGrade(studentId, courseEnrollmentId, {
+        gradeValue: draft.gradeValue.trim(),
+        assessmentDate: draft.assessmentDate,
+      })
+
+      setGrades((current) => {
+        const existingIndex = current.findIndex((item) => item.courseEnrollmentId === courseEnrollmentId)
+        if (existingIndex === -1) {
+          return [...current, updated]
+        }
+
+        return current.map((item) => (item.courseEnrollmentId === courseEnrollmentId ? updated : item))
+      })
+
+      setDisciplines((current) =>
+        current.map((item) =>
+          item.courseEnrollmentId === courseEnrollmentId ? { ...item, hasGrade: true } : item,
+        ),
+      )
+
+      pushToast({ tone: "info", title: "Успішно", message: "Оцінку збережено." })
+    } catch (err: unknown) {
+      const nextError = err instanceof Error ? err.message : "Не вдалося зберегти оцінку."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
+    } finally {
+      setSavingCourseEnrollmentId(null)
     }
   }
 
@@ -163,12 +242,10 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
     return <Spinner label="Завантаження предметів..." />
   }
 
-  if (error) {
-    return <StatusState tone="error" message={error} />
-  }
-
   return (
     <div className="page-stack">
+      {error ? <StatusState tone="error" message={error} /> : null}
+
       <section className="panel">
         <h2>Фільтри предметів</h2>
         <div className="filters-row">
@@ -228,13 +305,11 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
               <strong>Період:</strong> {averagePeriodLabel}
             </div>
           </div>
-        ) : (
-          <div></div>
-        )}
+        ) : null}
       </section>
 
       <section className="panel">
-        <h2>Предмети студента</h2>
+        <h2>{editable ? "Предмети та оцінювання" : "Предмети студента"}</h2>
         {filteredRows.length === 0 ? (
           <StatusState tone="info" message="За обраними фільтрами предмети не знайдено." />
         ) : (
@@ -248,16 +323,19 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
                   <th>Навчальний рік</th>
                   <th>Оцінка</th>
                   <th>Дата оцінювання</th>
+                  {editable ? <th>Дія</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredRows.map((row) => {
-                  const grade = gradeMap.get(
-                    buildGradeKey(row.disciplineName, row.semesterNo, row.academicYearStart),
-                  )
+                  const grade = gradeMap.get(row.courseEnrollmentId)
+                  const draft = drafts[row.courseEnrollmentId] ?? {
+                    gradeValue: grade?.gradeValue ?? "",
+                    assessmentDate: grade?.assessmentDate ?? todayValue(),
+                  }
 
                   return (
-                    <tr key={`${row.disciplineId}-${row.semesterNo}-${row.academicYearStart}`}>
+                    <tr key={row.courseEnrollmentId}>
                       <td>
                         <span
                           className={`grade-dot ${row.hasGrade ? "grade-dot--done" : ""}`}
@@ -267,8 +345,57 @@ export function StudentSubjectsPage({ studentId }: StudentSubjectsPageProps) {
                       <td>{row.disciplineName}</td>
                       <td>{row.semesterNo}</td>
                       <td>{row.academicYearLabel}</td>
-                      <td>{grade?.gradeValue ?? "—"}</td>
-                      <td>{grade ? formatDate(grade.assessmentDate) : "—"}</td>
+                      <td>
+                        {editable ? (
+                          <input
+                            type="text"
+                            value={draft.gradeValue}
+                            onChange={(event) =>
+                              setDrafts((current) => ({
+                                ...current,
+                                [row.courseEnrollmentId]: {
+                                  ...draft,
+                                  gradeValue: event.target.value,
+                                },
+                              }))
+                            }
+                          />
+                        ) : (
+                          grade?.gradeValue ?? "—"
+                        )}
+                      </td>
+                      <td>
+                        {editable ? (
+                          <input
+                            type="date"
+                            value={draft.assessmentDate}
+                            onChange={(event) =>
+                              setDrafts((current) => ({
+                                ...current,
+                                [row.courseEnrollmentId]: {
+                                  ...draft,
+                                  assessmentDate: event.target.value,
+                                },
+                              }))
+                            }
+                          />
+                        ) : grade ? (
+                          formatDate(grade.assessmentDate)
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      {editable ? (
+                        <td>
+                          <button
+                            type="button"
+                            disabled={savingCourseEnrollmentId === row.courseEnrollmentId}
+                            onClick={() => void saveGrade(row.courseEnrollmentId)}
+                          >
+                            {savingCourseEnrollmentId === row.courseEnrollmentId ? "Збереження..." : "Зберегти"}
+                          </button>
+                        </td>
+                      ) : null}
                     </tr>
                   )
                 })}

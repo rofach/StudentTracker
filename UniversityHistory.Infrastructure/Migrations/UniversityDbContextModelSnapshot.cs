@@ -3729,6 +3729,60 @@ namespace UniversityHistory.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("UniversityHistory.Infrastructure.Data.StudentTimelineEventViewRow", b =>
+                {
+                    b.Property<string>("AcademicUnitName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("AcademicUnitName");
+
+                    b.Property<string>("AcademicUnitType")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("AcademicUnitType");
+
+                    b.Property<DateOnly>("DateFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("DateFrom");
+
+                    b.Property<DateOnly?>("DateTo")
+                        .HasColumnType("date")
+                        .HasColumnName("DateTo");
+
+                    b.Property<string>("DepartmentName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DepartmentName");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("EventKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("EventKey");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("EventType");
+
+                    b.Property<string>("GroupCode")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("GroupCode");
+
+                    b.Property<int>("SortPriority")
+                        .HasColumnType("int")
+                        .HasColumnName("SortPriority");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("StudentId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_StudentTimeline", (string)null);
+                });
+
             modelBuilder.Entity("UniversityHistory.Domain.Entities.AcademicDifferenceItem", b =>
                 {
                     b.HasOne("UniversityHistory.Domain.Entities.PlanDiscipline", "PlanDiscipline")

@@ -1,3 +1,5 @@
+import "./Spinner.css"
+
 type SpinnerProps = {
   label?: string
 }

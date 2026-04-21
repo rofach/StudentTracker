@@ -20,6 +20,7 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
 
   const [items, setItems] = useState<ClassmateDto[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [hasLoaded, setHasLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [selectedClassmateId, setSelectedClassmateId] = useState<EntityId | null>(null)
@@ -48,15 +49,26 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
 
     getStudentClassmates(studentId, params.dateFrom, params.dateTo)
       .then((result) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setItems(result)
+        setHasLoaded(true)
       })
       .catch((err: unknown) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setError(err instanceof Error ? err.message : "Не вдалося завантажити одногрупників.")
+        setHasLoaded(true)
       })
       .finally(() => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setIsLoading(false)
       })
 
@@ -76,15 +88,24 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
 
     getStudentById(selectedClassmateId)
       .then((result) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setSelectedClassmate(result)
       })
       .catch(() => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setSelectedClassmate(null)
       })
       .finally(() => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setIsClassmateLoading(false)
       })
 
@@ -92,6 +113,9 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
       isActive = false
     }
   }, [selectedClassmateId])
+
+  const isInitialLoading = isLoading && !hasLoaded
+  const isRefreshing = isLoading && hasLoaded
 
   return (
     <div className="page-stack">
@@ -130,20 +154,25 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
       </section>
 
       <section className="panel">
-        <h2>Список одногрупників</h2>
-        {isLoading ? <Spinner label="Завантаження одногрупників..." /> : null}
+        <div className="section-heading">
+          <h2>Одногрупники</h2>
+          {isRefreshing ? <span className="loading-inline">Оновлення...</span> : null}
+        </div>
+
+        {isInitialLoading ? <Spinner label="Завантаження одногрупників..." /> : null}
         {error ? <StatusState tone="error" message={error} /> : null}
         {!isLoading && !error && items.length === 0 ? (
-          <StatusState tone="info" message="У вибраному періоді одногрупників не знайдено." />
+          <StatusState tone="info" message="Для вибраного інтервалу одногрупників не знайдено." />
         ) : null}
 
-        {!isLoading && !error && items.length > 0 ? (
+        {items.length > 0 ? (
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>ПІБ</th>
                   <th>Група</th>
+                  <th>Підгрупа</th>
                   <th>Спільно з</th>
                   <th>Спільно до</th>
                   <th>Деталі</th>
@@ -152,8 +181,11 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
               <tbody>
                 {items.map((item) => (
                   <tr key={`${item.classmateStudentId}-${item.groupId}-${item.sharedFrom}`}>
-                    <td>{item.lastName} {item.firstName}</td>
+                    <td>
+                      {item.lastName} {item.firstName}
+                    </td>
                     <td>{item.groupCode}</td>
+                    <td>{item.subgroupName ?? "—"}</td>
                     <td>{formatDate(item.sharedFrom)}</td>
                     <td>{formatDate(item.sharedTo)}</td>
                     <td>
@@ -172,7 +204,7 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
       {selectedClassmateId ? (
         <section className="panel">
           <h2>Дані одногрупника</h2>
-          {isClassmateLoading ? <Spinner label="Завантаження картки..." /> : null}
+          {isClassmateLoading ? <Spinner label="Завантаження картки студента..." /> : null}
           {!isClassmateLoading && selectedClassmate ? (
             <div className="summary-grid summary-grid--compact">
               <div>
@@ -192,7 +224,7 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
           {!isClassmateLoading && !selectedClassmate ? (
             <StatusState tone="info" message="Не вдалося завантажити дані одногрупника." />
           ) : null}
-          <p className="note-text">Оцінки інших студентів у цьому режимі не відображаються.</p>
+          <p className="note-text">Підгрупа показана як контекст спільного періоду навчання.</p>
         </section>
       ) : null}
     </div>

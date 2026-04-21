@@ -1,0 +1,36 @@
+.page-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header__content {
+  display: grid;
+  gap: 4px;
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.page-header__description {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 980px) {
+  .page-header {
+    flex-direction: column;
+  }
+}

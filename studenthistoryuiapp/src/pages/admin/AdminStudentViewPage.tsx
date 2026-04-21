@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getStudentDetails } from "../../api/studentsApi"
+import { StudentTransferHistoryPanel } from "../../components/admin/StudentTransferHistoryPanel"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
@@ -11,7 +12,7 @@ import { StudentHistoryPage } from "../student/StudentHistoryPage"
 import { StudentOverviewPage } from "../student/StudentOverviewPage"
 import { StudentSubjectsPage } from "../student/StudentSubjectsPage"
 
-type StudentSection = "overview" | "subjects" | "classmates" | "history"
+type StudentSection = "overview" | "subjects" | "classmates" | "history" | "transfers"
 
 type AdminStudentViewPageProps = {
   studentId: EntityId
@@ -23,6 +24,7 @@ const sectionLabels: Record<StudentSection, string> = {
   subjects: "Предмети",
   classmates: "Одногрупники",
   history: "Історія",
+  transfers: "Переведення",
 }
 
 export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPageProps) {
@@ -64,6 +66,11 @@ export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPa
     }
   }, [studentId])
 
+  const currentEnrollment = useMemo(
+    () => student?.enrollments.find((item) => item.dateTo === null) ?? student?.enrollments[0] ?? null,
+    [student],
+  )
+
   if (isLoading) {
     return <Spinner label="Завантаження картки студента..." />
   }
@@ -73,16 +80,14 @@ export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPa
   }
 
   if (!student) {
-    return <StatusState tone="info" message="Дані студента відсутні." />
+    return <StatusState tone="info" message="Дані студента недоступні." />
   }
-
-  const currentEnrollment = student.enrollments.find((item) => item.dateTo === null) ?? student.enrollments[0] ?? null
 
   return (
     <div className="page-stack">
       <PageHeader
         title={fullName(student.firstName, student.lastName, student.patronymic)}
-        description="Перегляд повної картки студента."
+        description="Картка студента."
         actions={
           <div className="inline-actions">
             <button type="button" onClick={() => navigate("/admin/students")}>
@@ -104,13 +109,19 @@ export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPa
             <strong>Статус:</strong> {formatStudentStatus(student.status)}
           </div>
           <div>
-            <strong>Email:</strong> {student.email ?? "—"}
+            <strong>Email:</strong> {student.email ?? "-"}
           </div>
           <div>
-            <strong>Група:</strong> {currentEnrollment?.groupCode ?? "—"}
+            <strong>Група:</strong> {currentEnrollment?.groupCode ?? "-"}
           </div>
           <div>
-            <strong>Кафедра:</strong> {currentEnrollment?.departmentName ?? "—"}
+            <strong>Кафедра:</strong> {currentEnrollment?.departmentName ?? "-"}
+          </div>
+          <div>
+            <strong>Підгрупа:</strong> {currentEnrollment?.subgroupName ?? "-"}
+          </div>
+          <div>
+            <strong>Стан навчання:</strong> {student.isOnAcademicLeave ? "Академвідпустка" : "Активний"}
           </div>
         </div>
       </section>
@@ -132,9 +143,12 @@ export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPa
 
       <section className="panel panel--inner">
         {selectedSection === "overview" ? <StudentOverviewPage studentId={studentId} /> : null}
-        {selectedSection === "subjects" ? <StudentSubjectsPage studentId={studentId} /> : null}
+        {selectedSection === "subjects" ? <StudentSubjectsPage studentId={studentId} editable /> : null}
         {selectedSection === "classmates" ? <StudentClassmatesPage studentId={studentId} /> : null}
         {selectedSection === "history" ? <StudentHistoryPage studentId={studentId} /> : null}
+        {selectedSection === "transfers" ? (
+          <StudentTransferHistoryPanel studentId={studentId} transfers={student.internalTransfers} />
+        ) : null}
       </section>
     </div>
   )

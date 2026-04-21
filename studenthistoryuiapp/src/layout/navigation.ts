@@ -9,6 +9,7 @@ export const STUDENT_MENU: NavItem[] = [
 
 export const ADMIN_MENU: NavItem[] = [
   { path: "/admin/students", label: "\u0421\u0442\u0443\u0434\u0435\u043D\u0442\u0438" },
+  { path: "/admin/movements", label: "\u0420\u0443\u0445 \u0441\u0442\u0443\u0434\u0435\u043D\u0442\u0456\u0432" },
   { path: "/admin/groups", label: "\u0413\u0440\u0443\u043F\u0438" },
   { path: "/admin/study-plans", label: "\u041D\u0430\u0432\u0447\u0430\u043B\u044C\u043D\u0456 \u043F\u043B\u0430\u043D\u0438" },
   { path: "/admin/disciplines", label: "\u041F\u0440\u0435\u0434\u043C\u0435\u0442\u0438" },
@@ -33,15 +34,15 @@ export function normalizePath(pathname: string): string {
     return pathname
   }
 
-  if (/^\/admin\/students\/\d+$/.test(pathname)) {
+  if (/^\/admin\/students\/[^/]+$/.test(pathname)) {
     return pathname
   }
 
-  if (/^\/admin\/students\/\d+\/edit$/.test(pathname)) {
+  if (/^\/admin\/students\/[^/]+\/edit$/.test(pathname)) {
     return pathname
   }
 
-  if (/^\/admin\/students\/\d+\/operations$/.test(pathname)) {
+  if (/^\/admin\/students\/[^/]+\/operations$/.test(pathname)) {
     return pathname
   }
 
@@ -49,11 +50,15 @@ export function normalizePath(pathname: string): string {
     return pathname
   }
 
+  if (pathname === "/admin/movements") {
+    return pathname
+  }
+
   if (pathname === "/admin/study-plans" || pathname === "/admin/study-plans/new") {
     return pathname
   }
 
-  if (/^\/admin\/study-plans\/\d+$/.test(pathname)) {
+  if (/^\/admin\/study-plans\/[^/]+$/.test(pathname)) {
     return pathname
   }
 
@@ -84,6 +89,10 @@ export function getActiveMenuPath(pathname: string): string {
 
   if (pathname.startsWith("/admin/groups")) {
     return "/admin/groups"
+  }
+
+  if (pathname.startsWith("/admin/movements")) {
+    return "/admin/movements"
   }
 
   if (pathname.startsWith("/admin/study-plans")) {

@@ -1,3 +1,5 @@
+import "./PaginationControls.css"
+
 type PaginationControlsProps = {
   page: number
   pageSize: number
@@ -37,10 +39,7 @@ export function PaginationControls({
       {onPageSizeChange ? (
         <label className="pagination__size">
           Рядків:
-          <select
-            value={pageSize}
-            onChange={(event) => onPageSizeChange(Number(event.target.value))}
-          >
+          <select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>
             <option value={10}>10</option>
             <option value={20}>20</option>
             <option value={50}>50</option>

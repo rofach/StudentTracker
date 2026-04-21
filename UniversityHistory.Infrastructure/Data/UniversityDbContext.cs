@@ -26,6 +26,7 @@ public class UniversityDbContext : DbContext
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<StudentGroupTransfer> StudentGroupTransfers => Set<StudentGroupTransfer>();
     public DbSet<AcademicDifferenceItem> AcademicDifferenceItems => Set<AcademicDifferenceItem>();
+    public DbSet<StudentTimelineEventViewRow> StudentTimelineEvents => Set<StudentTimelineEventViewRow>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -331,6 +332,23 @@ public class UniversityDbContext : DbContext
                 .HasForeignKey(d => d.PlanDisciplineId).OnDelete(DeleteBehavior.Restrict);
             e.HasIndex(d => new { d.TransferId, d.PlanDisciplineId }).IsUnique()
                 .HasDatabaseName("UX_AcademicDifferenceItem_TransferId_PlanDisciplineId");
+        });
+
+        modelBuilder.Entity<StudentTimelineEventViewRow>(e =>
+        {
+            e.HasNoKey();
+            e.ToView("vw_StudentTimeline");
+            e.Property(x => x.StudentId).HasColumnName("StudentId");
+            e.Property(x => x.EventType).HasColumnName("EventType");
+            e.Property(x => x.Description).HasColumnName("Description");
+            e.Property(x => x.DateFrom).HasColumnName("DateFrom");
+            e.Property(x => x.DateTo).HasColumnName("DateTo");
+            e.Property(x => x.GroupCode).HasColumnName("GroupCode");
+            e.Property(x => x.DepartmentName).HasColumnName("DepartmentName");
+            e.Property(x => x.AcademicUnitName).HasColumnName("AcademicUnitName");
+            e.Property(x => x.AcademicUnitType).HasColumnName("AcademicUnitType");
+            e.Property(x => x.SortPriority).HasColumnName("SortPriority");
+            e.Property(x => x.EventKey).HasColumnName("EventKey");
         });
 
         modelBuilder.Seed();

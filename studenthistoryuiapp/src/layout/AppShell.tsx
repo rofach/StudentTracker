@@ -1,3 +1,4 @@
+import "./AppShell.css"
 import type { ReactNode } from "react"
 import type { NavItem } from "../types/navigation"
 
@@ -28,10 +29,7 @@ export function AppShell({
           <p>{areaSubtitle}</p>
         </div>
 
-        <nav
-          className="sidebar__menu"
-          aria-label="\u0413\u043E\u043B\u043E\u0432\u043D\u0435 \u043C\u0435\u043D\u044E"
-        >
+        <nav className="sidebar__menu" aria-label="Головне меню">
           {menuItems.map((item) => (
             <button
               key={item.path}

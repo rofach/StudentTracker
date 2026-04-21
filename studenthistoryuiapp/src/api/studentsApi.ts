@@ -1,7 +1,9 @@
 import type {
+  AcademicDifferenceItemDto,
   AverageGradeDto,
   ChangeStatusDto,
   ClassmateDto,
+  CloseAcademicLeaveDto,
   CloseEnrollmentDto,
   CreateLeaveDto,
   EntityId,
@@ -10,15 +12,25 @@ import type {
   ExternalTransferDto,
   GradeDto,
   MoveStudentDto,
+  MoveStudentToSubgroupDto,
   PagedResult,
   StudentCreateDto,
+  StudentCurrentGroupDto,
   StudentDetailDto,
   StudentDisciplineOptionDto,
   StudentDto,
+  StudentGroupTransferDetailDto,
+  StudentGroupTransferDto,
+  StudentMovementDto,
   StudentUpdateDto,
   TimelineEventDto,
+  TransferPreviewDto,
+  TransferPreviewRequestDto,
+  UpsertGradeDto,
+  UpdateDifferenceItemDto,
+  AssignSubgroupDto,
 } from "../types/api"
-import { fetchJson, postJson, putJson } from "./http"
+import { fetchJson, patchJson, postJson, putJson } from "./http"
 import { getActiveGroups } from "./groupsApi"
 
 export function getStudents(page: number, pageSize: number): Promise<PagedResult<StudentDto>> {
@@ -78,6 +90,17 @@ export function getStudentClassmates(
   })
 }
 
+export function getStudentGroupOnDate(
+  studentId: EntityId,
+  date?: string,
+): Promise<StudentCurrentGroupDto> {
+  return fetchJson<StudentCurrentGroupDto>(`/students/${studentId}/group`, undefined, { date })
+}
+
+export function getStudentMovements(studentId: EntityId): Promise<StudentMovementDto> {
+  return fetchJson<StudentMovementDto>(`/students/${studentId}/movements`)
+}
+
 export function getStudentDisciplines(studentId: EntityId): Promise<StudentDisciplineOptionDto[]> {
   return fetchJson<StudentDisciplineOptionDto[]>(`/students/${studentId}/disciplines`)
 }
@@ -101,8 +124,46 @@ export function getStudentAverageGrade(
   return fetchJson<AverageGradeDto>(`/students/${studentId}/grades/average`, undefined, params)
 }
 
+export function upsertStudentGrade(
+  studentId: EntityId,
+  courseEnrollmentId: EntityId,
+  dto: UpsertGradeDto,
+): Promise<GradeDto> {
+  return putJson<GradeDto>(`/students/${studentId}/grades/${courseEnrollmentId}`, dto)
+}
+
 export function getStudentTransfers(studentId: EntityId): Promise<ExternalTransferDto[]> {
   return getStudentDetails(studentId).then((result) => result.transfers)
+}
+
+export function previewStudentTransfer(
+  studentId: EntityId,
+  dto: TransferPreviewRequestDto,
+): Promise<TransferPreviewDto> {
+  return postJson<TransferPreviewDto>(`/students/${studentId}/transfer-preview`, dto)
+}
+
+export function getStudentGroupTransfers(studentId: EntityId): Promise<StudentGroupTransferDto[]> {
+  return fetchJson<StudentGroupTransferDto[]>(`/students/${studentId}/group-transfers`)
+}
+
+export function getStudentGroupTransferDetail(
+  studentId: EntityId,
+  transferId: EntityId,
+): Promise<StudentGroupTransferDetailDto> {
+  return fetchJson<StudentGroupTransferDetailDto>(`/students/${studentId}/group-transfers/${transferId}`)
+}
+
+export function updateDifferenceItem(
+  studentId: EntityId,
+  transferId: EntityId,
+  itemId: EntityId,
+  dto: UpdateDifferenceItemDto,
+): Promise<AcademicDifferenceItemDto> {
+  return patchJson<AcademicDifferenceItemDto>(
+    `/students/${studentId}/group-transfers/${transferId}/difference-items/${itemId}`,
+    dto,
+  )
 }
 
 export function moveStudentToGroup(studentId: EntityId, dto: MoveStudentDto): Promise<void> {
@@ -113,12 +174,24 @@ export function createAcademicLeave(studentId: EntityId, dto: CreateLeaveDto): P
   return postJson<void>(`/students/${studentId}/leaves`, dto)
 }
 
+export function closeAcademicLeave(leaveId: EntityId, dto: CloseAcademicLeaveDto): Promise<void> {
+  return putJson<void>(`/leaves/${leaveId}/close`, dto)
+}
+
 export function enrollStudent(dto: EnrollStudentDto): Promise<{ enrollmentId: EntityId }> {
   return postJson<{ enrollmentId: EntityId }>("/enrollments", dto)
 }
 
 export function closeEnrollment(enrollmentId: EntityId, dto: CloseEnrollmentDto): Promise<void> {
   return putJson<void>(`/enrollments/${enrollmentId}/close`, dto)
+}
+
+export function assignEnrollmentSubgroup(enrollmentId: EntityId, dto: AssignSubgroupDto): Promise<void> {
+  return putJson<void>(`/enrollments/${enrollmentId}/subgroup`, dto)
+}
+
+export function moveEnrollmentSubgroup(enrollmentId: EntityId, dto: MoveStudentToSubgroupDto): Promise<void> {
+  return postJson<void>(`/enrollments/${enrollmentId}/subgroup-move`, dto)
 }
 
 export async function getSelectableGroups(date?: string) {

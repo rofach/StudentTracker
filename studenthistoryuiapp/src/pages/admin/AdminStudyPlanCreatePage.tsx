@@ -40,7 +40,7 @@ export function AdminStudyPlanCreatePage({ navigate }: AdminStudyPlanCreatePageP
     <div className="page-stack">
       <PageHeader
         title="Новий навчальний план"
-        description="Створення нового навчального плану перед додаванням дисциплін."
+        description="Новий навчальний план."
         actions={
           <button type="button" onClick={() => navigate("/admin/study-plans")}>
             Назад до списку

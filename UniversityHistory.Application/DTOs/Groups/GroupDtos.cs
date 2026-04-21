@@ -31,6 +31,11 @@ public record ActiveGroupDto(
     DateOnly? DateClosed
 );
 
+public record SubgroupDto(
+    Guid SubgroupId,
+    string SubgroupName
+);
+
 public record GroupStudentDto(
     Guid EnrollmentId,
     Guid StudentId,

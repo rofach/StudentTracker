@@ -1,3 +1,5 @@
+import "./StatusState.css"
+
 type StatusStateProps = {
   tone: "info" | "error"
   message: string

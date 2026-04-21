@@ -20,6 +20,7 @@ public interface IStudyPlanRepository
 
     void AddCourseEnrollments(IEnumerable<StudentCourseEnrollment> enrollments);
     Task<IEnumerable<StudentCourseEnrollment>> GetCourseEnrollmentsByEnrollmentIdAsync(Guid enrollmentId, CancellationToken ct = default);
+    Task<StudentCourseEnrollment?> GetCourseEnrollmentByIdAsync(Guid courseEnrollmentId, CancellationToken ct = default);
     void RemoveCourseEnrollments(IEnumerable<StudentCourseEnrollment> enrollments);
     Task RemovePlannedCourseEnrollmentsForDisciplineAsync(Guid planId, Guid disciplineId, CancellationToken ct = default);
 }

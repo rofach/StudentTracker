@@ -11,8 +11,11 @@ using UniversityHistory.Application.Queries.GetStudentGroupOnDate;
 using UniversityHistory.Application.Queries.GetStudentsInGroup;
 using UniversityHistory.Application.Queries.GetTimeline;
 using UniversityHistory.Application.Queries.GetAverageGrade;
+using UniversityHistory.Application.Queries.GetActiveAcademicDifference;
 using UniversityHistory.Application.Queries.GetStudentDisciplines;
+using UniversityHistory.Application.Queries.GetDisciplineSearch;
 using UniversityHistory.Application.Queries.GetStudentSearch;
+using UniversityHistory.Application.Queries.GetInternalTransferJournal;
 using UniversityHistory.Application.Services;
 using UniversityHistory.Application.Validation.Students;
 using UniversityHistory.Domain.Interfaces.Repositories;
@@ -47,8 +50,11 @@ builder.Services.AddScoped<IGetActiveGroupsQueryHandler, GetActiveGroupsQueryHan
 builder.Services.AddScoped<IGetStudentsInGroupQueryHandler, GetStudentsInGroupQueryHandler>();
 builder.Services.AddScoped<IGetStudentGroupOnDateQueryHandler, GetStudentGroupOnDateQueryHandler>();
 builder.Services.AddScoped<IGetAverageGradeQueryHandler, GetAverageGradeQueryHandler>();
+builder.Services.AddScoped<IGetActiveAcademicDifferenceQueryHandler, GetActiveAcademicDifferenceQueryHandler>();
 builder.Services.AddScoped<IGetStudentDisciplinesQueryHandler, GetStudentDisciplinesQueryHandler>();
+builder.Services.AddScoped<IGetDisciplineSearchQueryHandler, GetDisciplineSearchQueryHandler>();
 builder.Services.AddScoped<IGetStudentSearchQueryHandler, GetStudentSearchQueryHandler>();
+builder.Services.AddScoped<IGetInternalTransferJournalQueryHandler, GetInternalTransferJournalQueryHandler>();
 
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IGroupService, GroupService>();

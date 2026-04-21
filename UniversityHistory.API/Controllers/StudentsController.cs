@@ -191,5 +191,16 @@ public class StudentsController : ControllerBase
     {
         return Ok(await _gradeService.GetAverageGradeAsync(id, semesterNo, disciplineId, academicYearStart, ct));
     }
+
+    [HttpPut("{id:guid}/grades/{courseEnrollmentId:guid}")]
+    public async Task<IActionResult> UpsertGrade(
+        Guid id,
+        Guid courseEnrollmentId,
+        [FromBody] UpsertGradeDto dto,
+        CancellationToken ct)
+    {
+        var result = await _gradeService.UpsertGradeAsync(id, courseEnrollmentId, dto, ct);
+        return Ok(result);
+    }
 }
 

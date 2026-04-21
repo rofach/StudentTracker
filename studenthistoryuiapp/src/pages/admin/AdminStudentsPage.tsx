@@ -78,12 +78,15 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
   }, [deferredFullNameFilter, deferredEmailFilter, statusFilter])
 
   const students = useMemo(() => data?.items ?? [], [data])
+  const hasLoadedData = data !== null
+  const isInitialLoading = isLoading && !hasLoadedData
+  const isRefreshing = isLoading && hasLoadedData
 
   return (
     <div className="page-stack">
       <PageHeader
         title="Студенти"
-        description="Керування студентами"
+        description="Список студентів."
         actions={
           <button type="button" onClick={() => navigate("/admin/students/new")}>
             Створити студента
@@ -128,14 +131,18 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
       </section>
 
       <section className="panel">
-        <h2>Список студентів</h2>
-        {isLoading ? <Spinner label="Завантаження списку студентів..." /> : null}
+        <div className="section-heading">
+          <h2>Список студентів</h2>
+          {isRefreshing ? <span className="loading-inline">Оновлення...</span> : null}
+        </div>
+
+        {isInitialLoading ? <Spinner label="Завантаження списку студентів..." /> : null}
         {error ? <StatusState tone="error" message={error} /> : null}
         {!isLoading && !error && students.length === 0 ? (
           <StatusState tone="info" message="Студентів за заданими умовами не знайдено." />
         ) : null}
 
-        {!isLoading && !error && students.length > 0 ? (
+        {students.length > 0 ? (
           <>
             <div className="table-wrap">
               <table>

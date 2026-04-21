@@ -1,0 +1,12 @@
+.status-state {
+  border: 1px solid var(--border);
+  background: #f7f9fb;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.status-state--error {
+  border-color: #f3c0c0;
+  background: var(--error-bg);
+  color: var(--error-text);
+}

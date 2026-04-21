@@ -1,6 +1,8 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Mappings;
+using UniversityHistory.Application.Queries.GetActiveAcademicDifference;
+using UniversityHistory.Application.Queries.GetInternalTransferJournal;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
@@ -11,10 +13,17 @@ namespace UniversityHistory.Application.Services;
 public class MovementService : IMovementService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IGetActiveAcademicDifferenceQueryHandler _activeAcademicDifferenceHandler;
+    private readonly IGetInternalTransferJournalQueryHandler _internalTransferJournalHandler;
 
-    public MovementService(IUnitOfWork unitOfWork)
+    public MovementService(
+        IUnitOfWork unitOfWork,
+        IGetActiveAcademicDifferenceQueryHandler activeAcademicDifferenceHandler,
+        IGetInternalTransferJournalQueryHandler internalTransferJournalHandler)
     {
         _unitOfWork = unitOfWork;
+        _activeAcademicDifferenceHandler = activeAcademicDifferenceHandler;
+        _internalTransferJournalHandler = internalTransferJournalHandler;
     }
 
     public async Task<StudentMovementDto> GetMovementsAsync(Guid studentId, CancellationToken ct = default)
@@ -27,6 +36,35 @@ public class MovementService : IMovementService
         var internalTransfers = await _unitOfWork.GroupTransfers.GetByStudentIdAsync(studentId, ct);
 
         return leaves.ToDto(externalTransfers, internalTransfers);
+    }
+
+    public Task<PagedResult<ActiveAcademicDifferenceDto>> GetActiveAcademicDifferenceAsync(
+        string? studentName,
+        string? disciplineName,
+        string? status,
+        DateOnly? dateFrom,
+        DateOnly? dateTo,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        return _activeAcademicDifferenceHandler.HandleAsync(
+            new GetActiveAcademicDifferenceQuery(studentName, disciplineName, status, dateFrom, dateTo, page, pageSize),
+            ct);
+    }
+
+    public Task<PagedResult<InternalTransferJournalItemDto>> GetInternalTransferJournalAsync(
+        string? studentName,
+        DateOnly? dateFrom,
+        DateOnly? dateTo,
+        bool onlyWithPendingDifference = false,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        return _internalTransferJournalHandler.HandleAsync(
+            new GetInternalTransferJournalQuery(studentName, dateFrom, dateTo, onlyWithPendingDifference, page, pageSize),
+            ct);
     }
 
     public async Task<ExternalTransferDto> CreateTransferAsync(Guid studentId, CreateTransferDto dto, CancellationToken ct = default)

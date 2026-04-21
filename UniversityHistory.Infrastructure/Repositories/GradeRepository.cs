@@ -35,5 +35,19 @@ public class GradeRepository : IGradeRepository
         _db.GradeRecords.Add(grade);
         return grade;
     }
+
+    public async Task<GradeRecord?> GetByCourseEnrollmentIdAsync(Guid courseEnrollmentId, CancellationToken ct = default)
+    {
+        return await _db.GradeRecords
+            .Include(g => g.CourseEnrollment)
+                .ThenInclude(ce => ce.PlanDiscipline)
+                    .ThenInclude(pd => pd.Discipline)
+            .FirstOrDefaultAsync(g => g.CourseEnrollmentId == courseEnrollmentId, ct);
+    }
+
+    public void Update(GradeRecord grade)
+    {
+        _db.GradeRecords.Update(grade);
+    }
 }
 

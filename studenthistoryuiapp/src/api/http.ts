@@ -45,6 +45,7 @@ export async function fetchJson<TResponse>(
 
   if (!response.ok) {
     let message = `Помилка запиту (${response.status})`
+
     try {
       const maybeProblem = (await response.json()) as { title?: string; detail?: string }
       if (maybeProblem.detail || maybeProblem.title) {
@@ -73,6 +74,13 @@ export function postJson<TResponse>(path: string, body: unknown): Promise<TRespo
 export function putJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
   return fetchJson<TResponse>(path, {
     method: "PUT",
+    body: JSON.stringify(body),
+  })
+}
+
+export function patchJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
+  return fetchJson<TResponse>(path, {
+    method: "PATCH",
     body: JSON.stringify(body),
   })
 }

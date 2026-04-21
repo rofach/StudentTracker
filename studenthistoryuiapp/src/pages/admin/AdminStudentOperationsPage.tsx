@@ -1,17 +1,30 @@
 import { useEffect, useMemo, useState } from "react"
+import { getGroupSubgroups } from "../../api/groupsApi"
 import { getStudyPlans } from "../../api/studyPlansApi"
 import {
+  assignEnrollmentSubgroup,
+  closeAcademicLeave,
   closeEnrollment,
   createAcademicLeave,
   enrollStudent,
   getSelectableGroups,
   getStudentDetails,
+  moveEnrollmentSubgroup,
   moveStudentToGroup,
+  previewStudentTransfer,
 } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { ActiveGroupDto, EntityId, StudentDetailDto, StudyPlanDto } from "../../types/api"
+import { useToast } from "../../components/common/ToastCenter"
+import type {
+  ActiveGroupDto,
+  EntityId,
+  StudentDetailDto,
+  SubgroupDto,
+  StudyPlanDto,
+  TransferPreviewDto,
+} from "../../types/api"
 import { formatDate, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
 
@@ -20,27 +33,60 @@ type AdminStudentOperationsPageProps = {
   navigate: (path: string) => void
 }
 
+type SubgroupOption = {
+  subgroupId: EntityId
+  subgroupName: string
+}
+
 function todayValue(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+function mapSubgroups(items: SubgroupDto[]): SubgroupOption[] {
+  return items
+    .map((item) => ({ subgroupId: item.subgroupId, subgroupName: item.subgroupName }))
+    .sort((left, right) => left.subgroupName.localeCompare(right.subgroupName))
+}
+
+function renderPreviewList(title: string, items: TransferPreviewDto["disciplinesToKeep"]) {
+  if (items.length === 0) {
+    return (
+      <div>
+        <strong>{title}:</strong> немає
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <strong>{title}:</strong>{" "}
+      {items.map((item) => `${item.disciplineName} (семестр ${item.semesterNo})`).join(", ")}
+    </div>
+  )
+}
+
 export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudentOperationsPageProps) {
+  const { pushToast } = useToast()
   const [student, setStudent] = useState<StudentDetailDto | null>(null)
   const [groups, setGroups] = useState<ActiveGroupDto[]>([])
   const [plans, setPlans] = useState<StudyPlanDto[]>([])
+  const [subgroupOptions, setSubgroupOptions] = useState<SubgroupOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [movePreview, setMovePreview] = useState<TransferPreviewDto | null>(null)
+  const [previewSignature, setPreviewSignature] = useState<string | null>(null)
 
   const [enrollGroupId, setEnrollGroupId] = useState<EntityId | "">("")
   const [enrollDate, setEnrollDate] = useState(todayValue())
-  const [enrollReasonStart, setEnrollReasonStart] = useState("Вступ")
+  const [enrollReasonStart, setEnrollReasonStart] = useState("Первинне зарахування")
 
   const [moveGroupId, setMoveGroupId] = useState<EntityId | "">("")
   const [moveDate, setMoveDate] = useState(todayValue())
-  const [moveReasonEnd, setMoveReasonEnd] = useState("Переведення")
-  const [moveReasonStart, setMoveReasonStart] = useState("Переведення")
+  const [moveReasonEnd, setMoveReasonEnd] = useState("Переведення до іншої групи")
+  const [moveReasonStart, setMoveReasonStart] = useState("Переведення з іншої групи")
 
   const [closeDate, setCloseDate] = useState(todayValue())
   const [closeReasonEnd, setCloseReasonEnd] = useState("")
@@ -49,7 +95,15 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [leaveEndDate, setLeaveEndDate] = useState("")
   const [leaveReason, setLeaveReason] = useState("")
 
-  const loadData = async () => {
+  const [leaveCloseDate, setLeaveCloseDate] = useState(todayValue())
+  const [leaveReturnReason, setLeaveReturnReason] = useState("")
+
+  const [assignSubgroupId, setAssignSubgroupId] = useState<EntityId | "">("")
+  const [subgroupMoveId, setSubgroupMoveId] = useState<EntityId | "">("")
+  const [subgroupMoveDate, setSubgroupMoveDate] = useState(todayValue())
+  const [subgroupMoveReason, setSubgroupMoveReason] = useState("Переведення до підгрупи")
+
+  async function loadData() {
     const [studentResult, groupsResult, plansResult] = await Promise.all([
       getStudentDetails(studentId),
       getSelectableGroups(),
@@ -72,7 +126,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
           return
         }
 
-        setError(err instanceof Error ? err.message : "Не вдалося завантажити операції студента.")
+        setError(err instanceof Error ? err.message : "Не вдалося завантажити сторінку операцій студента.")
       })
       .finally(() => {
         if (!isActive) {
@@ -87,12 +141,60 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     }
   }, [studentId])
 
-  const currentEnrollment = useMemo(
-    () => student?.enrollments.find((item) => item.dateTo === null) ?? null,
-    [student],
-  )
-
+  const currentEnrollment = useMemo(() => student?.enrollments.find((item) => item.dateTo === null) ?? null, [student])
   const openPlan = useMemo(() => student?.plans.find((item) => item.dateTo === null) ?? null, [student])
+  const openLeave = useMemo(() => student?.leaves.find((item) => item.endDate === null) ?? null, [student])
+
+  useEffect(() => {
+    if (!currentEnrollment) {
+      setSubgroupOptions([])
+      return
+    }
+
+    let isActive = true
+
+    getGroupSubgroups(currentEnrollment.groupId)
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        const options = mapSubgroups(result)
+        setSubgroupOptions(options)
+        setAssignSubgroupId((current) => {
+          if (current && options.some((option) => option.subgroupId === current)) {
+            return current
+          }
+
+          return options[0]?.subgroupId ?? ""
+        })
+        setSubgroupMoveId((current) => {
+          const filtered = options.filter((option) => option.subgroupId !== currentEnrollment.subgroupId)
+          if (current && filtered.some((option) => option.subgroupId === current)) {
+            return current
+          }
+
+          return filtered[0]?.subgroupId ?? ""
+        })
+      })
+      .catch(() => {
+        if (!isActive) {
+          return
+        }
+
+        setSubgroupOptions([])
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [currentEnrollment?.groupId, currentEnrollment?.subgroupId])
+
+  useEffect(() => {
+    setMovePreview(null)
+    setPreviewSignature(null)
+    setPreviewError(null)
+  }, [moveGroupId, moveDate])
 
   const availableMoveGroups = useMemo(() => {
     if (!currentEnrollment) {
@@ -102,19 +204,53 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     return groups.filter((group) => group.groupId !== currentEnrollment.groupId)
   }, [groups, currentEnrollment])
 
-  const runAction = async (action: () => Promise<void>, successMessage: string) => {
+  const availableSubgroupMoveTargets = useMemo(
+    () => subgroupOptions.filter((option) => option.subgroupId !== currentEnrollment?.subgroupId),
+    [subgroupOptions, currentEnrollment?.subgroupId],
+  )
+
+  const isPreviewCurrent = Boolean(movePreview) && previewSignature === `${moveGroupId ?? ""}|${moveDate}`
+
+  async function runAction(action: () => Promise<void>, successMessage: string) {
     setIsSaving(true)
-    setMessage(null)
     setError(null)
 
     try {
       await action()
       await loadData()
-      setMessage(successMessage)
+      pushToast({ tone: "info", title: "Успішно", message: successMessage })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Не вдалося виконати операцію.")
+      const nextError = err instanceof Error ? err.message : "Не вдалося виконати операцію."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function loadPreview() {
+    if (!moveGroupId) {
+      return
+    }
+
+    setIsPreviewLoading(true)
+    setPreviewError(null)
+    setMovePreview(null)
+
+    try {
+      const result = await previewStudentTransfer(studentId, {
+        newGroupId: moveGroupId,
+        moveDate,
+      })
+
+      setMovePreview(result)
+      setPreviewSignature(`${moveGroupId}|${moveDate}`)
+    } catch (err: unknown) {
+      const nextError = err instanceof Error ? err.message : "Не вдалося завантажити попередній перегляд переведення."
+      setPreviewError(nextError)
+      pushToast({ tone: "error", message: nextError })
+    } finally {
+      setIsPreviewLoading(false)
     }
   }
 
@@ -127,14 +263,14 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   }
 
   if (!student) {
-    return <StatusState tone="info" message="Дані студента відсутні." />
+    return <StatusState tone="info" message="Дані студента недоступні." />
   }
 
   return (
     <div className="page-stack">
       <PageHeader
         title={fullName(student.firstName, student.lastName, student.patronymic)}
-        description="Академічні операції над студентом."
+        description="Адміністративні дії."
         actions={
           <div className="inline-actions">
             <button type="button" onClick={() => navigate(`/admin/students/${studentId}`)}>
@@ -147,6 +283,8 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
         }
       />
 
+      {error && student ? <StatusState tone="error" message={error} /> : null}
+
       <section className="panel">
         <h2>Поточний стан</h2>
         <div className="summary-grid">
@@ -157,10 +295,16 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
             <strong>Активна група:</strong> {currentEnrollment?.groupCode ?? "Немає"}
           </div>
           <div>
+            <strong>Підгрупа:</strong> {currentEnrollment?.subgroupName ?? "Немає"}
+          </div>
+          <div>
             <strong>Дата зарахування:</strong> {formatDate(currentEnrollment?.dateFrom ?? null)}
           </div>
           <div>
             <strong>Поточний план:</strong> {openPlan?.planName ?? "Немає"}
+          </div>
+          <div>
+            <strong>Академвідпустка:</strong> {openLeave ? `Відкрита з ${formatDate(openLeave.startDate)}` : "Немає"}
           </div>
         </div>
       </section>
@@ -171,10 +315,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
           <div className="form-grid">
             <label>
               Група
-              <select
-                value={enrollGroupId}
-                onChange={(event) => setEnrollGroupId(event.target.value)}
-              >
+              <select value={enrollGroupId} onChange={(event) => setEnrollGroupId(event.target.value)}>
                 <option value="">Оберіть групу</option>
                 {groups.map((group) => (
                   <option key={group.groupId} value={group.groupId}>
@@ -184,16 +325,12 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               </select>
             </label>
             <label>
-              Дата
+              Дата початку
               <input type="date" value={enrollDate} onChange={(event) => setEnrollDate(event.target.value)} />
             </label>
             <label>
               Причина початку
-              <input
-                type="text"
-                value={enrollReasonStart}
-                onChange={(event) => setEnrollReasonStart(event.target.value)}
-              />
+              <input type="text" value={enrollReasonStart} onChange={(event) => setEnrollReasonStart(event.target.value)} />
             </label>
           </div>
           <button
@@ -223,11 +360,8 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
             <>
               <div className="form-grid">
                 <label>
-                  Нова група
-                  <select
-                    value={moveGroupId}
-                    onChange={(event) => setMoveGroupId(event.target.value)}
-                  >
+                  Цільова група
+                  <select value={moveGroupId} onChange={(event) => setMoveGroupId(event.target.value)}>
                     <option value="">Оберіть групу</option>
                     {availableMoveGroups.map((group) => (
                       <option key={group.groupId} value={group.groupId}>
@@ -241,49 +375,69 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   <input type="date" value={moveDate} onChange={(event) => setMoveDate(event.target.value)} />
                 </label>
                 <label>
-                  Причина завершення
-                  <input
-                    type="text"
-                    value={moveReasonEnd}
-                    onChange={(event) => setMoveReasonEnd(event.target.value)}
-                  />
+                  Причина завершення поточного зарахування
+                  <input type="text" value={moveReasonEnd} onChange={(event) => setMoveReasonEnd(event.target.value)} />
                 </label>
                 <label>
-                  Причина початку
-                  <input
-                    type="text"
-                    value={moveReasonStart}
-                    onChange={(event) => setMoveReasonStart(event.target.value)}
-                  />
+                  Причина початку нового зарахування
+                  <input type="text" value={moveReasonStart} onChange={(event) => setMoveReasonStart(event.target.value)} />
                 </label>
               </div>
-              <button
-                type="button"
-                disabled={isSaving || moveGroupId === ""}
-                onClick={() =>
-                  void runAction(
-                    () =>
-                      moveStudentToGroup(studentId, {
-                        newGroupId: moveGroupId,
-                        newSubgroupId: null,
-                        moveDate,
-                        reasonEnd: moveReasonEnd,
-                        reasonStart: moveReasonStart,
-                      }),
-                    "Переведення до іншої групи виконано.",
-                  )
-                }
-              >
-                {isSaving ? "Виконання..." : "Перевести"}
-              </button>
+
+              <div className="inline-actions">
+                <button type="button" disabled={isPreviewLoading || moveGroupId === ""} onClick={() => void loadPreview()}>
+                  {isPreviewLoading ? "Завантаження перегляду..." : "Попередній перегляд"}
+                </button>
+                <button
+                  type="button"
+                  disabled={isSaving || moveGroupId === "" || !isPreviewCurrent}
+                  onClick={() =>
+                    void runAction(
+                      async () => {
+                        await moveStudentToGroup(studentId, {
+                          newGroupId: moveGroupId,
+                          newSubgroupId: null,
+                          moveDate,
+                          reasonEnd: moveReasonEnd,
+                          reasonStart: moveReasonStart,
+                        })
+                        setMovePreview(null)
+                        setPreviewSignature(null)
+                      },
+                      "Студента переведено до нової групи.",
+                    )
+                  }
+                >
+                  {isSaving ? "Виконання..." : "Підтвердити переведення"}
+                </button>
+              </div>
+
+              {previewError ? <StatusState tone="error" message={previewError} /> : null}
+              {movePreview ? (
+                <div className="summary-grid summary-grid--compact">
+                  <div>
+                    <strong>Поточний план:</strong> {movePreview.currentPlanName ?? "Немає"}
+                  </div>
+                  <div>
+                    <strong>Цільовий план:</strong> {movePreview.targetPlanName ?? "Немає"}
+                  </div>
+                  <div className="summary-grid__full">{renderPreviewList("Залишити", movePreview.disciplinesToKeep)}</div>
+                  <div className="summary-grid__full">
+                    {renderPreviewList("Вилучити заплановані", movePreview.plannedToRemove)}
+                  </div>
+                  <div className="summary-grid__full">
+                    {renderPreviewList("Додати як академрізницю", movePreview.newDisciplinesToAdd)}
+                  </div>
+                </div>
+              ) : null}
             </>
           ) : (
-            <StatusState tone="info" message="Активне зарахування відсутнє. Спочатку зарахуйте студента до групи." />
+            <StatusState tone="info" message="Перед переведенням потрібне активне зарахування." />
           )}
         </section>
 
         <section className="panel">
-          <h2>Закриття поточного зарахування</h2>
+          <h2>Закриття активного зарахування</h2>
           {currentEnrollment ? (
             <>
               <div className="form-grid">
@@ -293,11 +447,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 </label>
                 <label>
                   Причина завершення
-                  <input
-                    type="text"
-                    value={closeReasonEnd}
-                    onChange={(event) => setCloseReasonEnd(event.target.value)}
-                  />
+                  <input type="text" value={closeReasonEnd} onChange={(event) => setCloseReasonEnd(event.target.value)} />
                 </label>
               </div>
               <button
@@ -310,7 +460,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                         dateTo: closeDate,
                         reasonEnd: closeReasonEnd,
                       }),
-                    "Поточне зарахування закрито.",
+                    "Активне зарахування закрито.",
                   )
                 }
               >
@@ -318,7 +468,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               </button>
             </>
           ) : (
-            <StatusState tone="info" message="У студента немає активного зарахування для закриття." />
+            <StatusState tone="info" message="Немає активного зарахування для закриття." />
           )}
         </section>
 
@@ -332,7 +482,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   <input type="date" value={leaveDate} onChange={(event) => setLeaveDate(event.target.value)} />
                 </label>
                 <label>
-                  Р”Р°С‚Р° Р·Р°РІРµСЂС€РµРЅРЅСЏ
+                  Запланована дата завершення
                   <input type="date" value={leaveEndDate} onChange={(event) => setLeaveEndDate(event.target.value)} />
                 </label>
                 <label>
@@ -342,7 +492,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               </div>
               <button
                 type="button"
-                disabled={isSaving || leaveReason.trim().length === 0}
+                disabled={isSaving || openLeave !== null || leaveReason.trim().length === 0}
                 onClick={() =>
                   void runAction(
                     () =>
@@ -358,28 +508,164 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               >
                 {isSaving ? "Виконання..." : "Оформити академвідпустку"}
               </button>
+              {openLeave ? (
+                <p className="note-text">Вже є відкрита академвідпустка. Закрий її перед створенням нової.</p>
+              ) : null}
             </>
           ) : (
-            <StatusState tone="info" message="Академвідпустка можлива лише для активного зарахування." />
+            <StatusState tone="info" message="Академвідпустка доступна лише для активного зарахування." />
           )}
         </section>
       </div>
 
       <div className="content-grid content-grid--two-columns">
         <section className="panel">
-          <h2>Навчальний план</h2>
+          <h2>Закриття академвідпустки</h2>
+          {openLeave ? (
+            <>
+              <div className="summary-grid summary-grid--compact">
+                <div>
+                  <strong>Відкрита з:</strong> {formatDate(openLeave.startDate)}
+                </div>
+                <div>
+                  <strong>Причина:</strong> {openLeave.reason ?? "-"}
+                </div>
+              </div>
+              <div className="form-grid">
+                <label>
+                  Дата завершення
+                  <input type="date" value={leaveCloseDate} onChange={(event) => setLeaveCloseDate(event.target.value)} />
+                </label>
+                <label>
+                  Причина повернення
+                  <input
+                    type="text"
+                    value={leaveReturnReason}
+                    onChange={(event) => setLeaveReturnReason(event.target.value)}
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() =>
+                  void runAction(
+                    () =>
+                      closeAcademicLeave(openLeave.leaveId, {
+                        endDate: leaveCloseDate,
+                        returnReason: leaveReturnReason.trim() || null,
+                      }),
+                    "Академвідпустку закрито.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Закрити академвідпустку"}
+              </button>
+            </>
+          ) : (
+            <StatusState tone="info" message="Немає відкритої академвідпустки для закриття." />
+          )}
+        </section>
+
+        <section className="panel">
+          <h2>Операції з підгрупою</h2>
+          {!currentEnrollment ? (
+            <StatusState tone="info" message="Для операцій з підгрупою потрібне активне зарахування." />
+          ) : subgroupOptions.length === 0 ? (
+            <StatusState tone="info" message="Не вдалося визначити доступні підгрупи для поточної групи." />
+          ) : currentEnrollment.subgroupId ? (
+            <>
+              <div className="summary-grid summary-grid--compact">
+                <div>
+                  <strong>Поточна підгрупа:</strong> {currentEnrollment.subgroupName ?? "-"}
+                </div>
+              </div>
+              <div className="form-grid">
+                <label>
+                  Цільова підгрупа
+                  <select value={subgroupMoveId} onChange={(event) => setSubgroupMoveId(event.target.value)}>
+                    <option value="">Оберіть підгрупу</option>
+                    {availableSubgroupMoveTargets.map((option) => (
+                      <option key={option.subgroupId} value={option.subgroupId}>
+                        {option.subgroupName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Дата переведення
+                  <input type="date" value={subgroupMoveDate} onChange={(event) => setSubgroupMoveDate(event.target.value)} />
+                </label>
+                <label>
+                  Причина
+                  <input type="text" value={subgroupMoveReason} onChange={(event) => setSubgroupMoveReason(event.target.value)} />
+                </label>
+              </div>
+              <button
+                type="button"
+                disabled={isSaving || subgroupMoveId === "" || subgroupMoveReason.trim().length === 0}
+                onClick={() =>
+                  void runAction(
+                    () =>
+                      moveEnrollmentSubgroup(currentEnrollment.enrollmentId, {
+                        newSubgroupId: subgroupMoveId,
+                        moveDate: subgroupMoveDate,
+                        reason: subgroupMoveReason.trim(),
+                      }),
+                    "Історію підгрупи оновлено.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Перевести до підгрупи"}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="form-grid">
+                <label>
+                  Підгрупа
+                  <select value={assignSubgroupId} onChange={(event) => setAssignSubgroupId(event.target.value)}>
+                    <option value="">Оберіть підгрупу</option>
+                    {subgroupOptions.map((option) => (
+                      <option key={option.subgroupId} value={option.subgroupId}>
+                        {option.subgroupName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <button
+                type="button"
+                disabled={isSaving || assignSubgroupId === ""}
+                onClick={() =>
+                  void runAction(
+                    () => assignEnrollmentSubgroup(currentEnrollment.enrollmentId, { subgroupId: assignSubgroupId }),
+                    "Підгрупу призначено.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Призначити підгрупу"}
+              </button>
+            </>
+          )}
+        </section>
+      </div>
+
+      <div className="content-grid content-grid--two-columns">
+        <section className="panel">
+          <h2>Контекст навчального плану</h2>
           <StatusState
             tone="info"
             message={
               currentEnrollment
-                ? `План студента визначається через групу ${currentEnrollment.groupCode}. Змінюйте або призначайте план у розділі груп.`
-                : "Спочатку зарахуйте студента до групи, щоб для нього визначився навчальний план."
+                ? `Активний навчальний план визначається через групу ${currentEnrollment.groupCode}.`
+                : "Спочатку зарахуйте студента до групи, щоб визначився навчальний план."
             }
           />
         </section>
 
         <section className="panel">
-          <h2>Доступні плани</h2>
+          <h2>Доступні навчальні плани</h2>
           {plans.length === 0 ? (
             <StatusState tone="info" message="Навчальні плани ще не створені." />
           ) : (
@@ -406,9 +692,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
           )}
         </section>
       </div>
-
-      {message ? <StatusState tone="info" message={message} /> : null}
-      {error ? <StatusState tone="error" message={error} /> : null}
     </div>
   )
 }

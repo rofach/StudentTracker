@@ -4,6 +4,7 @@ using UniversityHistory.Application.Mappings;
 using UniversityHistory.Application.Queries.GetAverageGrade;
 using UniversityHistory.Application.Queries.GetStudentDisciplines;
 using UniversityHistory.Domain.Entities;
+using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
 using UniversityHistory.Domain.Interfaces.Repositories;
 
@@ -60,6 +61,65 @@ public class GradeService : IGradeService
         return await _studentDisciplinesHandler.HandleAsync(
             new GetStudentDisciplinesQuery(studentId),
             ct);
+    }
+
+    public async Task<GradeDto> UpsertGradeAsync(
+        Guid studentId,
+        Guid courseEnrollmentId,
+        UpsertGradeDto dto,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(dto.GradeValue))
+            throw new DomainException("Grade value is required.");
+
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        var courseEnrollment = await _unitOfWork.StudyPlans.GetCourseEnrollmentByIdAsync(courseEnrollmentId, ct)
+            ?? throw new NotFoundException(nameof(StudentCourseEnrollment), courseEnrollmentId);
+
+        if (courseEnrollment.Enrollment.StudentId != studentId)
+            throw new DomainException($"Course enrollment {courseEnrollmentId} does not belong to student {studentId}.");
+
+        var existingGrade = await _unitOfWork.Grades.GetByCourseEnrollmentIdAsync(courseEnrollmentId, ct);
+
+        GradeRecord grade;
+        if (existingGrade is null)
+        {
+            grade = new GradeRecord
+            {
+                CourseEnrollmentId = courseEnrollmentId,
+                CourseEnrollment = courseEnrollment,
+                GradeValue = dto.GradeValue.Trim(),
+                AssessmentDate = dto.AssessmentDate
+            };
+            _unitOfWork.Grades.Add(grade);
+        }
+        else
+        {
+            existingGrade.GradeValue = dto.GradeValue.Trim();
+            existingGrade.AssessmentDate = dto.AssessmentDate;
+            grade = existingGrade;
+            _unitOfWork.Grades.Update(existingGrade);
+        }
+
+        courseEnrollment.Status = CourseStatus.Completed;
+
+        var differenceItems = await _unitOfWork.GroupTransfers
+            .GetOpenDifferenceItemsByStudentAndPlanDisciplineAsync(
+                studentId,
+                courseEnrollment.PlanDisciplineId,
+                ct);
+
+        foreach (var differenceItem in differenceItems)
+        {
+            differenceItem.Status = DifferenceItemStatus.Completed;
+            _unitOfWork.GroupTransfers.UpdateDifferenceItem(differenceItem);
+        }
+
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return grade.ToDto(courseEnrollment.PlanDiscipline.SemesterNo);
     }
 
     private static int ResolveSemesterNo(GradeRecord grade)

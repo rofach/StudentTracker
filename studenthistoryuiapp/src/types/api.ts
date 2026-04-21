@@ -1,5 +1,7 @@
 export type EntityId = string
 
+export type DifferenceItemStatus = "Pending" | "Completed" | "Waived"
+
 export type PagedResult<TItem> = {
   items: TItem[]
   page: number
@@ -45,7 +47,7 @@ export type AcademicLeaveDto = {
   startDate: string
   endDate: string | null
   reason: string | null
-  returnReason?: string | null
+  returnReason: string | null
 }
 
 export type ExternalTransferDto = {
@@ -54,6 +56,20 @@ export type ExternalTransferDto = {
   transferDate: string
   institutionName: string
   notes: string | null
+}
+
+export type StudentInternalTransferSummaryDto = {
+  transferId: EntityId
+  transferDate: string
+  reason: string
+  oldEnrollmentId: EntityId
+  oldGroupCode: string
+  newEnrollmentId: EntityId
+  newGroupCode: string
+  differenceItemsTotal: number
+  differenceItemsPending: number
+  differenceItemsCompleted: number
+  differenceItemsWaived: number
 }
 
 export type StudentDetailDto = {
@@ -65,13 +81,16 @@ export type StudentDetailDto = {
   email: string | null
   phone: string | null
   status: string
+  isOnAcademicLeave: boolean
   enrollments: EnrollmentSummaryDto[]
   plans: GroupPlanAssignmentDto[]
   leaves: AcademicLeaveDto[]
   transfers: ExternalTransferDto[]
+  internalTransfers: StudentInternalTransferSummaryDto[]
 }
 
 export type StudentDisciplineOptionDto = {
+  courseEnrollmentId: EntityId
   disciplineId: EntityId
   disciplineName: string
   semesterNo: number
@@ -82,6 +101,7 @@ export type StudentDisciplineOptionDto = {
 
 export type GradeDto = {
   gradeId: EntityId
+  courseEnrollmentId: EntityId
   disciplineName: string
   semesterNo: number
   academicYearStart: number
@@ -96,12 +116,19 @@ export type AverageGradeDto = {
   academicYearLabel: string | null
 }
 
+export type UpsertGradeDto = {
+  gradeValue: string
+  assessmentDate: string
+}
+
 export type ClassmateDto = {
   classmateStudentId: EntityId
   firstName: string
   lastName: string
   groupId: EntityId
   groupCode: string
+  subgroupId: EntityId | null
+  subgroupName: string | null
   sharedFrom: string
   sharedTo: string | null
 }
@@ -115,6 +142,12 @@ export type TimelineEventDto = {
   departmentName: string | null
   academicUnitName: string | null
   academicUnitType: string | null
+}
+
+export type StudentMovementDto = {
+  leaves: AcademicLeaveDto[]
+  transfers: ExternalTransferDto[]
+  internalTransfers: StudentInternalTransferSummaryDto[]
 }
 
 export type GroupCompositionMemberDto = {
@@ -138,12 +171,32 @@ export type ActiveGroupDto = {
   dateClosed: string | null
 }
 
+export type SubgroupDto = {
+  subgroupId: EntityId
+  subgroupName: string
+}
+
 export type GroupStudentDto = {
   enrollmentId: EntityId
   studentId: EntityId
   firstName: string
   lastName: string
   email: string | null
+  subgroupId: EntityId | null
+  subgroupName: string | null
+  dateFrom: string
+  dateTo: string | null
+}
+
+export type StudentCurrentGroupDto = {
+  enrollmentId: EntityId
+  groupId: EntityId
+  groupCode: string
+  departmentName: string
+  academicUnitName: string
+  academicUnitType: string
+  subgroupId: EntityId | null
+  subgroupName: string | null
   dateFrom: string
   dateTo: string | null
 }
@@ -183,6 +236,12 @@ export type UpdatePlanDisciplineDto = {
 export type DisciplineDto = {
   disciplineId: EntityId
   disciplineName: string
+}
+
+export type DisciplineSearchItemDto = {
+  disciplineId: EntityId
+  disciplineName: string
+  planUsageCount: number
 }
 
 export type AcademicUnitDto = {
@@ -241,11 +300,26 @@ export type MoveStudentDto = {
   reasonStart: string
 }
 
+export type AssignSubgroupDto = {
+  subgroupId: EntityId
+}
+
+export type MoveStudentToSubgroupDto = {
+  newSubgroupId: EntityId
+  moveDate: string
+  reason: string
+}
+
 export type CreateLeaveDto = {
   enrollmentId: EntityId
   startDate: string
   endDate?: string | null
-  reason: string | null
+  reason: string
+}
+
+export type CloseAcademicLeaveDto = {
+  endDate: string
+  returnReason: string | null
 }
 
 export type AssignGroupPlanDto = {
@@ -286,4 +360,89 @@ export type CreateDepartmentDto = {
 
 export type UpdateDepartmentDto = {
   name: string
+}
+
+export type TransferPreviewRequestDto = {
+  newGroupId: EntityId
+  moveDate: string
+}
+
+export type TransferPreviewDisciplineDto = {
+  disciplineId: EntityId
+  disciplineName: string
+  semesterNo: number
+}
+
+export type TransferPreviewDto = {
+  currentPlanId: EntityId | null
+  currentPlanName: string | null
+  targetPlanId: EntityId | null
+  targetPlanName: string | null
+  disciplinesToKeep: TransferPreviewDisciplineDto[]
+  plannedToRemove: TransferPreviewDisciplineDto[]
+  newDisciplinesToAdd: TransferPreviewDisciplineDto[]
+}
+
+export type AcademicDifferenceItemDto = {
+  differenceItemId: EntityId
+  transferId: EntityId
+  planDisciplineId: EntityId
+  disciplineName: string
+  semesterNo: number
+  status: DifferenceItemStatus
+  notes: string | null
+}
+
+export type UpdateDifferenceItemDto = {
+  status: DifferenceItemStatus
+  notes: string | null
+}
+
+export type StudentGroupTransferDto = {
+  transferId: EntityId
+  studentId: EntityId
+  oldEnrollmentId: EntityId
+  newEnrollmentId: EntityId
+  transferDate: string
+  reason: string
+}
+
+export type StudentGroupTransferDetailDto = {
+  transferId: EntityId
+  studentId: EntityId
+  oldEnrollmentId: EntityId
+  oldGroupCode: string
+  newEnrollmentId: EntityId
+  newGroupCode: string
+  transferDate: string
+  reason: string
+  differenceItems: AcademicDifferenceItemDto[]
+}
+
+export type ActiveAcademicDifferenceDto = {
+  differenceItemId: EntityId
+  transferId: EntityId
+  studentId: EntityId
+  studentName: string
+  oldGroupCode: string
+  newGroupCode: string
+  transferDate: string
+  disciplineName: string
+  semesterNo: number
+  status: DifferenceItemStatus
+  notes: string | null
+}
+
+export type InternalTransferJournalItemDto = {
+  transferId: EntityId
+  studentId: EntityId
+  studentName: string
+  oldGroupCode: string
+  newGroupCode: string
+  transferDate: string
+  reason: string
+  differenceItemsTotal: number
+  differenceItemsPending: number
+  differenceItemsCompleted: number
+  differenceItemsWaived: number
 }

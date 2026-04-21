@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getStudentDetails } from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
@@ -23,15 +23,24 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
 
     getStudentDetails(studentId)
       .then((result) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setData(result)
       })
       .catch((err: unknown) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setError(err instanceof Error ? err.message : "Не вдалося завантажити дані студента.")
       })
       .finally(() => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setIsLoading(false)
       })
 
@@ -39,6 +48,15 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
       isActive = false
     }
   }, [studentId])
+
+  const currentEnrollment = useMemo(
+    () => data?.enrollments.find((item) => item.dateTo === null) ?? data?.enrollments[0] ?? null,
+    [data],
+  )
+
+  const currentPlan = useMemo(() => data?.plans.find((item) => item.dateTo === null) ?? data?.plans[0] ?? null, [data])
+
+  const openLeave = useMemo(() => data?.leaves.find((item) => item.endDate === null) ?? null, [data])
 
   if (isLoading) {
     return <Spinner label="Завантаження даних студента..." />
@@ -49,11 +67,8 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
   }
 
   if (!data) {
-    return <StatusState tone="info" message="Дані студента відсутні." />
+    return <StatusState tone="info" message="Дані студента недоступні." />
   }
-
-  const currentEnrollment = data.enrollments.find((item) => item.dateTo === null) ?? data.enrollments[0]
-  const currentPlan = data.plans.find((item) => item.dateTo === null) ?? data.plans[0]
 
   return (
     <div className="page-stack">
@@ -74,6 +89,9 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
           </div>
           <div>
             <strong>Телефон:</strong> {formatNullable(data.phone)}
+          </div>
+          <div>
+            <strong>Стан навчання:</strong> {data.isOnAcademicLeave ? "Академвідпустка" : "Навчається"}
           </div>
         </div>
       </section>
@@ -96,7 +114,7 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
             </div>
           </div>
         ) : (
-          <StatusState tone="info" message="Немає активного зарахування в групу." />
+          <StatusState tone="info" message="Немає активного зарахування до групи." />
         )}
 
         {currentPlan ? (
@@ -108,11 +126,64 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
               <strong>Спеціальність:</strong> {currentPlan.specialtyCode}
             </div>
             <div>
-              <strong>З:</strong> {formatDate(currentPlan.dateFrom)}
+              <strong>Діє з:</strong> {formatDate(currentPlan.dateFrom)}
             </div>
           </div>
         ) : (
-          <StatusState tone="info" message="Для студента ще не визначено навчальний план через групу." />
+          <StatusState tone="info" message="Через групу ще не призначено поточний навчальний план." />
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>Академвідпустка</h2>
+        {openLeave ? (
+          <div className="summary-grid">
+            <div>
+              <strong>Початок:</strong> {formatDate(openLeave.startDate)}
+            </div>
+            <div>
+              <strong>Причина:</strong> {formatNullable(openLeave.reason)}
+            </div>
+            <div>
+              <strong>Заплановане завершення:</strong> {formatDate(openLeave.endDate)}
+            </div>
+          </div>
+        ) : (
+          <StatusState tone="info" message="Зараз немає відкритої академвідпустки." />
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>Внутрішні переведення</h2>
+        {data.internalTransfers.length === 0 ? (
+          <StatusState tone="info" message="Внутрішніх переведень ще не було." />
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Маршрут</th>
+                  <th>Причина</th>
+                  <th>Академрізниця</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.internalTransfers.map((transfer) => (
+                  <tr key={transfer.transferId}>
+                    <td>{formatDate(transfer.transferDate)}</td>
+                    <td>
+                      {transfer.oldGroupCode} -&gt; {transfer.newGroupCode}
+                    </td>
+                    <td>{transfer.reason}</td>
+                    <td>
+                      {transfer.differenceItemsPending}/{transfer.differenceItemsTotal} очікує
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

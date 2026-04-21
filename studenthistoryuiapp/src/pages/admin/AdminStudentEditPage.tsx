@@ -113,7 +113,7 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
     <div className="page-stack">
       <PageHeader
         title={title}
-        description="Редагування базових даних студента."
+        description="Редагування студента."
         actions={
           <div className="inline-actions">
             <button type="button" onClick={() => navigate(`/admin/students/${studentId}`)}>

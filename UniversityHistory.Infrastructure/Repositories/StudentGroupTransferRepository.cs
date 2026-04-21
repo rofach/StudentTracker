@@ -54,6 +54,20 @@ public class StudentGroupTransferRepository : IStudentGroupTransferRepository
             .FirstOrDefaultAsync(d => d.DifferenceItemId == differenceItemId, ct);
     }
 
+    public async Task<IEnumerable<AcademicDifferenceItem>> GetOpenDifferenceItemsByStudentAndPlanDisciplineAsync(
+        Guid studentId,
+        Guid planDisciplineId,
+        CancellationToken ct = default)
+    {
+        return await _db.AcademicDifferenceItems
+            .Include(d => d.Transfer)
+                .ThenInclude(t => t.OldEnrollment)
+            .Where(d => d.PlanDisciplineId == planDisciplineId
+                     && d.Transfer.OldEnrollment.StudentId == studentId
+                     && d.Status != DifferenceItemStatus.Completed)
+            .ToListAsync(ct);
+    }
+
     public void UpdateDifferenceItem(AcademicDifferenceItem item)
     {
         _db.AcademicDifferenceItems.Update(item);

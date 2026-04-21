@@ -1,9 +1,9 @@
 import "./styles/tokens.css"
-import "./styles/layout.css"
-import "./styles/forms.css"
-import "./styles/tables.css"
-import "./styles/states.css"
-import "./styles/pages.css"
+import "./components/common/FormControls.css"
+import "./components/common/PageLayout.css"
+import "./components/common/TableView.css"
+import "./App.css"
+import { ToastProvider } from "./components/common/ToastCenter"
 import { CURRENT_STUDENT_ID } from "./config"
 import { usePathRoute } from "./hooks/usePathRoute"
 import { AppShell } from "./layout/AppShell"
@@ -11,6 +11,7 @@ import { ADMIN_MENU, STUDENT_MENU, getActiveMenuPath, getAppArea } from "./layou
 import { parseAdminStudentRoute, parseAdminStudyPlanRoute } from "./layout/routeParsers"
 import { AdminDisciplinesPage } from "./pages/admin/AdminDisciplinesPage"
 import { AdminGroupsPage } from "./pages/admin/AdminGroupsPage"
+import { AdminMovementReportsPage } from "./pages/admin/AdminMovementReportsPage"
 import { AdminStructurePage } from "./pages/admin/AdminStructurePage"
 import { AdminStudentCreatePage } from "./pages/admin/AdminStudentCreatePage"
 import { AdminStudentEditPage } from "./pages/admin/AdminStudentEditPage"
@@ -74,6 +75,8 @@ function renderAdminRoute(path: string, navigate: (path: string) => void) {
   }
 
   switch (path) {
+    case "/admin/movements":
+      return <AdminMovementReportsPage />
     case "/admin/groups":
       return <AdminGroupsPage navigate={navigate} />
     case "/admin/disciplines":
@@ -95,50 +98,44 @@ export default function App() {
   const content = area === "admin" ? renderAdminRoute(path, navigate) : renderStudentRoute(path)
 
   return (
-    <AppShell
-      areaTitle={
-        area === "admin"
-          ? "\u0410\u0434\u043C\u0456\u043D \u043F\u0430\u043D\u0435\u043B\u044C"
-          : "\u041A\u0430\u0431\u0456\u043D\u0435\u0442 \u0441\u0442\u0443\u0434\u0435\u043D\u0442\u0430"
-      }
-      areaSubtitle={
-        area === "admin"
-          ? "\u0423\u043F\u0440\u0430\u0432\u043B\u0456\u043D\u043D\u044F \u043D\u0430\u0432\u0447\u0430\u043B\u044C\u043D\u0438\u043C \u043F\u0440\u043E\u0446\u0435\u0441\u043E\u043C"
-          : "\u041F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u044C\u043D\u0438\u0439 \u043F\u0435\u0440\u0435\u0433\u043B\u044F\u0434 \u0434\u0430\u043D\u0438\u0445"
-      }
-      menuItems={menuItems}
-      activePath={activeItem.path}
-      onNavigate={navigate}
-      topBar={
-        <div className="topbar">
-          <div>
-            <div className="topbar__title">{activeItem.label}</div>
-            <div className="topbar__meta">
-              {area === "student"
-                ? `\u0441\u0442\u0443\u0434\u0435\u043D\u0442 ID ${CURRENT_STUDENT_ID}`
-                : "\u0420\u0435\u0436\u0438\u043C \u0430\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0442\u043E\u0440\u0430"}
+    <ToastProvider>
+      <AppShell
+        areaTitle={area === "admin" ? "Адмін панель" : "Кабінет студента"}
+        areaSubtitle={
+          area === "admin" ? "Управління навчальним процесом" : "Персональний перегляд даних"
+        }
+        menuItems={menuItems}
+        activePath={activeItem.path}
+        onNavigate={navigate}
+        topBar={
+          <div className="topbar">
+            <div>
+              <div className="topbar__title">{activeItem.label}</div>
+              <div className="topbar__meta">
+                {area === "student" ? `студент ID ${CURRENT_STUDENT_ID}` : "Режим адміністратора"}
+              </div>
+            </div>
+
+            <div className="topbar__actions">
+              <button
+                type="button"
+                className={area === "student" ? "area-switch area-switch--active" : "area-switch"}
+                onClick={() => navigate("/student/overview")}
+              >
+                Студент
+              </button>
+              <button
+                type="button"
+                className={area === "admin" ? "area-switch area-switch--active" : "area-switch"}
+                onClick={() => navigate("/admin/students")}
+              >
+                Адмін
+              </button>
             </div>
           </div>
-
-          <div className="topbar__actions">
-            <button
-              type="button"
-              className={area === "student" ? "area-switch area-switch--active" : "area-switch"}
-              onClick={() => navigate("/student/overview")}
-            >
-              {"\u0421\u0442\u0443\u0434\u0435\u043D\u0442"}
-            </button>
-            <button
-              type="button"
-              className={area === "admin" ? "area-switch area-switch--active" : "area-switch"}
-              onClick={() => navigate("/admin/students")}
-            >
-              {"\u0410\u0434\u043C\u0456\u043D"}
-            </button>
-          </div>
-        </div>
-      }
-      content={content}
-    />
+        }
+        content={content}
+      />
+    </ToastProvider>
   )
 }

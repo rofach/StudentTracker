@@ -86,6 +86,17 @@ public class StudyPlanRepository : IStudyPlanRepository
             .ToListAsync(ct);
     }
 
+    public async Task<StudentCourseEnrollment?> GetCourseEnrollmentByIdAsync(
+        Guid courseEnrollmentId, CancellationToken ct = default)
+    {
+        return await _db.StudentCourseEnrollments
+            .Include(ce => ce.Enrollment)
+            .Include(ce => ce.PlanDiscipline)
+                .ThenInclude(pd => pd.Discipline)
+            .Include(ce => ce.GradeRecords)
+            .FirstOrDefaultAsync(ce => ce.CourseEnrollmentId == courseEnrollmentId, ct);
+    }
+
     public async Task RemovePlannedCourseEnrollmentsForDisciplineAsync(
         Guid planId, Guid disciplineId, CancellationToken ct = default)
     {

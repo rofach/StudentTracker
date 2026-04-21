@@ -11,6 +11,7 @@ public static class GradeMappingExtensions
 
         return new GradeDto(
             grade.GradeId,
+            grade.CourseEnrollmentId,
             grade.CourseEnrollment.PlanDiscipline.Discipline.DisciplineName,
             semesterNo,
             academicYearStart,

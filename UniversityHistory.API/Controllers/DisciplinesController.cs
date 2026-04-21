@@ -21,6 +21,18 @@ public class DisciplinesController : ControllerBase
         return Ok(await _service.GetAllAsync(ct));
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> Search(
+        CancellationToken ct,
+        [FromQuery] string? name,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Min(100, Math.Max(1, pageSize));
+        return Ok(await _service.SearchAsync(name, page, pageSize, ct));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {

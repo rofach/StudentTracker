@@ -7,6 +7,7 @@ import type {
   GroupPlanAssignmentDto,
   GroupStudentDto,
   PagedResult,
+  SubgroupDto,
 } from "../types/api"
 import { fetchJson, postJson, putJson } from "./http"
 
@@ -26,6 +27,10 @@ export function getStudentsInGroup(
   params: { date?: string; page: number; pageSize: number },
 ): Promise<PagedResult<GroupStudentDto>> {
   return fetchJson<PagedResult<GroupStudentDto>>(`/groups/${groupId}/students`, undefined, params)
+}
+
+export function getGroupSubgroups(groupId: EntityId): Promise<SubgroupDto[]> {
+  return fetchJson<SubgroupDto[]>(`/groups/${groupId}/subgroups`)
 }
 
 export function getGroupPlanHistory(groupId: EntityId): Promise<GroupPlanAssignmentDto[]> {

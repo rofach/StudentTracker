@@ -1,6 +1,9 @@
 .table-wrap {
   overflow: auto;
   border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fffdfa;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 table {
@@ -15,7 +18,7 @@ table {
 
 th,
 td {
-  padding: 10px;
+  padding: 11px 12px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   font-size: 14px;
@@ -23,32 +26,16 @@ td {
 }
 
 th {
-  background: #f5f8fb;
+  background: #f4efe7;
   color: var(--muted);
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .row-selected {
-  background: #edf5ff;
+  background: #eef5f3;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.pagination__info {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.pagination__size {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--muted);
+tbody tr:hover {
+  background: #faf6ef;
 }

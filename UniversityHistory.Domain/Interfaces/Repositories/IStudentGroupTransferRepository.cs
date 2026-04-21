@@ -9,5 +9,9 @@ public interface IStudentGroupTransferRepository
     Task<StudentGroupTransfer?> GetByIdAsync(Guid transferId, CancellationToken ct = default);
     Task<IEnumerable<StudentGroupTransfer>> GetByStudentIdAsync(Guid studentId, CancellationToken ct = default);
     Task<AcademicDifferenceItem?> GetDifferenceItemByIdAsync(Guid differenceItemId, CancellationToken ct = default);
+    Task<IEnumerable<AcademicDifferenceItem>> GetOpenDifferenceItemsByStudentAndPlanDisciplineAsync(
+        Guid studentId,
+        Guid planDisciplineId,
+        CancellationToken ct = default);
     void UpdateDifferenceItem(AcademicDifferenceItem item);
 }

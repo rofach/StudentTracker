@@ -227,6 +227,7 @@ public class StudyPlanService : IStudyPlanService
                 EnrollmentId = enrollmentId,
                 GroupPlanAssignmentId = groupPlanAssignmentId,
                 PlanDisciplineId = pd.PlanDisciplineId,
+                PlanDiscipline = pd,
                 AcademicYearStart = CalculateAcademicYearStart(startDate, pd.SemesterNo),
                 Status = CourseStatus.Planned
             })

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getStudentTimeline } from "../../api/studentsApi"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
@@ -11,6 +11,43 @@ type StudentHistoryPageProps = {
 }
 
 const DEFAULT_PAGE_SIZE = 20
+
+const curatedEventLabels: Record<string, string> = {
+  EnrollmentStart: "Зарахування",
+  EnrollmentEnd: "Завершення зарахування",
+  AcademicLeaveStart: "Початок академвідпустки",
+  AcademicLeaveEnd: "Завершення академвідпустки",
+  SubgroupChange: "Зміна підгрупи",
+  GroupTransfer: "Переведення між групами",
+  ExternalTransfer: "Зовнішнє переведення",
+}
+
+function getEventLabel(eventType: string): string {
+  return curatedEventLabels[eventType] ?? eventType
+}
+
+function getCuratedDescription(item: TimelineEventDto): string {
+  switch (item.eventType) {
+    case "EnrollmentStart":
+      return item.groupCode ? `Зараховано до групи ${item.groupCode}` : "Початок зарахування"
+    case "AcademicLeaveStart":
+      return "Початок академвідпустки"
+    case "AcademicLeaveEnd":
+      return item.description.includes(":")
+        ? item.description.replace("Academic leave ended", "Повернення з академвідпустки")
+        : "Повернення з академвідпустки"
+    case "SubgroupChange":
+      return item.description.replace("Subgroup changed to", "Переведено до підгрупи")
+    case "GroupTransfer": {
+      const [baseDescription] = item.description.split(". Academic difference:")
+      return baseDescription.replace("Transferred from group", "Переведено з групи").replace(" to ", " до ")
+    }
+    case "ExternalTransfer":
+      return item.description
+    default:
+      return item.description
+  }
+}
 
 export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
   const [page, setPage] = useState(1)
@@ -26,15 +63,24 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
 
     getStudentTimeline(studentId, page, pageSize)
       .then((result) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setData(result)
       })
       .catch((err: unknown) => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setError(err instanceof Error ? err.message : "Не вдалося завантажити історію.")
       })
       .finally(() => {
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
+
         setIsLoading(false)
       })
 
@@ -43,22 +89,41 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
     }
   }, [studentId, page, pageSize])
 
+  const visibleItems = useMemo(() => {
+    if (!data) {
+      return []
+    }
+
+    return data.items.filter((item) => item.eventType !== "EnrollmentEnd")
+  }, [data])
+
+  const hasLoadedData = data !== null
+  const isInitialLoading = isLoading && !hasLoadedData
+  const isRefreshing = isLoading && hasLoadedData
+
   return (
     <section className="panel">
-      <h2>Історія студента</h2>
-      {isLoading ? <Spinner label="Завантаження історії..." /> : null}
+      <div className="section-heading">
+        <div>
+          <h2>Історія студента</h2>
+          <p className="note-text">Показано основні події.</p>
+        </div>
+        {isRefreshing ? <span className="loading-inline">Оновлення...</span> : null}
+      </div>
+
+      {isInitialLoading ? <Spinner label="Завантаження історії..." /> : null}
       {error ? <StatusState tone="error" message={error} /> : null}
-      {!isLoading && !error && (!data || data.items.length === 0) ? (
+      {!isLoading && !error && (!data || visibleItems.length === 0) ? (
         <StatusState tone="info" message="Історичні події відсутні." />
       ) : null}
 
-      {!isLoading && !error && data && data.items.length > 0 ? (
+      {visibleItems.length > 0 ? (
         <>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Тип події</th>
+                  <th>Подія</th>
                   <th>Опис</th>
                   <th>Дата від</th>
                   <th>Дата до</th>
@@ -68,10 +133,10 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {data.items.map((item, index) => (
-                  <tr key={`${item.eventType}-${item.dateFrom}-${index}`}>
-                    <td>{item.eventType}</td>
-                    <td>{item.description}</td>
+                {visibleItems.map((item, index) => (
+                  <tr key={`${item.eventType}-${item.dateFrom}-${item.description}-${index}`}>
+                    <td>{getEventLabel(item.eventType)}</td>
+                    <td>{getCuratedDescription(item)}</td>
                     <td>{formatDate(item.dateFrom)}</td>
                     <td>{formatDate(item.dateTo)}</td>
                     <td>{item.groupCode ?? "—"}</td>
@@ -86,7 +151,7 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
           <PaginationControls
             page={page}
             pageSize={pageSize}
-            totalCount={data.totalCount}
+            totalCount={data?.totalCount ?? 0}
             onPageChange={setPage}
             onPageSizeChange={(nextPageSize) => {
               setPageSize(nextPageSize)

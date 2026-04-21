@@ -42,6 +42,10 @@ public class GroupsController : ControllerBase
         return Ok(await _groupService.GetStudentsInGroupAsync(id, date, page, pageSize, ct));
     }
 
+    [HttpGet("{id:guid}/subgroups")]
+    public async Task<IActionResult> GetSubgroups(Guid id, CancellationToken ct) =>
+        Ok(await _groupService.GetSubgroupsAsync(id, ct));
+
     [HttpGet("{id:guid}/plans")]
     public async Task<IActionResult> GetPlanHistory(Guid id, CancellationToken ct) =>
         Ok(await _planService.GetGroupPlanHistoryAsync(id, ct));
