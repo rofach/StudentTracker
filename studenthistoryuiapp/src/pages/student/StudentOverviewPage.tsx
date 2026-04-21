@@ -5,6 +5,7 @@ import { StatusState } from "../../components/common/StatusState"
 import type { EntityId, StudentDetailDto } from "../../types/api"
 import { formatDate, formatNullable, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
+import { formatDifferenceSummary } from "../../utils/difference"
 
 type StudentOverviewPageProps = {
   studentId: EntityId
@@ -173,12 +174,10 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
                   <tr key={transfer.transferId}>
                     <td>{formatDate(transfer.transferDate)}</td>
                     <td>
-                      {transfer.oldGroupCode} -&gt; {transfer.newGroupCode}
+                      {transfer.oldGroupCode} → {transfer.newGroupCode}
                     </td>
                     <td>{transfer.reason}</td>
-                    <td>
-                      {transfer.differenceItemsPending}/{transfer.differenceItemsTotal} очікує
-                    </td>
+                    <td>{formatDifferenceSummary(transfer.differenceItemsPending, transfer.differenceItemsTotal)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -31,5 +31,6 @@ public record InternalTransferJournalItemDto(
 public record DisciplineSearchItemDto(
     Guid DisciplineId,
     string DisciplineName,
+    string? Description,
     int PlanUsageCount
 );

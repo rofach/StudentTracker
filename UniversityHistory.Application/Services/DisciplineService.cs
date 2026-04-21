@@ -68,6 +68,7 @@ public class DisciplineService : IDisciplineService
         }
 
         discipline.DisciplineName = dto.DisciplineName;
+        discipline.Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim();
         _unitOfWork.Disciplines.Update(discipline);
         await _unitOfWork.SaveChangesAsync(ct);
         return discipline.ToDto();

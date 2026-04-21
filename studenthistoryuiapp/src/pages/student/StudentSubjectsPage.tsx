@@ -1,5 +1,5 @@
 import "./StudentSubjectsPage.css"
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   getStudentAverageGrade,
   getStudentDisciplines,
@@ -9,6 +9,7 @@ import {
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import { useToast } from "../../components/common/ToastCenter"
+import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import type { AverageGradeDto, EntityId, GradeDto, StudentDisciplineOptionDto } from "../../types/api"
 import { formatDate } from "../../utils/format"
 
@@ -46,7 +47,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
 
   const [semesterFilter, setSemesterFilter] = useState<string>("all")
   const [searchText, setSearchText] = useState("")
-  const deferredSearchText = useDeferredValue(searchText)
+  const debouncedSearchText = useDebouncedValue(searchText, 250)
 
   const [average, setAverage] = useState<AverageGradeDto | null>(null)
   const [isAverageLoading, setIsAverageLoading] = useState(false)
@@ -143,7 +144,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
   }, [disciplines, gradeMap])
 
   const filteredRows = useMemo(() => {
-    const normalizedSearch = deferredSearchText.trim().toLowerCase()
+    const normalizedSearch = debouncedSearchText.trim().toLowerCase()
 
     return disciplines.filter((row) => {
       const semesterMatches =
@@ -153,7 +154,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
 
       return semesterMatches && searchMatches
     })
-  }, [disciplines, semesterFilter, deferredSearchText])
+  }, [disciplines, semesterFilter, debouncedSearchText])
 
   const averagePeriodLabel = useMemo(() => {
     if (!average) {

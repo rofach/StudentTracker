@@ -27,6 +27,16 @@ type AdminStudyPlanDetailPageProps = {
   navigate: (path: string) => void
 }
 
+const controlTypeLabels: Record<string, string> = {
+  Exam: "Екзамен",
+  Credit: "Залік",
+  Coursework: "Курсова робота",
+}
+
+function formatControlType(controlType: string) {
+  return controlTypeLabels[controlType] ?? controlType
+}
+
 const emptyDisciplineForm: AddPlanDisciplineDto = {
   disciplineId: "",
   semesterNo: 1,
@@ -113,6 +123,11 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
     const usedIds = new Set(disciplines.map((item) => item.disciplineId))
     return allDisciplines.filter((item) => !usedIds.has(item.disciplineId))
   }, [allDisciplines, disciplines])
+
+  const selectedDisciplineInfo = useMemo(
+    () => allDisciplines.find((item) => item.disciplineId === selectedDisciplineId) ?? null,
+    [allDisciplines, selectedDisciplineId],
+  )
 
   useEffect(() => {
     if (availableDisciplines.length > 0 && addForm.disciplineId === "") {
@@ -317,7 +332,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                     >
                       <td>{item.disciplineName}</td>
                       <td>{item.semesterNo}</td>
-                      <td>{item.controlType}</td>
+                      <td>{formatControlType(item.controlType)}</td>
                       <td>{item.hours}</td>
                       <td>{item.credits}</td>
                     </tr>
@@ -330,6 +345,9 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
               {selectedDiscipline ? (
                 <section className="panel panel--inner">
                   <h3>{selectedDiscipline.disciplineName}</h3>
+                  {selectedDisciplineInfo?.description ? (
+                    <p className="note-text">{selectedDisciplineInfo.description}</p>
+                  ) : null}
                   <div className="form-grid">
                     <label>
                       Семестр

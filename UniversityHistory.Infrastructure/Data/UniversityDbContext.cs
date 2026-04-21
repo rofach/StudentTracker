@@ -121,6 +121,7 @@ public class UniversityDbContext : DbContext
             e.HasKey(d => d.DisciplineId);
             e.Property(d => d.DisciplineId).HasColumnName("discipline_id");
             e.Property(d => d.DisciplineName).HasColumnName("discipline_name").HasMaxLength(200).IsRequired();
+            e.Property(d => d.Description).HasColumnName("description").HasMaxLength(1000);
         });
 
         modelBuilder.Entity<StudyPlan>(e =>

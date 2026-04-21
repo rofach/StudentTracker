@@ -1,28 +1,38 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getActiveAcademicDifference, getInternalTransferJournal } from "../../api/reportsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
+import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import type {
   ActiveAcademicDifferenceDto,
+  DifferenceItemStatus,
   InternalTransferJournalItemDto,
   PagedResult,
 } from "../../types/api"
 import { formatDate, formatNullable } from "../../utils/format"
+import { formatDifferenceBreakdown, formatDifferenceStatus } from "../../utils/difference"
 
 const DEFAULT_PAGE_SIZE = 20
+
+const differenceStatusOptions: Array<{ value: DifferenceItemStatus | "all"; label: string }> = [
+  { value: "Pending", label: "Очікує" },
+  { value: "Completed", label: "Завершено" },
+  { value: "Waived", label: "Зараховано" },
+  { value: "all", label: "Усі" },
+]
 
 export function AdminMovementReportsPage() {
   const [differencePage, setDifferencePage] = useState(1)
   const [differencePageSize, setDifferencePageSize] = useState(DEFAULT_PAGE_SIZE)
   const [differenceStudentFilter, setDifferenceStudentFilter] = useState("")
   const [differenceDisciplineFilter, setDifferenceDisciplineFilter] = useState("")
-  const [differenceStatusFilter, setDifferenceStatusFilter] = useState("Pending")
+  const [differenceStatusFilter, setDifferenceStatusFilter] = useState<DifferenceItemStatus | "all">("Pending")
   const [differenceDateFrom, setDifferenceDateFrom] = useState("")
   const [differenceDateTo, setDifferenceDateTo] = useState("")
-  const deferredDifferenceStudent = useDeferredValue(differenceStudentFilter)
-  const deferredDifferenceDiscipline = useDeferredValue(differenceDisciplineFilter)
+  const debouncedDifferenceStudent = useDebouncedValue(differenceStudentFilter)
+  const debouncedDifferenceDiscipline = useDebouncedValue(differenceDisciplineFilter)
   const [differenceData, setDifferenceData] = useState<PagedResult<ActiveAcademicDifferenceDto> | null>(null)
   const [differenceLoading, setDifferenceLoading] = useState(true)
   const [differenceError, setDifferenceError] = useState<string | null>(null)
@@ -33,7 +43,7 @@ export function AdminMovementReportsPage() {
   const [transferDateFrom, setTransferDateFrom] = useState("")
   const [transferDateTo, setTransferDateTo] = useState("")
   const [onlyWithPendingDifference, setOnlyWithPendingDifference] = useState(false)
-  const deferredTransferStudent = useDeferredValue(transferStudentFilter)
+  const debouncedTransferStudent = useDebouncedValue(transferStudentFilter)
   const [transferData, setTransferData] = useState<PagedResult<InternalTransferJournalItemDto> | null>(null)
   const [transferLoading, setTransferLoading] = useState(true)
   const [transferError, setTransferError] = useState<string | null>(null)
@@ -44,8 +54,8 @@ export function AdminMovementReportsPage() {
     setDifferenceError(null)
 
     getActiveAcademicDifference({
-      studentName: deferredDifferenceStudent.trim() || undefined,
-      disciplineName: deferredDifferenceDiscipline.trim() || undefined,
+      studentName: debouncedDifferenceStudent.trim() || undefined,
+      disciplineName: debouncedDifferenceDiscipline.trim() || undefined,
       status: differenceStatusFilter === "all" ? undefined : differenceStatusFilter,
       dateFrom: differenceDateFrom || undefined,
       dateTo: differenceDateTo || undefined,
@@ -78,8 +88,8 @@ export function AdminMovementReportsPage() {
       isActive = false
     }
   }, [
-    deferredDifferenceStudent,
-    deferredDifferenceDiscipline,
+    debouncedDifferenceStudent,
+    debouncedDifferenceDiscipline,
     differenceStatusFilter,
     differenceDateFrom,
     differenceDateTo,
@@ -89,7 +99,7 @@ export function AdminMovementReportsPage() {
 
   useEffect(() => {
     setDifferencePage(1)
-  }, [deferredDifferenceStudent, deferredDifferenceDiscipline, differenceStatusFilter, differenceDateFrom, differenceDateTo])
+  }, [debouncedDifferenceStudent, debouncedDifferenceDiscipline, differenceStatusFilter, differenceDateFrom, differenceDateTo])
 
   useEffect(() => {
     let isActive = true
@@ -97,7 +107,7 @@ export function AdminMovementReportsPage() {
     setTransferError(null)
 
     getInternalTransferJournal({
-      studentName: deferredTransferStudent.trim() || undefined,
+      studentName: debouncedTransferStudent.trim() || undefined,
       dateFrom: transferDateFrom || undefined,
       dateTo: transferDateTo || undefined,
       onlyWithPendingDifference,
@@ -129,11 +139,11 @@ export function AdminMovementReportsPage() {
     return () => {
       isActive = false
     }
-  }, [deferredTransferStudent, transferDateFrom, transferDateTo, onlyWithPendingDifference, transferPage, transferPageSize])
+  }, [debouncedTransferStudent, transferDateFrom, transferDateTo, onlyWithPendingDifference, transferPage, transferPageSize])
 
   useEffect(() => {
     setTransferPage(1)
-  }, [deferredTransferStudent, transferDateFrom, transferDateTo, onlyWithPendingDifference])
+  }, [debouncedTransferStudent, transferDateFrom, transferDateTo, onlyWithPendingDifference])
 
   const differenceItems = useMemo(() => differenceData?.items ?? [], [differenceData])
   const transferItems = useMemo(() => transferData?.items ?? [], [transferData])
@@ -177,11 +187,15 @@ export function AdminMovementReportsPage() {
 
           <label>
             Статус
-            <select value={differenceStatusFilter} onChange={(event) => setDifferenceStatusFilter(event.target.value)}>
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-              <option value="Waived">Waived</option>
-              <option value="all">Усі</option>
+            <select
+              value={differenceStatusFilter}
+              onChange={(event) => setDifferenceStatusFilter(event.target.value as DifferenceItemStatus | "all")}
+            >
+              {differenceStatusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -227,7 +241,7 @@ export function AdminMovementReportsPage() {
                       </td>
                       <td>{item.disciplineName}</td>
                       <td>{item.semesterNo}</td>
-                      <td>{item.status}</td>
+                      <td>{formatDifferenceStatus(item.status)}</td>
                       <td>{formatNullable(item.notes)}</td>
                     </tr>
                   ))}
@@ -277,7 +291,7 @@ export function AdminMovementReportsPage() {
           </label>
 
           <label className="checkbox-field">
-            <span>Тільки з активною академрізницею</span>
+            <span>Лише з активною академрізницею</span>
             <input
               type="checkbox"
               checked={onlyWithPendingDifference}
@@ -318,7 +332,11 @@ export function AdminMovementReportsPage() {
                         усього: {item.differenceItemsTotal}
                         <br />
                         <span className="note-text">
-                          pending: {item.differenceItemsPending}, completed: {item.differenceItemsCompleted}, waived: {item.differenceItemsWaived}
+                          {formatDifferenceBreakdown(
+                            item.differenceItemsPending,
+                            item.differenceItemsCompleted,
+                            item.differenceItemsWaived,
+                          )}
                         </span>
                       </td>
                     </tr>

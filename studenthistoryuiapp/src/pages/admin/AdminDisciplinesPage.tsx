@@ -1,10 +1,11 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createDiscipline, deleteDiscipline, searchDisciplines, updateDiscipline } from "../../api/disciplinesApi"
 import { useToast } from "../../components/common/ToastCenter"
 import { PageHeader } from "../../components/common/PageHeader"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
+import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import type { DisciplineSearchItemDto, EntityId, PagedResult } from "../../types/api"
 
 const DEFAULT_PAGE_SIZE = 20
@@ -14,18 +15,20 @@ export function AdminDisciplinesPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [nameFilter, setNameFilter] = useState("")
-  const deferredNameFilter = useDeferredValue(nameFilter)
+  const debouncedNameFilter = useDebouncedValue(nameFilter)
   const [data, setData] = useState<PagedResult<DisciplineSearchItemDto> | null>(null)
   const [selectedId, setSelectedId] = useState<EntityId | null>(null)
   const [newName, setNewName] = useState("")
+  const [newDescription, setNewDescription] = useState("")
   const [editName, setEditName] = useState("")
+  const [editDescription, setEditDescription] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const loadItems = async () => {
     const result = await searchDisciplines({
-      name: deferredNameFilter.trim() || undefined,
+      name: debouncedNameFilter.trim() || undefined,
       page,
       pageSize,
     })
@@ -64,11 +67,11 @@ export function AdminDisciplinesPage() {
     return () => {
       isActive = false
     }
-  }, [page, pageSize, deferredNameFilter])
+  }, [page, pageSize, debouncedNameFilter])
 
   useEffect(() => {
     setPage(1)
-  }, [deferredNameFilter])
+  }, [debouncedNameFilter])
 
   const items = useMemo(() => data?.items ?? [], [data])
   const hasLoadedData = data !== null
@@ -82,8 +85,10 @@ export function AdminDisciplinesPage() {
   useEffect(() => {
     if (selectedDiscipline) {
       setEditName(selectedDiscipline.disciplineName)
+      setEditDescription(selectedDiscipline.description ?? "")
     } else {
       setEditName("")
+      setEditDescription("")
     }
   }, [selectedDiscipline])
 
@@ -110,24 +115,40 @@ export function AdminDisciplinesPage() {
 
       <section className="panel">
         <h2>Новий предмет</h2>
-        <div className="filters-row">
+        <div className="form-grid">
           <label>
             Назва
             <input type="text" value={newName} onChange={(event) => setNewName(event.target.value)} />
           </label>
-          <button
-            type="button"
-            disabled={isSaving || newName.trim().length === 0}
-            onClick={() =>
-              void runAction(
-                () => createDiscipline({ disciplineName: newName.trim() }).then(() => setNewName("")),
-                "Предмет створено.",
-              )
-            }
-          >
-            {isSaving ? "Збереження..." : "Створити"}
-          </button>
+          <label className="summary-grid__full">
+            Опис
+            <textarea
+              rows={4}
+              value={newDescription}
+              onChange={(event) => setNewDescription(event.target.value)}
+              placeholder="Коротко опишіть зміст дисципліни"
+            />
+          </label>
         </div>
+        <button
+          type="button"
+          disabled={isSaving || newName.trim().length === 0}
+          onClick={() =>
+            void runAction(
+              () =>
+                createDiscipline({
+                  disciplineName: newName.trim(),
+                  description: newDescription.trim() || null,
+                }).then(() => {
+                  setNewName("")
+                  setNewDescription("")
+                }),
+              "Предмет створено.",
+            )
+          }
+        >
+          {isSaving ? "Збереження..." : "Створити"}
+        </button>
       </section>
 
       <section className="panel">
@@ -165,6 +186,7 @@ export function AdminDisciplinesPage() {
                     <thead>
                       <tr>
                         <th>Назва</th>
+                        <th>Опис</th>
                         <th>Використань у планах</th>
                       </tr>
                     </thead>
@@ -176,6 +198,7 @@ export function AdminDisciplinesPage() {
                           onClick={() => setSelectedId(item.disciplineId)}
                         >
                           <td>{item.disciplineName}</td>
+                          <td>{item.description?.trim() || "—"}</td>
                           <td>{item.planUsageCount}</td>
                         </tr>
                       ))}
@@ -212,6 +235,15 @@ export function AdminDisciplinesPage() {
                     Назва
                     <input type="text" value={editName} onChange={(event) => setEditName(event.target.value)} />
                   </label>
+                  <label className="summary-grid__full">
+                    Опис
+                    <textarea
+                      rows={6}
+                      value={editDescription}
+                      onChange={(event) => setEditDescription(event.target.value)}
+                      placeholder="Коротко опишіть зміст дисципліни"
+                    />
+                  </label>
                 </div>
 
                 <div className="inline-actions">
@@ -223,6 +255,7 @@ export function AdminDisciplinesPage() {
                         () =>
                           updateDiscipline(selectedDiscipline.disciplineId, {
                             disciplineName: editName.trim(),
+                            description: editDescription.trim() || null,
                           }).then(() => undefined),
                         "Предмет оновлено.",
                       )
@@ -239,6 +272,7 @@ export function AdminDisciplinesPage() {
                           deleteDiscipline(selectedDiscipline.disciplineId).then(() => {
                             setSelectedId(null)
                             setEditName("")
+                            setEditDescription("")
                           }),
                         "Предмет видалено.",
                       )

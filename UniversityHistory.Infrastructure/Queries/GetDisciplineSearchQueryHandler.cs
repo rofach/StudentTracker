@@ -21,12 +21,13 @@ public class GetDisciplineSearchQueryHandler : IGetDisciplineSearchQueryHandler
             SELECT
                 d.discipline_id                                 AS DisciplineId,
                 d.discipline_name                               AS DisciplineName,
+                d.description                                   AS Description,
                 COUNT(pd.plan_discipline_id)                    AS PlanUsageCount
             FROM Discipline d
             LEFT JOIN Plan_Disciplines pd
                 ON pd.discipline_id = d.discipline_id
             WHERE ({name} IS NULL OR d.discipline_name LIKE N'%' + {name} + N'%')
-            GROUP BY d.discipline_id, d.discipline_name
+            GROUP BY d.discipline_id, d.discipline_name, d.description
             """);
 
         var totalCount = await rawQuery.CountAsync(ct);

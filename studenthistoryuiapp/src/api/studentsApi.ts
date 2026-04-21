@@ -24,8 +24,6 @@ import type {
   StudentMovementDto,
   StudentUpdateDto,
   TimelineEventDto,
-  TransferPreviewDto,
-  TransferPreviewRequestDto,
   UpsertGradeDto,
   UpdateDifferenceItemDto,
   AssignSubgroupDto,
@@ -134,13 +132,6 @@ export function upsertStudentGrade(
 
 export function getStudentTransfers(studentId: EntityId): Promise<ExternalTransferDto[]> {
   return getStudentDetails(studentId).then((result) => result.transfers)
-}
-
-export function previewStudentTransfer(
-  studentId: EntityId,
-  dto: TransferPreviewRequestDto,
-): Promise<TransferPreviewDto> {
-  return postJson<TransferPreviewDto>(`/students/${studentId}/transfer-preview`, dto)
 }
 
 export function getStudentGroupTransfers(studentId: EntityId): Promise<StudentGroupTransferDto[]> {

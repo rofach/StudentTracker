@@ -236,11 +236,13 @@ export type UpdatePlanDisciplineDto = {
 export type DisciplineDto = {
   disciplineId: EntityId
   disciplineName: string
+  description: string | null
 }
 
 export type DisciplineSearchItemDto = {
   disciplineId: EntityId
   disciplineName: string
+  description: string | null
   planUsageCount: number
 }
 
@@ -342,6 +344,7 @@ export type UpdateStudyPlanDto = CreateStudyPlanDto
 
 export type CreateDisciplineDto = {
   disciplineName: string
+  description: string | null
 }
 
 export type UpdateDisciplineDto = CreateDisciplineDto
@@ -360,27 +363,6 @@ export type CreateDepartmentDto = {
 
 export type UpdateDepartmentDto = {
   name: string
-}
-
-export type TransferPreviewRequestDto = {
-  newGroupId: EntityId
-  moveDate: string
-}
-
-export type TransferPreviewDisciplineDto = {
-  disciplineId: EntityId
-  disciplineName: string
-  semesterNo: number
-}
-
-export type TransferPreviewDto = {
-  currentPlanId: EntityId | null
-  currentPlanName: string | null
-  targetPlanId: EntityId | null
-  targetPlanName: string | null
-  disciplinesToKeep: TransferPreviewDisciplineDto[]
-  plannedToRemove: TransferPreviewDisciplineDto[]
-  newDisciplinesToAdd: TransferPreviewDisciplineDto[]
 }
 
 export type AcademicDifferenceItemDto = {

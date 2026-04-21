@@ -7,7 +7,6 @@ public interface IEnrollmentService
     Task<Guid> EnrollStudentAsync(EnrollStudentDto dto, CancellationToken ct = default);
     Task CloseEnrollmentAsync(Guid enrollmentId, CloseEnrollmentDto dto, CancellationToken ct = default);
     Task MoveToGroupAsync(Guid studentId, MoveStudentDto dto, CancellationToken ct = default);
-    Task<TransferPreviewDto> PreviewTransferAsync(Guid studentId, TransferPreviewRequestDto dto, CancellationToken ct = default);
     Task<IEnumerable<StudentGroupTransferDto>> GetGroupTransfersAsync(Guid studentId, CancellationToken ct = default);
     Task<StudentGroupTransferDetailDto> GetGroupTransferDetailAsync(Guid studentId, Guid transferId, CancellationToken ct = default);
     Task<AcademicDifferenceItemDto> UpdateDifferenceItemAsync(Guid studentId, Guid transferId, Guid itemId, UpdateDifferenceItemDto dto, CancellationToken ct = default);

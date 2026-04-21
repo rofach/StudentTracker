@@ -9,6 +9,7 @@ import type {
   StudentInternalTransferSummaryDto,
 } from "../../types/api"
 import { formatDate } from "../../utils/format"
+import { formatDifferenceStatus, formatDifferenceSummary } from "../../utils/difference"
 
 type StudentTransferHistoryPanelProps = {
   studentId: EntityId
@@ -21,12 +22,6 @@ type DifferenceDraft = {
 }
 
 const differenceStatuses: DifferenceItemStatus[] = ["Pending", "Completed", "Waived"]
-
-const differenceStatusLabels: Record<DifferenceItemStatus, string> = {
-  Pending: "Очікує",
-  Completed: "Завершено",
-  Waived: "Зараховано без виконання",
-}
 
 export function StudentTransferHistoryPanel({ studentId, transfers }: StudentTransferHistoryPanelProps) {
   const [summaries, setSummaries] = useState<StudentInternalTransferSummaryDto[]>(transfers)
@@ -198,9 +193,7 @@ export function StudentTransferHistoryPanel({ studentId, transfers }: StudentTra
                   <td>{transfer.oldGroupCode}</td>
                   <td>{transfer.newGroupCode}</td>
                   <td>{transfer.reason}</td>
-                  <td>
-                    {transfer.differenceItemsPending}/{transfer.differenceItemsTotal} очікує
-                  </td>
+                  <td>{formatDifferenceSummary(transfer.differenceItemsPending, transfer.differenceItemsTotal)}</td>
                   <td>
                     <button type="button" onClick={() => setSelectedTransferId(transfer.transferId)}>
                       Переглянути
@@ -221,13 +214,14 @@ export function StudentTransferHistoryPanel({ studentId, transfers }: StudentTra
               <strong>Дата:</strong> {formatDate(selectedTransfer.transferDate)}
             </div>
             <div>
-              <strong>Маршрут:</strong> {selectedTransfer.oldGroupCode} -&gt; {selectedTransfer.newGroupCode}
+              <strong>Маршрут:</strong> {selectedTransfer.oldGroupCode} → {selectedTransfer.newGroupCode}
             </div>
             <div>
               <strong>Причина:</strong> {selectedTransfer.reason}
             </div>
             <div>
-              <strong>Академрізниця:</strong> {selectedTransfer.differenceItemsPending}/{selectedTransfer.differenceItemsTotal} очікує
+              <strong>Академрізниця:</strong>{" "}
+              {formatDifferenceSummary(selectedTransfer.differenceItemsPending, selectedTransfer.differenceItemsTotal)}
             </div>
           </div>
         ) : null}
@@ -275,7 +269,7 @@ export function StudentTransferHistoryPanel({ studentId, transfers }: StudentTra
                         >
                           {differenceStatuses.map((status) => (
                             <option key={status} value={status}>
-                              {differenceStatusLabels[status]}
+                              {formatDifferenceStatus(status)}
                             </option>
                           ))}
                         </select>

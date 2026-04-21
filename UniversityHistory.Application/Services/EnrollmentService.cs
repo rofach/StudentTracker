@@ -1,5 +1,6 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
+using UniversityHistory.Application.Rules;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
@@ -10,8 +11,13 @@ namespace UniversityHistory.Application.Services;
 public class EnrollmentService : IEnrollmentService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IStudyProcessRule _studyProcessRule;
 
-    public EnrollmentService(IUnitOfWork uow) => _unitOfWork = uow;
+    public EnrollmentService(IUnitOfWork uow, IStudyProcessRule studyProcessRule)
+    {
+        _unitOfWork = uow;
+        _studyProcessRule = studyProcessRule;
+    }
 
     public async Task<Guid> EnrollStudentAsync(EnrollStudentDto dto, CancellationToken ct = default)
     {
@@ -59,6 +65,9 @@ public class EnrollmentService : IEnrollmentService
             throw new DomainException($"Enrollment {enrollmentId} is already closed.");
         if (dto.DateTo < enrollment.DateFrom)
             throw new DomainException("DateTo cannot be before DateFrom.");
+
+        await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(enrollmentId, dto.DateTo, ct);
+
         enrollment.DateTo = dto.DateTo;
         enrollment.ReasonEnd = dto.ReasonEnd;
         _unitOfWork.Enrollments.Update(enrollment);
@@ -89,8 +98,7 @@ public class EnrollmentService : IEnrollmentService
         var current = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, ct)
             ?? throw new DomainException($"Student {studentId} has no active enrollment to move from.");
 
-        if (await _unitOfWork.AcademicLeaves.HasActiveLeaveOnDateAsync(current.EnrollmentId, dto.MoveDate, ct))
-            throw new DomainException("Cannot modify study process while the student is on academic leave.");
+        await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(current.EnrollmentId, dto.MoveDate, ct);
 
         if (dto.MoveDate <= current.DateFrom)
             throw new DomainException("Move date cannot be before the current enrollment's start date.");
@@ -101,6 +109,7 @@ public class EnrollmentService : IEnrollmentService
         var oldCourses = (await _unitOfWork.StudyPlans
             .GetCourseEnrollmentsByEnrollmentIdAsync(current.EnrollmentId, ct)).ToList();
         var coveredDisciplineIds = await GetCoveredDisciplineIdsAsync(studentId, ct);
+        var activeSemesterNo = await GetActiveSemesterNoAsync(studentId, dto.MoveDate, ct);
 
         var toRemove = oldCourses
             .Where(ce => ce.Status == CourseStatus.Planned && !ce.GradeRecords.Any())
@@ -149,6 +158,7 @@ public class EnrollmentService : IEnrollmentService
         await _unitOfWork.SaveChangesAsync(ct);
 
         var differenceItems = activePlan.Plan.PlanDisciplines
+            .Where(pd => pd.SemesterNo <= activeSemesterNo)
             .Where(pd => !coveredDisciplineIds.Contains(pd.DisciplineId))
             .Select(pd => new AcademicDifferenceItem
             {
@@ -167,69 +177,6 @@ public class EnrollmentService : IEnrollmentService
             OpenSubgroupEnrollment(newEnrollment.EnrollmentId, dto.NewSubgroupId.Value, dto.MoveDate, dto.ReasonStart);
 
         await _unitOfWork.SaveChangesAsync(ct);
-    }
-
-    public async Task<TransferPreviewDto> PreviewTransferAsync(
-        Guid studentId, TransferPreviewRequestDto dto, CancellationToken ct = default)
-    {
-        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
-            ?? throw new NotFoundException(nameof(Student), studentId);
-
-        var current = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, ct)
-            ?? throw new DomainException($"Student {studentId} has no active enrollment.");
-
-        if (dto.MoveDate <= current.DateFrom)
-            throw new DomainException("Move date cannot be before the current enrollment's start date.");
-
-        _ = await _unitOfWork.Groups.GetByIdAsync(dto.NewGroupId, ct)
-            ?? throw new NotFoundException(nameof(StudyGroup), dto.NewGroupId);
-
-        var oldCourses = await GetStudentCourseHistoryAsync(studentId, ct);
-
-        var coveredDisciplineIds = GetCoveredDisciplineIds(oldCourses);
-
-        var plannedToRemove = oldCourses
-            .Where(ce => ce.EnrollmentId == current.EnrollmentId
-                      && ce.Status == CourseStatus.Planned
-                      && !ce.GradeRecords.Any())
-            .Select(ce => new TransferPreviewDisciplineDto(
-                ce.PlanDiscipline.DisciplineId,
-                ce.PlanDiscipline.Discipline.DisciplineName,
-                ce.PlanDiscipline.SemesterNo))
-            .ToList();
-
-        var keptCourses = oldCourses
-            .Where(ce => coveredDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
-            .Select(ce => new TransferPreviewDisciplineDto(
-                ce.PlanDiscipline.DisciplineId,
-                ce.PlanDiscipline.Discipline.DisciplineName,
-                ce.PlanDiscipline.SemesterNo))
-            .DistinctBy(d => d.DisciplineId)
-            .ToList();
-
-        var currentPlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(
-            current.GroupId, dto.MoveDate, ct);
-
-        var targetPlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(
-            dto.NewGroupId, dto.MoveDate, ct)
-            ?? throw new DomainException("Target group has no active study plan on the transfer date.");
-
-        var newToAdd = targetPlan.Plan.PlanDisciplines
-            .Where(pd => !coveredDisciplineIds.Contains(pd.DisciplineId))
-            .Select(pd => new TransferPreviewDisciplineDto(
-                pd.DisciplineId,
-                pd.Discipline.DisciplineName,
-                pd.SemesterNo))
-            .ToList();
-
-        return new TransferPreviewDto(
-            currentPlan?.PlanId,
-            currentPlan?.Plan.PlanName,
-            targetPlan?.PlanId,
-            targetPlan?.Plan.PlanName,
-            keptCourses,
-            plannedToRemove,
-            newToAdd);
     }
 
     public async Task<IEnumerable<StudentGroupTransferDto>> GetGroupTransfersAsync(
@@ -314,8 +261,7 @@ public class EnrollmentService : IEnrollmentService
             throw new DomainException($"Cannot assign subgroup to a closed enrollment {enrollmentId}.");
 
         var operationDate = DateOnly.FromDateTime(DateTime.Today);
-        if (await _unitOfWork.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollmentId, operationDate, ct))
-            throw new DomainException("Cannot modify study process while the student is on academic leave.");
+        await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(enrollmentId, operationDate, ct);
 
         if (!enrollment.Group.Subgroups.Any(sg => sg.SubgroupId == dto.SubgroupId))
             throw new DomainException($"Subgroup {dto.SubgroupId} does not belong to Group {enrollment.GroupId}.");
@@ -336,8 +282,7 @@ public class EnrollmentService : IEnrollmentService
         if (enrollment.DateTo.HasValue)
             throw new DomainException($"Cannot move subgroup for a closed enrollment {enrollmentId}.");
 
-        if (await _unitOfWork.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollmentId, dto.MoveDate, ct))
-            throw new DomainException("Cannot modify study process while the student is on academic leave.");
+        await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(enrollmentId, dto.MoveDate, ct);
 
         if (dto.MoveDate < enrollment.DateFrom)
             throw new DomainException("Move date cannot be before the enrollment start date.");
@@ -376,6 +321,13 @@ public class EnrollmentService : IEnrollmentService
         return GetCoveredDisciplineIds(courses);
     }
 
+    private async Task<int> GetActiveSemesterNoAsync(Guid studentId, DateOnly onDate, CancellationToken ct)
+    {
+        var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
+        var studyStartDate = enrollments.Min(static enrollment => enrollment.DateFrom);
+        return GetSemesterIndex(studyStartDate, onDate);
+    }
+
     private async Task<List<StudentCourseEnrollment>> GetStudentCourseHistoryAsync(Guid studentId, CancellationToken ct)
     {
         var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
@@ -390,6 +342,28 @@ public class EnrollmentService : IEnrollmentService
 
         return courses;
     }
+
+    private static int GetSemesterIndex(DateOnly startDate, DateOnly onDate)
+    {
+        if (onDate <= startDate)
+            return 1;
+
+        var semester = 1;
+        var cursor = startDate;
+
+        while (NextSemesterStart(cursor) <= onDate)
+        {
+            cursor = NextSemesterStart(cursor);
+            semester++;
+        }
+
+        return semester;
+    }
+
+    private static DateOnly NextSemesterStart(DateOnly currentSemesterStart) =>
+        currentSemesterStart.Month >= 8
+            ? new DateOnly(currentSemesterStart.Year + 1, 2, 1)
+            : new DateOnly(currentSemesterStart.Year, 9, 1);
 
     private void OpenSubgroupEnrollment(Guid enrollmentId, Guid subgroupId, DateOnly dateFrom, string reason)
     {

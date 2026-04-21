@@ -3,6 +3,7 @@ using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Mappings;
 using UniversityHistory.Application.Queries.GetAverageGrade;
 using UniversityHistory.Application.Queries.GetStudentDisciplines;
+using UniversityHistory.Application.Rules;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
@@ -15,15 +16,18 @@ public class GradeService : IGradeService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IGetAverageGradeQueryHandler _avgHandler;
     private readonly IGetStudentDisciplinesQueryHandler _studentDisciplinesHandler;
+    private readonly IStudyProcessRule _studyProcessRule;
 
     public GradeService(
         IUnitOfWork unitOfWork,
         IGetAverageGradeQueryHandler avgHandler,
-        IGetStudentDisciplinesQueryHandler studentDisciplinesHandler)
+        IGetStudentDisciplinesQueryHandler studentDisciplinesHandler,
+        IStudyProcessRule studyProcessRule)
     {
         _unitOfWork = unitOfWork;
         _avgHandler = avgHandler;
         _studentDisciplinesHandler = studentDisciplinesHandler;
+        _studyProcessRule = studyProcessRule;
     }
 
     public async Task<PagedResult<GradeDto>> GetGradesAsync(Guid studentId, int page = 1, int pageSize = 20, CancellationToken ct = default)
@@ -80,6 +84,11 @@ public class GradeService : IGradeService
 
         if (courseEnrollment.Enrollment.StudentId != studentId)
             throw new DomainException($"Course enrollment {courseEnrollmentId} does not belong to student {studentId}.");
+
+        await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(
+            courseEnrollment.EnrollmentId,
+            dto.AssessmentDate,
+            ct);
 
         var existingGrade = await _unitOfWork.Grades.GetByCourseEnrollmentIdAsync(courseEnrollmentId, ct);
 

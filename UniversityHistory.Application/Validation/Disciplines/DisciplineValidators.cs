@@ -11,6 +11,9 @@ public class CreateDisciplineDtoValidator : AppValidator<CreateDisciplineDto>
         RuleFor(x => x.DisciplineName)
             .NotEmpty()
             .MaximumLength(200);
+
+        RuleFor(x => x.Description)
+            .MaximumLength(1000);
     }
 }
 
@@ -21,6 +24,9 @@ public class UpdateDisciplineDtoValidator : AppValidator<UpdateDisciplineDto>
         RuleFor(x => x.DisciplineName)
             .NotEmpty()
             .MaximumLength(200);
+
+        RuleFor(x => x.Description)
+            .MaximumLength(1000);
     }
 }
 

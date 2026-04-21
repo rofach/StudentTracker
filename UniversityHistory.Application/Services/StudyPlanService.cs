@@ -1,6 +1,7 @@
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Mappings;
+using UniversityHistory.Application.Rules;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
@@ -11,7 +12,13 @@ namespace UniversityHistory.Application.Services;
 public class StudyPlanService : IStudyPlanService
 {
     private readonly IUnitOfWork _unitOfWork;
-    public StudyPlanService(IUnitOfWork uow) => _unitOfWork = uow;
+    private readonly IStudyProcessRule _studyProcessRule;
+
+    public StudyPlanService(IUnitOfWork uow, IStudyProcessRule studyProcessRule)
+    {
+        _unitOfWork = uow;
+        _studyProcessRule = studyProcessRule;
+    }
 
     public async Task<IEnumerable<StudyPlanDto>> GetAllPlansAsync(CancellationToken ct = default)
     {
@@ -136,9 +143,7 @@ public class StudyPlanService : IStudyPlanService
         var activeEnrollments = await _unitOfWork.Enrollments.GetActiveByGroupIdOnDateAsync(groupId, dto.DateFrom, ct);
         foreach (var enrollment in activeEnrollments)
         {
-            if (await _unitOfWork.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollment.EnrollmentId, dto.DateFrom, ct))
-                throw new DomainException(
-                    $"Cannot modify study process while student enrollment {enrollment.EnrollmentId} is on academic leave.");
+            await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(enrollment.EnrollmentId, dto.DateFrom, ct);
 
             var existingDisciplineIds = (await _unitOfWork.StudyPlans
                     .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct))
@@ -189,9 +194,10 @@ public class StudyPlanService : IStudyPlanService
         var activeEnrollments = await _unitOfWork.Enrollments.GetActiveByGroupIdOnDateAsync(groupId, dto.NewPlanDateFrom, ct);
         foreach (var enrollment in activeEnrollments)
         {
-            if (await _unitOfWork.AcademicLeaves.HasActiveLeaveOnDateAsync(enrollment.EnrollmentId, dto.NewPlanDateFrom, ct))
-                throw new DomainException(
-                    $"Cannot modify study process while student enrollment {enrollment.EnrollmentId} is on academic leave.");
+            await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(
+                enrollment.EnrollmentId,
+                dto.NewPlanDateFrom,
+                ct);
 
             var allCourses = (await _unitOfWork.StudyPlans
                 .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct)).ToList();

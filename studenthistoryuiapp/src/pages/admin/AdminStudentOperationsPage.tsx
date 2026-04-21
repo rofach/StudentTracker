@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { getGroupSubgroups } from "../../api/groupsApi"
-import { getStudyPlans } from "../../api/studyPlansApi"
 import {
   assignEnrollmentSubgroup,
   closeAcademicLeave,
@@ -11,7 +10,6 @@ import {
   getStudentDetails,
   moveEnrollmentSubgroup,
   moveStudentToGroup,
-  previewStudentTransfer,
 } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
@@ -22,8 +20,6 @@ import type {
   EntityId,
   StudentDetailDto,
   SubgroupDto,
-  StudyPlanDto,
-  TransferPreviewDto,
 } from "../../types/api"
 import { formatDate, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
@@ -48,36 +44,14 @@ function mapSubgroups(items: SubgroupDto[]): SubgroupOption[] {
     .sort((left, right) => left.subgroupName.localeCompare(right.subgroupName))
 }
 
-function renderPreviewList(title: string, items: TransferPreviewDto["disciplinesToKeep"]) {
-  if (items.length === 0) {
-    return (
-      <div>
-        <strong>{title}:</strong> немає
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <strong>{title}:</strong>{" "}
-      {items.map((item) => `${item.disciplineName} (семестр ${item.semesterNo})`).join(", ")}
-    </div>
-  )
-}
-
 export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudentOperationsPageProps) {
   const { pushToast } = useToast()
   const [student, setStudent] = useState<StudentDetailDto | null>(null)
   const [groups, setGroups] = useState<ActiveGroupDto[]>([])
-  const [plans, setPlans] = useState<StudyPlanDto[]>([])
   const [subgroupOptions, setSubgroupOptions] = useState<SubgroupOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [previewError, setPreviewError] = useState<string | null>(null)
-  const [movePreview, setMovePreview] = useState<TransferPreviewDto | null>(null)
-  const [previewSignature, setPreviewSignature] = useState<string | null>(null)
 
   const [enrollGroupId, setEnrollGroupId] = useState<EntityId | "">("")
   const [enrollDate, setEnrollDate] = useState(todayValue())
@@ -104,15 +78,13 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [subgroupMoveReason, setSubgroupMoveReason] = useState("Переведення до підгрупи")
 
   async function loadData() {
-    const [studentResult, groupsResult, plansResult] = await Promise.all([
+    const [studentResult, groupsResult] = await Promise.all([
       getStudentDetails(studentId),
       getSelectableGroups(),
-      getStudyPlans(),
     ])
 
     setStudent(studentResult)
     setGroups(groupsResult)
-    setPlans(plansResult)
   }
 
   useEffect(() => {
@@ -141,9 +113,18 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     }
   }, [studentId])
 
-  const currentEnrollment = useMemo(() => student?.enrollments.find((item) => item.dateTo === null) ?? null, [student])
-  const openPlan = useMemo(() => student?.plans.find((item) => item.dateTo === null) ?? null, [student])
-  const openLeave = useMemo(() => student?.leaves.find((item) => item.endDate === null) ?? null, [student])
+  const currentEnrollment = useMemo(
+    () => student?.enrollments.find((item) => item.dateTo === null) ?? null,
+    [student],
+  )
+  const openPlan = useMemo(
+    () => student?.plans.find((item) => item.dateTo === null) ?? null,
+    [student],
+  )
+  const openLeave = useMemo(
+    () => student?.leaves.find((item) => item.endDate === null) ?? null,
+    [student],
+  )
 
   useEffect(() => {
     if (!currentEnrollment) {
@@ -161,6 +142,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
 
         const options = mapSubgroups(result)
         setSubgroupOptions(options)
+
         setAssignSubgroupId((current) => {
           if (current && options.some((option) => option.subgroupId === current)) {
             return current
@@ -168,6 +150,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
 
           return options[0]?.subgroupId ?? ""
         })
+
         setSubgroupMoveId((current) => {
           const filtered = options.filter((option) => option.subgroupId !== currentEnrollment.subgroupId)
           if (current && filtered.some((option) => option.subgroupId === current)) {
@@ -190,12 +173,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     }
   }, [currentEnrollment?.groupId, currentEnrollment?.subgroupId])
 
-  useEffect(() => {
-    setMovePreview(null)
-    setPreviewSignature(null)
-    setPreviewError(null)
-  }, [moveGroupId, moveDate])
-
   const availableMoveGroups = useMemo(() => {
     if (!currentEnrollment) {
       return groups
@@ -208,8 +185,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     () => subgroupOptions.filter((option) => option.subgroupId !== currentEnrollment?.subgroupId),
     [subgroupOptions, currentEnrollment?.subgroupId],
   )
-
-  const isPreviewCurrent = Boolean(movePreview) && previewSignature === `${moveGroupId ?? ""}|${moveDate}`
 
   async function runAction(action: () => Promise<void>, successMessage: string) {
     setIsSaving(true)
@@ -225,32 +200,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
       pushToast({ tone: "error", message: nextError })
     } finally {
       setIsSaving(false)
-    }
-  }
-
-  async function loadPreview() {
-    if (!moveGroupId) {
-      return
-    }
-
-    setIsPreviewLoading(true)
-    setPreviewError(null)
-    setMovePreview(null)
-
-    try {
-      const result = await previewStudentTransfer(studentId, {
-        newGroupId: moveGroupId,
-        moveDate,
-      })
-
-      setMovePreview(result)
-      setPreviewSignature(`${moveGroupId}|${moveDate}`)
-    } catch (err: unknown) {
-      const nextError = err instanceof Error ? err.message : "Не вдалося завантажити попередній перегляд переведення."
-      setPreviewError(nextError)
-      pushToast({ tone: "error", message: nextError })
-    } finally {
-      setIsPreviewLoading(false)
     }
   }
 
@@ -283,7 +232,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
         }
       />
 
-      {error && student ? <StatusState tone="error" message={error} /> : null}
+      {error ? <StatusState tone="error" message={error} /> : null}
 
       <section className="panel">
         <h2>Поточний стан</h2>
@@ -330,7 +279,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
             </label>
             <label>
               Причина початку
-              <input type="text" value={enrollReasonStart} onChange={(event) => setEnrollReasonStart(event.target.value)} />
+              <input
+                type="text"
+                value={enrollReasonStart}
+                onChange={(event) => setEnrollReasonStart(event.target.value)}
+              />
             </label>
           </div>
           <button
@@ -380,56 +333,33 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 </label>
                 <label>
                   Причина початку нового зарахування
-                  <input type="text" value={moveReasonStart} onChange={(event) => setMoveReasonStart(event.target.value)} />
+                  <input
+                    type="text"
+                    value={moveReasonStart}
+                    onChange={(event) => setMoveReasonStart(event.target.value)}
+                  />
                 </label>
               </div>
 
-              <div className="inline-actions">
-                <button type="button" disabled={isPreviewLoading || moveGroupId === ""} onClick={() => void loadPreview()}>
-                  {isPreviewLoading ? "Завантаження перегляду..." : "Попередній перегляд"}
-                </button>
-                <button
-                  type="button"
-                  disabled={isSaving || moveGroupId === "" || !isPreviewCurrent}
-                  onClick={() =>
-                    void runAction(
-                      async () => {
-                        await moveStudentToGroup(studentId, {
-                          newGroupId: moveGroupId,
-                          newSubgroupId: null,
-                          moveDate,
-                          reasonEnd: moveReasonEnd,
-                          reasonStart: moveReasonStart,
-                        })
-                        setMovePreview(null)
-                        setPreviewSignature(null)
-                      },
-                      "Студента переведено до нової групи.",
-                    )
-                  }
-                >
-                  {isSaving ? "Виконання..." : "Підтвердити переведення"}
-                </button>
-              </div>
-
-              {previewError ? <StatusState tone="error" message={previewError} /> : null}
-              {movePreview ? (
-                <div className="summary-grid summary-grid--compact">
-                  <div>
-                    <strong>Поточний план:</strong> {movePreview.currentPlanName ?? "Немає"}
-                  </div>
-                  <div>
-                    <strong>Цільовий план:</strong> {movePreview.targetPlanName ?? "Немає"}
-                  </div>
-                  <div className="summary-grid__full">{renderPreviewList("Залишити", movePreview.disciplinesToKeep)}</div>
-                  <div className="summary-grid__full">
-                    {renderPreviewList("Вилучити заплановані", movePreview.plannedToRemove)}
-                  </div>
-                  <div className="summary-grid__full">
-                    {renderPreviewList("Додати як академрізницю", movePreview.newDisciplinesToAdd)}
-                  </div>
-                </div>
-              ) : null}
+              <button
+                type="button"
+                disabled={isSaving || moveGroupId === ""}
+                onClick={() =>
+                  void runAction(
+                    () =>
+                      moveStudentToGroup(studentId, {
+                        newGroupId: moveGroupId,
+                        newSubgroupId: null,
+                        moveDate,
+                        reasonEnd: moveReasonEnd,
+                        reasonStart: moveReasonStart,
+                      }),
+                    "Студента переведено до нової групи.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Перевести до групи"}
+              </button>
             </>
           ) : (
             <StatusState tone="info" message="Перед переведенням потрібне активне зарахування." />
@@ -534,7 +464,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               <div className="form-grid">
                 <label>
                   Дата завершення
-                  <input type="date" value={leaveCloseDate} onChange={(event) => setLeaveCloseDate(event.target.value)} />
+                  <input
+                    type="date"
+                    value={leaveCloseDate}
+                    onChange={(event) => setLeaveCloseDate(event.target.value)}
+                  />
                 </label>
                 <label>
                   Причина повернення
@@ -594,11 +528,19 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 </label>
                 <label>
                   Дата переведення
-                  <input type="date" value={subgroupMoveDate} onChange={(event) => setSubgroupMoveDate(event.target.value)} />
+                  <input
+                    type="date"
+                    value={subgroupMoveDate}
+                    onChange={(event) => setSubgroupMoveDate(event.target.value)}
+                  />
                 </label>
                 <label>
                   Причина
-                  <input type="text" value={subgroupMoveReason} onChange={(event) => setSubgroupMoveReason(event.target.value)} />
+                  <input
+                    type="text"
+                    value={subgroupMoveReason}
+                    onChange={(event) => setSubgroupMoveReason(event.target.value)}
+                  />
                 </label>
               </div>
               <button
@@ -647,48 +589,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 {isSaving ? "Виконання..." : "Призначити підгрупу"}
               </button>
             </>
-          )}
-        </section>
-      </div>
-
-      <div className="content-grid content-grid--two-columns">
-        <section className="panel">
-          <h2>Контекст навчального плану</h2>
-          <StatusState
-            tone="info"
-            message={
-              currentEnrollment
-                ? `Активний навчальний план визначається через групу ${currentEnrollment.groupCode}.`
-                : "Спочатку зарахуйте студента до групи, щоб визначився навчальний план."
-            }
-          />
-        </section>
-
-        <section className="panel">
-          <h2>Доступні навчальні плани</h2>
-          {plans.length === 0 ? (
-            <StatusState tone="info" message="Навчальні плани ще не створені." />
-          ) : (
-            <div className="table-wrap table-wrap--compact">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Назва</th>
-                    <th>Спеціальність</th>
-                    <th>Діє з</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {plans.map((plan) => (
-                    <tr key={plan.planId}>
-                      <td>{plan.planName ?? `План ${plan.planId}`}</td>
-                      <td>{plan.specialtyCode}</td>
-                      <td>{formatDate(plan.validFrom)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           )}
         </section>
       </div>

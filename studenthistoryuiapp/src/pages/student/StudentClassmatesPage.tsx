@@ -224,7 +224,7 @@ export function StudentClassmatesPage({ studentId }: StudentClassmatesPageProps)
           {!isClassmateLoading && !selectedClassmate ? (
             <StatusState tone="info" message="Не вдалося завантажити дані одногрупника." />
           ) : null}
-          <p className="note-text">Підгрупа показана як контекст спільного періоду навчання.</p>
+          <p className="note-text">Підгрупа вказана для періоду, коли ви навчалися разом.</p>
         </section>
       ) : null}
     </div>

@@ -9,13 +9,14 @@ public static class DisciplineMappingExtensions
     {
         return new Discipline
         {
-            DisciplineName = dto.DisciplineName
+            DisciplineName = dto.DisciplineName,
+            Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim()
         };
     }
 
     public static DisciplineDto ToDto(this Discipline discipline)
     {
-        return new DisciplineDto(discipline.DisciplineId, discipline.DisciplineName);
+        return new DisciplineDto(discipline.DisciplineId, discipline.DisciplineName, discipline.Description);
     }
 }
 

@@ -3,6 +3,7 @@ using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Mappings;
 using UniversityHistory.Application.Queries.GetActiveAcademicDifference;
 using UniversityHistory.Application.Queries.GetInternalTransferJournal;
+using UniversityHistory.Application.Rules;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
 using UniversityHistory.Domain.Exceptions;
@@ -15,15 +16,18 @@ public class MovementService : IMovementService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IGetActiveAcademicDifferenceQueryHandler _activeAcademicDifferenceHandler;
     private readonly IGetInternalTransferJournalQueryHandler _internalTransferJournalHandler;
+    private readonly IStudyProcessRule _studyProcessRule;
 
     public MovementService(
         IUnitOfWork unitOfWork,
         IGetActiveAcademicDifferenceQueryHandler activeAcademicDifferenceHandler,
-        IGetInternalTransferJournalQueryHandler internalTransferJournalHandler)
+        IGetInternalTransferJournalQueryHandler internalTransferJournalHandler,
+        IStudyProcessRule studyProcessRule)
     {
         _unitOfWork = unitOfWork;
         _activeAcademicDifferenceHandler = activeAcademicDifferenceHandler;
         _internalTransferJournalHandler = internalTransferJournalHandler;
+        _studyProcessRule = studyProcessRule;
     }
 
     public async Task<StudentMovementDto> GetMovementsAsync(Guid studentId, CancellationToken ct = default)
@@ -71,6 +75,8 @@ public class MovementService : IMovementService
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
+
+        await _studyProcessRule.EnsureStudentModificationAllowedAsync(studentId, dto.TransferDate, ct);
 
         var institution = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(dto.InstitutionId, ct)
             ?? throw new NotFoundException(nameof(Institution), dto.InstitutionId);

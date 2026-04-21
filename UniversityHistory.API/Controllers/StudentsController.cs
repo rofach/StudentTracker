@@ -140,13 +140,6 @@ public class StudentsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id:guid}/transfer-preview")]
-    public async Task<IActionResult> TransferPreview(Guid id, [FromBody] TransferPreviewRequestDto dto, CancellationToken ct)
-    {
-        var result = await _enrollmentService.PreviewTransferAsync(id, dto, ct);
-        return Ok(result);
-    }
-
     [HttpGet("{id:guid}/group-transfers")]
     public async Task<IActionResult> GetGroupTransfers(Guid id, CancellationToken ct)
     {

@@ -3,6 +3,7 @@ import "./components/common/FormControls.css"
 import "./components/common/PageLayout.css"
 import "./components/common/TableView.css"
 import "./App.css"
+import { PageSectionTitleProvider } from "./components/common/PageHeader"
 import { ToastProvider } from "./components/common/ToastCenter"
 import { CURRENT_STUDENT_ID } from "./config"
 import { usePathRoute } from "./hooks/usePathRoute"
@@ -134,7 +135,7 @@ export default function App() {
             </div>
           </div>
         }
-        content={content}
+        content={<PageSectionTitleProvider title={activeItem.label}>{content}</PageSectionTitleProvider>}
       />
     </ToastProvider>
   )

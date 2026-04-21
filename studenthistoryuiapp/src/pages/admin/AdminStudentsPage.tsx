@@ -1,9 +1,10 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getStudents, searchStudents } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { PaginationControls } from "../../components/common/PaginationControls"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
+import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import type { PagedResult, StudentDto } from "../../types/api"
 import { formatDate, fullName } from "../../utils/format"
 import { formatStudentStatus } from "../../utils/status"
@@ -18,16 +19,16 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
   const [fullNameFilter, setFullNameFilter] = useState("")
   const [emailFilter, setEmailFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const deferredFullNameFilter = useDeferredValue(fullNameFilter)
-  const deferredEmailFilter = useDeferredValue(emailFilter)
+  const debouncedFullNameFilter = useDebouncedValue(fullNameFilter)
+  const debouncedEmailFilter = useDebouncedValue(emailFilter)
 
   const [data, setData] = useState<PagedResult<StudentDto> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const normalizedFullName = deferredFullNameFilter.trim()
-    const normalizedEmail = deferredEmailFilter.trim()
+    const normalizedFullName = debouncedFullNameFilter.trim()
+    const normalizedEmail = debouncedEmailFilter.trim()
     const hasSearch = normalizedFullName.length > 0 || normalizedEmail.length > 0 || statusFilter !== "all"
 
     let isActive = true
@@ -71,11 +72,11 @@ export function AdminStudentsPage({ navigate }: AdminStudentsPageProps) {
     return () => {
       isActive = false
     }
-  }, [page, pageSize, deferredFullNameFilter, deferredEmailFilter, statusFilter])
+  }, [page, pageSize, debouncedFullNameFilter, debouncedEmailFilter, statusFilter])
 
   useEffect(() => {
     setPage(1)
-  }, [deferredFullNameFilter, deferredEmailFilter, statusFilter])
+  }, [debouncedFullNameFilter, debouncedEmailFilter, statusFilter])
 
   const students = useMemo(() => data?.items ?? [], [data])
   const hasLoadedData = data !== null
