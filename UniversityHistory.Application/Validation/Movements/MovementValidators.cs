@@ -65,4 +65,30 @@ public class CloseAcademicLeaveDtoValidator : AppValidator<CloseAcademicLeaveDto
     }
 }
 
+public class UpdateAcademicLeaveDtoValidator : AppValidator<UpdateAcademicLeaveDto>
+{
+    public UpdateAcademicLeaveDtoValidator()
+    {
+        RuleFor(x => x.StartDate)
+            .NotDefaultDate();
+
+        RuleFor(x => x.Reason)
+            .NotEmpty()
+            .MaximumLength(200);
+
+        When(x => x.EndDate.HasValue, () =>
+        {
+            RuleFor(x => x.EndDate!.Value)
+                .Must((dto, endDate) => endDate >= dto.StartDate)
+                .WithMessage("EndDate must be on or after StartDate.");
+        });
+
+        When(x => !string.IsNullOrWhiteSpace(x.ReturnReason), () =>
+        {
+            RuleFor(x => x.ReturnReason!)
+                .MaximumLength(200);
+        });
+    }
+}
+
 

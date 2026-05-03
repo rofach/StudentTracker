@@ -26,6 +26,7 @@ import type {
   TimelineEventDto,
   UpsertGradeDto,
   UpdateDifferenceItemDto,
+  UpdateAcademicLeaveDto,
   AssignSubgroupDto,
 } from "../types/api"
 import { fetchJson, patchJson, postJson, putJson } from "./http"
@@ -167,6 +168,10 @@ export function createAcademicLeave(studentId: EntityId, dto: CreateLeaveDto): P
 
 export function closeAcademicLeave(leaveId: EntityId, dto: CloseAcademicLeaveDto): Promise<void> {
   return putJson<void>(`/leaves/${leaveId}/close`, dto)
+}
+
+export function updateAcademicLeave(leaveId: EntityId, dto: UpdateAcademicLeaveDto): Promise<void> {
+  return putJson<void>(`/leaves/${leaveId}`, dto)
 }
 
 export function enrollStudent(dto: EnrollStudentDto): Promise<{ enrollmentId: EntityId }> {

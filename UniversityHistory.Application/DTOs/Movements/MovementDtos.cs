@@ -66,3 +66,10 @@ public record CloseAcademicLeaveDto(
     string? ReturnReason
 );
 
+public record UpdateAcademicLeaveDto(
+    DateOnly StartDate,
+    DateOnly? EndDate,
+    string Reason,
+    string? ReturnReason
+);
+

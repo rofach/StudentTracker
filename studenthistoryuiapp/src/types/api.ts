@@ -324,6 +324,13 @@ export type CloseAcademicLeaveDto = {
   returnReason: string | null
 }
 
+export type UpdateAcademicLeaveDto = {
+  startDate: string
+  endDate: string | null
+  reason: string
+  returnReason: string | null
+}
+
 export type AssignGroupPlanDto = {
   planId: EntityId
   dateFrom: string

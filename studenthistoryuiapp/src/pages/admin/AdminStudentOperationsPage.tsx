@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react"
 import { getGroupSubgroups } from "../../api/groupsApi"
 import {
   assignEnrollmentSubgroup,
-  closeAcademicLeave,
   closeEnrollment,
   createAcademicLeave,
   enrollStudent,
@@ -10,12 +9,14 @@ import {
   getStudentDetails,
   moveEnrollmentSubgroup,
   moveStudentToGroup,
+  updateAcademicLeave,
 } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import { useToast } from "../../components/common/ToastCenter"
 import type {
+  AcademicLeaveDto,
   ActiveGroupDto,
   EntityId,
   StudentDetailDto,
@@ -44,6 +45,16 @@ function mapSubgroups(items: SubgroupDto[]): SubgroupOption[] {
     .sort((left, right) => left.subgroupName.localeCompare(right.subgroupName))
 }
 
+function sortLeaves(items: AcademicLeaveDto[]): AcademicLeaveDto[] {
+  return [...items].sort((left, right) => right.startDate.localeCompare(left.startDate))
+}
+
+function formatLeaveOption(leave: AcademicLeaveDto): string {
+  return leave.endDate
+    ? `${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}`
+    : `${formatDate(leave.startDate)} - відкрита`
+}
+
 export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudentOperationsPageProps) {
   const { pushToast } = useToast()
   const [student, setStudent] = useState<StudentDetailDto | null>(null)
@@ -69,8 +80,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [leaveEndDate, setLeaveEndDate] = useState("")
   const [leaveReason, setLeaveReason] = useState("")
 
-  const [leaveCloseDate, setLeaveCloseDate] = useState(todayValue())
-  const [leaveReturnReason, setLeaveReturnReason] = useState("")
+  const [selectedLeaveId, setSelectedLeaveId] = useState<EntityId | "">("")
+  const [editLeaveStartDate, setEditLeaveStartDate] = useState("")
+  const [editLeaveEndDate, setEditLeaveEndDate] = useState("")
+  const [editLeaveReason, setEditLeaveReason] = useState("")
+  const [editLeaveReturnReason, setEditLeaveReturnReason] = useState("")
 
   const [assignSubgroupId, setAssignSubgroupId] = useState<EntityId | "">("")
   const [subgroupMoveId, setSubgroupMoveId] = useState<EntityId | "">("")
@@ -85,6 +99,23 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
 
     setStudent(studentResult)
     setGroups(groupsResult)
+  }
+
+  async function runAction(action: () => Promise<void>, successMessage: string) {
+    setIsSaving(true)
+    setError(null)
+
+    try {
+      await action()
+      await loadData()
+      pushToast({ tone: "info", title: "Успішно", message: successMessage })
+    } catch (err: unknown) {
+      const nextError = err instanceof Error ? err.message : "Не вдалося виконати операцію."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   useEffect(() => {
@@ -124,6 +155,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const openLeave = useMemo(
     () => student?.leaves.find((item) => item.endDate === null) ?? null,
     [student],
+  )
+  const leaves = useMemo(() => sortLeaves(student?.leaves ?? []), [student?.leaves])
+  const selectedLeave = useMemo(
+    () => leaves.find((item) => item.leaveId === selectedLeaveId) ?? leaves[0] ?? null,
+    [leaves, selectedLeaveId],
   )
 
   useEffect(() => {
@@ -173,6 +209,36 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     }
   }, [currentEnrollment?.groupId, currentEnrollment?.subgroupId])
 
+  useEffect(() => {
+    if (!leaves.length) {
+      setSelectedLeaveId("")
+      return
+    }
+
+    setSelectedLeaveId((current) => {
+      if (current && leaves.some((item) => item.leaveId === current)) {
+        return current
+      }
+
+      return leaves[0].leaveId
+    })
+  }, [leaves])
+
+  useEffect(() => {
+    if (!selectedLeave) {
+      setEditLeaveStartDate("")
+      setEditLeaveEndDate("")
+      setEditLeaveReason("")
+      setEditLeaveReturnReason("")
+      return
+    }
+
+    setEditLeaveStartDate(selectedLeave.startDate)
+    setEditLeaveEndDate(selectedLeave.endDate ?? "")
+    setEditLeaveReason(selectedLeave.reason ?? "")
+    setEditLeaveReturnReason(selectedLeave.returnReason ?? "")
+  }, [selectedLeave])
+
   const availableMoveGroups = useMemo(() => {
     if (!currentEnrollment) {
       return groups
@@ -185,23 +251,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     () => subgroupOptions.filter((option) => option.subgroupId !== currentEnrollment?.subgroupId),
     [subgroupOptions, currentEnrollment?.subgroupId],
   )
-
-  async function runAction(action: () => Promise<void>, successMessage: string) {
-    setIsSaving(true)
-    setError(null)
-
-    try {
-      await action()
-      await loadData()
-      pushToast({ tone: "info", title: "Успішно", message: successMessage })
-    } catch (err: unknown) {
-      const nextError = err instanceof Error ? err.message : "Не вдалося виконати операцію."
-      setError(nextError)
-      pushToast({ tone: "error", message: nextError })
-    } finally {
-      setIsSaving(false)
-    }
-  }
 
   if (isLoading) {
     return <Spinner label="Завантаження сторінки операцій..." />
@@ -297,7 +346,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                     groupId: enrollGroupId,
                     subgroupId: null,
                     dateFrom: enrollDate,
-                    reasonStart: enrollReasonStart,
+                    reasonStart: enrollReasonStart.trim(),
                   }).then(() => undefined),
                 "Студента зараховано до групи.",
               )
@@ -351,8 +400,8 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                         newGroupId: moveGroupId,
                         newSubgroupId: null,
                         moveDate,
-                        reasonEnd: moveReasonEnd,
-                        reasonStart: moveReasonStart,
+                        reasonEnd: moveReasonEnd.trim(),
+                        reasonStart: moveReasonStart.trim(),
                       }),
                     "Студента переведено до нової групи.",
                   )
@@ -388,7 +437,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                     () =>
                       closeEnrollment(currentEnrollment.enrollmentId, {
                         dateTo: closeDate,
-                        reasonEnd: closeReasonEnd,
+                        reasonEnd: closeReasonEnd.trim(),
                       }),
                     "Активне зарахування закрито.",
                   )
@@ -403,7 +452,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
         </section>
 
         <section className="panel">
-          <h2>Академвідпустка</h2>
+          <h2>Нова академвідпустка</h2>
           {currentEnrollment ? (
             <>
               <div className="form-grid">
@@ -439,7 +488,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 {isSaving ? "Виконання..." : "Оформити академвідпустку"}
               </button>
               {openLeave ? (
-                <p className="note-text">Вже є відкрита академвідпустка. Закрий її перед створенням нової.</p>
+                <p className="note-text">У студента вже є відкрита академвідпустка. Її можна змінити в блоці редагування нижче.</p>
               ) : null}
             </>
           ) : (
@@ -450,54 +499,97 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
 
       <div className="content-grid content-grid--two-columns">
         <section className="panel">
-          <h2>Закриття академвідпустки</h2>
-          {openLeave ? (
+          <h2>Редагування академвідпустки</h2>
+          {leaves.length > 0 ? (
             <>
               <div className="summary-grid summary-grid--compact">
                 <div>
-                  <strong>Відкрита з:</strong> {formatDate(openLeave.startDate)}
+                  <strong>Усього записів:</strong> {leaves.length}
                 </div>
                 <div>
-                  <strong>Причина:</strong> {openLeave.reason ?? "-"}
+                  <strong>Активна:</strong> {openLeave ? `так, з ${formatDate(openLeave.startDate)}` : "ні"}
                 </div>
               </div>
+
               <div className="form-grid">
+                <label>
+                  Відпустка
+                  <select value={selectedLeave?.leaveId ?? ""} onChange={(event) => setSelectedLeaveId(event.target.value)}>
+                    {leaves.map((leave) => (
+                      <option key={leave.leaveId} value={leave.leaveId}>
+                        {formatLeaveOption(leave)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Дата початку
+                  <input
+                    type="date"
+                    value={editLeaveStartDate}
+                    onChange={(event) => setEditLeaveStartDate(event.target.value)}
+                  />
+                </label>
                 <label>
                   Дата завершення
                   <input
                     type="date"
-                    value={leaveCloseDate}
-                    onChange={(event) => setLeaveCloseDate(event.target.value)}
+                    value={editLeaveEndDate}
+                    onChange={(event) => setEditLeaveEndDate(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Причина
+                  <input
+                    type="text"
+                    value={editLeaveReason}
+                    onChange={(event) => setEditLeaveReason(event.target.value)}
                   />
                 </label>
                 <label>
                   Причина повернення
                   <input
                     type="text"
-                    value={leaveReturnReason}
-                    onChange={(event) => setLeaveReturnReason(event.target.value)}
+                    value={editLeaveReturnReason}
+                    onChange={(event) => setEditLeaveReturnReason(event.target.value)}
                   />
                 </label>
               </div>
-              <button
-                type="button"
-                disabled={isSaving}
-                onClick={() =>
-                  void runAction(
-                    () =>
-                      closeAcademicLeave(openLeave.leaveId, {
-                        endDate: leaveCloseDate,
-                        returnReason: leaveReturnReason.trim() || null,
-                      }),
-                    "Академвідпустку закрито.",
-                  )
-                }
-              >
-                {isSaving ? "Виконання..." : "Закрити академвідпустку"}
-              </button>
+
+              <div className="inline-actions">
+                <button
+                  type="button"
+                  disabled={isSaving || !selectedLeave || editLeaveReason.trim().length === 0}
+                  onClick={() =>
+                    selectedLeave
+                      ? void runAction(
+                          () =>
+                            updateAcademicLeave(selectedLeave.leaveId, {
+                              startDate: editLeaveStartDate,
+                              endDate: editLeaveEndDate || null,
+                              reason: editLeaveReason.trim(),
+                              returnReason: editLeaveReturnReason.trim() || null,
+                            }),
+                          "Академвідпустку оновлено.",
+                        )
+                      : undefined
+                  }
+                >
+                  {isSaving ? "Виконання..." : "Зберегти зміни"}
+                </button>
+                <button type="button" disabled={isSaving} onClick={() => setEditLeaveEndDate("")}>
+                  Очистити дату завершення
+                </button>
+              </div>
+
+              {selectedLeave ? (
+                <p className="note-text">
+                  Через це редагування можна і закрити відкриту відпустку, і скоригувати вже закриту.
+                </p>
+              ) : null}
             </>
           ) : (
-            <StatusState tone="info" message="Немає відкритої академвідпустки для закриття." />
+            <StatusState tone="info" message="У студента ще немає записів про академвідпустку." />
           )}
         </section>
 

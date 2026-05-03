@@ -164,5 +164,75 @@ public class MovementService : IMovementService
         await _unitOfWork.SaveChangesAsync(ct);
         return leave.ToDto();
     }
+
+    public async Task<AcademicLeaveDto> UpdateLeaveAsync(Guid leaveId, UpdateAcademicLeaveDto dto, CancellationToken ct = default)
+    {
+        var leave = await _unitOfWork.AcademicLeaves.GetByIdAsync(leaveId, ct)
+            ?? throw new NotFoundException(nameof(AcademicLeave), leaveId);
+
+        var enrollment = leave.Enrollment;
+
+        if (dto.StartDate < enrollment.DateFrom)
+            throw new DomainException("StartDate cannot be before the enrollment's DateFrom.");
+
+        if (dto.EndDate.HasValue && dto.EndDate.Value < dto.StartDate)
+            throw new DomainException("EndDate cannot be before StartDate.");
+
+        if (enrollment.DateTo.HasValue)
+        {
+            if (dto.StartDate > enrollment.DateTo.Value)
+                throw new DomainException("StartDate cannot be after the enrollment's DateTo.");
+
+            if (dto.EndDate.HasValue && dto.EndDate.Value > enrollment.DateTo.Value)
+                throw new DomainException("EndDate cannot be after the enrollment's DateTo.");
+        }
+
+        if (await _unitOfWork.AcademicLeaves.HasOverlapAsync(
+                enrollment.EnrollmentId,
+                dto.StartDate,
+                dto.EndDate,
+                leave.LeaveId,
+                ct))
+        {
+            throw new DomainException($"Academic leave for enrollment {enrollment.EnrollmentId} overlaps with an existing leave period.");
+        }
+
+        leave.StartDate = dto.StartDate;
+        leave.EndDate = dto.EndDate;
+        leave.Reason = dto.Reason;
+        leave.ReturnReason = dto.ReturnReason;
+        _unitOfWork.AcademicLeaves.Update(leave);
+
+        await RecalculateStudentLeaveStatusAsync(enrollment.StudentId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return leave.ToDto();
+    }
+
+    private async Task RecalculateStudentLeaveStatusAsync(Guid studentId, CancellationToken ct)
+    {
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var hasActiveLeaveToday = (await _unitOfWork.AcademicLeaves.GetByStudentIdAsync(studentId, ct))
+            .Any(existing => existing.StartDate <= today && (!existing.EndDate.HasValue || existing.EndDate.Value >= today));
+
+        if (hasActiveLeaveToday)
+        {
+            if (student.Status != StudentStatus.OnLeave)
+            {
+                student.Status = StudentStatus.OnLeave;
+                _unitOfWork.Students.Update(student);
+            }
+
+            return;
+        }
+
+        if (student.Status == StudentStatus.OnLeave)
+        {
+            student.Status = StudentStatus.Active;
+            _unitOfWork.Students.Update(student);
+        }
+    }
 }
 

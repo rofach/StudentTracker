@@ -22,5 +22,12 @@ public class LeavesController : ControllerBase
         var result = await _movementService.CloseLeaveAsync(id, dto, ct);
         return Ok(result);
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAcademicLeaveDto dto, CancellationToken ct)
+    {
+        var result = await _movementService.UpdateLeaveAsync(id, dto, ct);
+        return Ok(result);
+    }
 }
 
