@@ -1,4 +1,5 @@
 import type { AppArea, AppRoute, NavItem } from "../types/navigation"
+import type { UserRole } from "../types/api"
 
 export const STUDENT_MENU: NavItem[] = [
   { path: "/student/overview", label: "\u041E\u0433\u043B\u044F\u0434" },
@@ -18,7 +19,11 @@ export const ADMIN_MENU: NavItem[] = [
 
 export function normalizePath(pathname: string): string {
   if (!pathname || pathname === "/") {
-    return "/student/overview"
+    return "/login"
+  }
+
+  if (pathname === "/login") {
+    return pathname
   }
 
   if (
@@ -70,11 +75,25 @@ export function normalizePath(pathname: string): string {
     return pathname
   }
 
-  return "/student/overview"
+  return "/login"
 }
 
 export function getAppArea(pathname: string): AppArea {
   return pathname.startsWith("/admin/") ? "admin" : "student"
+}
+
+export function getDefaultPathForRole(role: UserRole): string {
+  return role === "Admin" ? "/admin/students" : "/student/overview"
+}
+
+export function canAccessPath(role: UserRole, pathname: string): boolean {
+  if (pathname === "/login") {
+    return true
+  }
+
+  return role === "Admin"
+    ? pathname.startsWith("/admin/")
+    : pathname.startsWith("/student/")
 }
 
 export function isKnownRoute(route: string): route is AppRoute["path"] {

@@ -1,12 +1,32 @@
 export type EntityId = string
 
 export type DifferenceItemStatus = "Pending" | "Completed" | "Waived"
+export type UserRole = "Admin" | "Student"
 
 export type PagedResult<TItem> = {
   items: TItem[]
   page: number
   pageSize: number
   totalCount: number
+}
+
+export type LoginRequestDto = {
+  login: string
+  password: string
+}
+
+export type CurrentUserDto = {
+  userId: EntityId
+  userName: string
+  email: string | null
+  role: UserRole
+  studentId: EntityId | null
+}
+
+export type AuthSessionDto = {
+  accessToken: string
+  expiresAt: string
+  user: CurrentUserDto
 }
 
 export type StudentDto = {

@@ -1,3 +1,5 @@
+import { getAuthToken } from "../auth/authStorage"
+
 const API_BASE = "/api"
 
 type QueryValue = string | number | boolean | null | undefined
@@ -35,10 +37,12 @@ export async function fetchJson<TResponse>(
   init?: RequestInit,
   query?: Record<string, QueryValue>,
 ): Promise<TResponse> {
+  const token = getAuthToken()
   const response = await fetch(buildUrl(path, query), {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
   })

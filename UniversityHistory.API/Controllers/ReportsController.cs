@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UniversityHistory.API.Auth;
 using UniversityHistory.Application.Interfaces.Services;
 
 namespace UniversityHistory.API.Controllers;
 
 [ApiController]
+[Authorize(Roles = AuthRoles.Admin)]
 [Route("api/[controller]")]
 [Produces("application/json")]
 public class ReportsController : ControllerBase

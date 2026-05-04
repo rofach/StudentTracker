@@ -4,11 +4,20 @@ import "./components/common/PageLayout.css"
 import "./components/common/TableView.css"
 import "./App.css"
 import { PageSectionTitleProvider } from "./components/common/PageHeader"
+import { Spinner } from "./components/common/Spinner"
+import { StatusState } from "./components/common/StatusState"
 import { ToastProvider } from "./components/common/ToastCenter"
-import { CURRENT_STUDENT_ID } from "./config"
+import { AuthProvider, useAuth } from "./auth/AuthContext"
 import { usePathRoute } from "./hooks/usePathRoute"
 import { AppShell } from "./layout/AppShell"
-import { ADMIN_MENU, STUDENT_MENU, getActiveMenuPath, getAppArea } from "./layout/navigation"
+import {
+  ADMIN_MENU,
+  STUDENT_MENU,
+  canAccessPath,
+  getActiveMenuPath,
+  getAppArea,
+  getDefaultPathForRole,
+} from "./layout/navigation"
 import { parseAdminStudentRoute, parseAdminStudyPlanRoute } from "./layout/routeParsers"
 import { AdminDisciplinesPage } from "./pages/admin/AdminDisciplinesPage"
 import { AdminGroupsPage } from "./pages/admin/AdminGroupsPage"
@@ -22,23 +31,24 @@ import { AdminStudentViewPage } from "./pages/admin/AdminStudentViewPage"
 import { AdminStudyPlanCreatePage } from "./pages/admin/AdminStudyPlanCreatePage"
 import { AdminStudyPlanDetailPage } from "./pages/admin/AdminStudyPlanDetailPage"
 import { AdminStudyPlansPage } from "./pages/admin/AdminStudyPlansPage"
+import { LoginPage } from "./pages/auth/LoginPage"
 import { StudentClassmatesPage } from "./pages/student/StudentClassmatesPage"
 import { StudentHistoryPage } from "./pages/student/StudentHistoryPage"
 import { StudentOverviewPage } from "./pages/student/StudentOverviewPage"
 import { StudentSubjectsPage } from "./pages/student/StudentSubjectsPage"
 
-function renderStudentRoute(path: string) {
+function renderStudentRoute(path: string, studentId: string) {
   switch (path) {
     case "/student/overview":
-      return <StudentOverviewPage studentId={CURRENT_STUDENT_ID} />
+      return <StudentOverviewPage studentId={studentId} />
     case "/student/subjects":
-      return <StudentSubjectsPage studentId={CURRENT_STUDENT_ID} />
+      return <StudentSubjectsPage studentId={studentId} />
     case "/student/classmates":
-      return <StudentClassmatesPage studentId={CURRENT_STUDENT_ID} />
+      return <StudentClassmatesPage studentId={studentId} />
     case "/student/history":
-      return <StudentHistoryPage studentId={CURRENT_STUDENT_ID} />
+      return <StudentHistoryPage studentId={studentId} />
     default:
-      return <StudentOverviewPage studentId={CURRENT_STUDENT_ID} />
+      return <StudentOverviewPage studentId={studentId} />
   }
 }
 
@@ -89,54 +99,86 @@ function renderAdminRoute(path: string, navigate: (path: string) => void) {
   }
 }
 
-export default function App() {
+function AppContent() {
+  const { user, isLoading, logout } = useAuth()
   const { path, navigate } = usePathRoute()
-  const area = getAppArea(path)
 
+  if (isLoading) {
+    return <Spinner label="Перевірка сесії..." />
+  }
+
+  if (!user) {
+    return <LoginPage navigate={navigate} />
+  }
+
+  if (!canAccessPath(user.role, path)) {
+    const nextPath = getDefaultPathForRole(user.role)
+    if (nextPath !== path) {
+      navigate(nextPath)
+      return <Spinner label="Переадресація..." />
+    }
+  }
+
+  if (path === "/login") {
+    const nextPath = getDefaultPathForRole(user.role)
+    navigate(nextPath)
+    return <Spinner label="Переадресація..." />
+  }
+
+  const area = getAppArea(path)
   const menuItems = area === "admin" ? ADMIN_MENU : STUDENT_MENU
   const activeMenuPath = getActiveMenuPath(path)
   const activeItem = menuItems.find((item) => item.path === activeMenuPath) ?? menuItems[0]
-  const content = area === "admin" ? renderAdminRoute(path, navigate) : renderStudentRoute(path)
+  const content =
+    area === "admin"
+      ? renderAdminRoute(path, navigate)
+      : user.studentId
+        ? renderStudentRoute(path, user.studentId)
+        : <StatusState tone="error" message="Для студентського акаунта не прив'язано studentId." />
 
   return (
-    <ToastProvider>
-      <AppShell
-        areaTitle={area === "admin" ? "Адмін панель" : "Кабінет студента"}
-        areaSubtitle={
-          area === "admin" ? "Управління навчальним процесом" : "Персональний перегляд даних"
-        }
-        menuItems={menuItems}
-        activePath={activeItem.path}
-        onNavigate={navigate}
-        topBar={
-          <div className="topbar">
-            <div>
-              <div className="topbar__title">{activeItem.label}</div>
-              <div className="topbar__meta">
-                {area === "student" ? `студент ID ${CURRENT_STUDENT_ID}` : "Режим адміністратора"}
-              </div>
-            </div>
-
-            <div className="topbar__actions">
-              <button
-                type="button"
-                className={area === "student" ? "area-switch area-switch--active" : "area-switch"}
-                onClick={() => navigate("/student/overview")}
-              >
-                Студент
-              </button>
-              <button
-                type="button"
-                className={area === "admin" ? "area-switch area-switch--active" : "area-switch"}
-                onClick={() => navigate("/admin/students")}
-              >
-                Адмін
-              </button>
+    <AppShell
+      areaTitle={area === "admin" ? "Адмін-панель" : "Кабінет студента"}
+      areaSubtitle={area === "admin" ? "Керування навчальним процесом" : "Персональний перегляд даних"}
+      menuItems={menuItems}
+      activePath={activeItem.path}
+      onNavigate={navigate}
+      topBar={
+        <div className="topbar">
+          <div>
+            <div className="topbar__title">{activeItem.label}</div>
+            <div className="topbar__meta">
+              {area === "student"
+                ? user.email ?? user.userName
+                : `${user.userName}${user.email ? ` • ${user.email}` : ""}`}
             </div>
           </div>
-        }
-        content={<PageSectionTitleProvider title={activeItem.label}>{content}</PageSectionTitleProvider>}
-      />
+
+          <div className="topbar__actions">
+            <button
+              type="button"
+              className="area-switch"
+              onClick={() => {
+                logout()
+                navigate("/login")
+              }}
+            >
+              Вийти
+            </button>
+          </div>
+        </div>
+      }
+      content={<PageSectionTitleProvider title={activeItem.label}>{content}</PageSectionTitleProvider>}
+    />
+  )
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </ToastProvider>
   )
 }
