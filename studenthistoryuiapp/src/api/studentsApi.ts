@@ -14,10 +14,13 @@ import type {
   MoveStudentDto,
   MoveStudentToSubgroupDto,
   PagedResult,
+  ResetStudentPasswordDto,
   StudentCreateDto,
+  StudentCreatedResultDto,
   StudentCurrentGroupDto,
   StudentDetailDto,
   StudentDisciplineOptionDto,
+  StudentAccountPasswordDto,
   StudentDto,
   StudentGroupTransferDetailDto,
   StudentGroupTransferDto,
@@ -50,12 +53,19 @@ export function getStudentById(studentId: EntityId): Promise<StudentDto> {
   return fetchJson<StudentDto>(`/students/${studentId}`)
 }
 
-export function createStudent(dto: StudentCreateDto): Promise<StudentDto> {
-  return postJson<StudentDto>("/students", dto)
+export function createStudent(dto: StudentCreateDto): Promise<StudentCreatedResultDto> {
+  return postJson<StudentCreatedResultDto>("/students", dto)
 }
 
 export function updateStudent(studentId: EntityId, dto: StudentUpdateDto): Promise<StudentDto> {
   return putJson<StudentDto>(`/students/${studentId}`, dto)
+}
+
+export function resetStudentPassword(
+  studentId: EntityId,
+  dto: ResetStudentPasswordDto,
+): Promise<StudentAccountPasswordDto> {
+  return postJson<StudentAccountPasswordDto>(`/students/${studentId}/account/reset-password`, dto)
 }
 
 export function changeStudentStatus(studentId: EntityId, dto: ChangeStatusDto): Promise<void> {

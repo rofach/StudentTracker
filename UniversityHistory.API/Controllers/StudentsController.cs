@@ -13,17 +13,20 @@ namespace UniversityHistory.API.Controllers;
 public class StudentsController : ControllerBase
 {
     private readonly IStudentService _studentService;
+    private readonly IStudentAccountService _studentAccountService;
     private readonly IMovementService _movementService;
     private readonly IGradeService _gradeService;
     private readonly IEnrollmentService _enrollmentService;
 
     public StudentsController(
         IStudentService studentService,
+        IStudentAccountService studentAccountService,
         IMovementService movementService,
         IGradeService gradeService,
         IEnrollmentService enrollmentService)
     {
         _studentService = studentService;
+        _studentAccountService = studentAccountService;
         _movementService = movementService;
         _gradeService = gradeService;
         _enrollmentService = enrollmentService;
@@ -65,16 +68,24 @@ public class StudentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] StudentCreateDto dto, CancellationToken ct)
     {
-        var created = await _studentService.CreateAsync(dto, ct);
-        return CreatedAtAction(nameof(GetById), new { id = created.StudentId }, created);
+        var created = await _studentAccountService.CreateStudentAsync(dto, ct);
+        return CreatedAtAction(nameof(GetById), new { id = created.Student.StudentId }, created);
     }
 
     [Authorize(Roles = AuthRoles.Admin)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] StudentUpdateDto dto, CancellationToken ct)
     {
-        var updated = await _studentService.UpdateAsync(id, dto, ct);
+        var updated = await _studentAccountService.UpdateStudentAsync(id, dto, ct);
         return Ok(updated);
+    }
+
+    [Authorize(Roles = AuthRoles.Admin)]
+    [HttpPost("{id:guid}/account/reset-password")]
+    public async Task<IActionResult> ResetPassword(Guid id, [FromBody] ResetStudentPasswordDto dto, CancellationToken ct)
+    {
+        var result = await _studentAccountService.ResetPasswordAsync(id, dto, ct);
+        return Ok(result);
     }
 
     [Authorize(Roles = AuthRoles.Admin)]

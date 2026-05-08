@@ -40,6 +40,17 @@ export type StudentDto = {
   status: string
 }
 
+export type StudentAccountPasswordDto = {
+  login: string
+  password: string
+  generatedRandomly: boolean
+}
+
+export type StudentCreatedResultDto = {
+  student: StudentDto
+  account: StudentAccountPasswordDto
+}
+
 export type EnrollmentSummaryDto = {
   enrollmentId: EntityId
   groupId: EntityId
@@ -299,6 +310,10 @@ export type StudentUpdateDto = StudentCreateDto
 
 export type ChangeStatusDto = {
   status: string
+}
+
+export type ResetStudentPasswordDto = {
+  newPassword: string | null
 }
 
 export type EnrollStudentDto = {

@@ -10,32 +10,25 @@ public class StudentCreateDtoValidator : AppValidator<StudentCreateDto>
     public StudentCreateDtoValidator()
     {
         RuleFor(x => x.FirstName)
-            .NotEmpty()
-            .MaximumLength(50);
+            .RequiredPersonName();
 
         RuleFor(x => x.LastName)
-            .NotEmpty()
-            .MaximumLength(50);
+            .RequiredPersonName();
+
+        RuleFor(x => x.Patronymic)
+            .OptionalPersonName();
+
+        RuleFor(x => x.Email)
+            .RequiredEmailAddressEx();
 
         When(x => x.BirthDate.HasValue, () =>
         {
             RuleFor(x => x.BirthDate!.Value)
-                .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))
-                .WithMessage("BirthDate cannot be in the future.");
+                .NotInFuture();
         });
 
-        When(x => !string.IsNullOrWhiteSpace(x.Email), () =>
-        {
-            RuleFor(x => x.Email!)
-                .MaximumLength(100)
-                .EmailAddress();
-        });
-
-        When(x => !string.IsNullOrWhiteSpace(x.Phone), () =>
-        {
-            RuleFor(x => x.Phone!)
-                .MaximumLength(20);
-        });
+        RuleFor(x => x.Phone)
+            .OptionalPhoneNumber();
     }
 }
 
@@ -44,32 +37,25 @@ public class StudentUpdateDtoValidator : AppValidator<StudentUpdateDto>
     public StudentUpdateDtoValidator()
     {
         RuleFor(x => x.FirstName)
-            .NotEmpty()
-            .MaximumLength(50);
+            .RequiredPersonName();
 
         RuleFor(x => x.LastName)
-            .NotEmpty()
-            .MaximumLength(50);
+            .RequiredPersonName();
+
+        RuleFor(x => x.Patronymic)
+            .OptionalPersonName();
+
+        RuleFor(x => x.Email)
+            .RequiredEmailAddressEx();
 
         When(x => x.BirthDate.HasValue, () =>
         {
             RuleFor(x => x.BirthDate!.Value)
-                .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))
-                .WithMessage("BirthDate cannot be in the future.");
+                .NotInFuture();
         });
 
-        When(x => !string.IsNullOrWhiteSpace(x.Email), () =>
-        {
-            RuleFor(x => x.Email!)
-                .MaximumLength(100)
-                .EmailAddress();
-        });
-
-        When(x => !string.IsNullOrWhiteSpace(x.Phone), () =>
-        {
-            RuleFor(x => x.Phone!)
-                .MaximumLength(20);
-        });
+        RuleFor(x => x.Phone)
+            .OptionalPhoneNumber();
     }
 }
 

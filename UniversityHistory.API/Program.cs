@@ -1,15 +1,10 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using System.Text.Json.Serialization;
-using UniversityHistory.API.Auth;
+using UniversityHistory.API.Extensions;
 using UniversityHistory.API.Middleware;
 using UniversityHistory.API.Services;
-using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Queries.GetClassmates;
 using UniversityHistory.Application.Queries.GetActiveGroups;
 using UniversityHistory.Application.Queries.GetGroupComposition;
@@ -22,6 +17,7 @@ using UniversityHistory.Application.Queries.GetStudentDisciplines;
 using UniversityHistory.Application.Queries.GetDisciplineSearch;
 using UniversityHistory.Application.Queries.GetStudentSearch;
 using UniversityHistory.Application.Queries.GetInternalTransferJournal;
+using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Rules;
 using UniversityHistory.Application.Services;
 using UniversityHistory.Application.Validation.Students;
@@ -35,49 +31,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<UniversityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
-builder.Services.Configure<BootstrapAuthOptions>(builder.Configuration.GetSection(BootstrapAuthOptions.SectionName));
-
-var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
-    ?? throw new InvalidOperationException("JWT configuration is missing.");
-var jwtSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey));
-
-builder.Services
-    .AddIdentityCore<ApplicationUser>(options =>
-    {
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequiredLength = 8;
-        options.User.RequireUniqueEmail = true;
-    })
-    .AddRoles<IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<AuthDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
-
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
-            ValidIssuer = jwtOptions.Issuer,
-            ValidAudience = jwtOptions.Audience,
-            IssuerSigningKey = jwtSigningKey,
-            ClockSkew = TimeSpan.FromMinutes(1),
-        };
-    });
-
-builder.Services.AddAuthorization();
+builder.Services.AddAuthModule(builder.Configuration);
 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
@@ -117,8 +71,6 @@ builder.Services.AddScoped<IStudyProcessRule, StudyProcessRule>();
 builder.Services.AddScoped<IDisciplineService, DisciplineService>();
 builder.Services.AddScoped<IAcademicUnitService, AcademicUnitService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IdentitySeeder>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -159,11 +111,6 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
-    await identitySeeder.SeedAsync();
-}
+await app.SeedIdentityAsync();
 
 await app.RunAsync();

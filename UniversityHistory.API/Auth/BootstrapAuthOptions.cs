@@ -1,3 +1,5 @@
+using UniversityHistory.Application.Auth;
+
 namespace UniversityHistory.API.Auth;
 
 public class BootstrapAuthOptions

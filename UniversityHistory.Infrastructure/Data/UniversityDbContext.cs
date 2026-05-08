@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Enums;
+using UniversityHistory.Infrastructure.Identity;
 
 namespace UniversityHistory.Infrastructure.Data;
 
-public class UniversityDbContext : DbContext
+public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public UniversityDbContext(DbContextOptions<UniversityDbContext> options) : base(options) { }
 
@@ -30,6 +33,23 @@ public class UniversityDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.Property(user => user.StudentId)
+                .HasColumnName("student_id");
+
+            entity.HasIndex(user => user.StudentId)
+                .IsUnique()
+                .HasFilter("[student_id] IS NOT NULL");
+
+            entity.HasOne<Student>()
+                .WithOne()
+                .HasForeignKey<ApplicationUser>(user => user.StudentId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
         modelBuilder.Entity<Student>(e =>
         {
             e.ToTable("Student");
