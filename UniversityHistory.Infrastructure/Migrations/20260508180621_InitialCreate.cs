@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using UniversityHistory.Infrastructure.Migrations.Sql;
 
 #nullable disable
+using UniversityHistory.Infrastructure.Migrations.Sql;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
@@ -15,7 +15,7 @@ namespace UniversityHistory.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Academic_Unit",
+                name: "academic_unit",
                 columns: table => new
                 {
                     academic_unit_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -24,12 +24,26 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Academic_Unit", x => x.academic_unit_id);
+                    table.PrimaryKey("pk_academic_unit", x => x.academic_unit_id);
                     table.CheckConstraint("chk_academic_unit_type", "type IN ('Faculty','Institute')");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Discipline",
+                name: "asp_net_roles",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    normalized_name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    concurrency_stamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_roles", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "discipline",
                 columns: table => new
                 {
                     discipline_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -38,11 +52,11 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Discipline", x => x.discipline_id);
+                    table.PrimaryKey("pk_discipline", x => x.discipline_id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Institution",
+                name: "institution",
                 columns: table => new
                 {
                     institution_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -52,11 +66,11 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Institution", x => x.institution_id);
+                    table.PrimaryKey("pk_institution", x => x.institution_id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student",
+                name: "student",
                 columns: table => new
                 {
                     student_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -70,12 +84,12 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Student", x => x.student_id);
+                    table.PrimaryKey("pk_student", x => x.student_id);
                     table.CheckConstraint("chk_student_status", "status IN ('Active','OnLeave','Expelled','Graduated')");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Study_Plan",
+                name: "study_plan",
                 columns: table => new
                 {
                     plan_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -85,11 +99,11 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Study_Plan", x => x.plan_id);
+                    table.PrimaryKey("pk_study_plan", x => x.plan_id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Department",
+                name: "department",
                 columns: table => new
                 {
                     department_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -98,17 +112,69 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Department", x => x.department_id);
+                    table.PrimaryKey("pk_department", x => x.department_id);
                     table.ForeignKey(
-                        name: "FK_Department_Academic_Unit_academic_unit_id",
+                        name: "fk_department_academic_unit_academic_unit_id",
                         column: x => x.academic_unit_id,
-                        principalTable: "Academic_Unit",
+                        principalTable: "academic_unit",
                         principalColumn: "academic_unit_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "External_Transfers",
+                name: "asp_net_role_claims",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    role_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    claim_type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    claim_value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_role_claims", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_asp_net_role_claims_asp_net_roles_role_id",
+                        column: x => x.role_id,
+                        principalTable: "asp_net_roles",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "asp_net_users",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    student_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    user_name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    normalized_user_name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    normalized_email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    email_confirmed = table.Column<bool>(type: "bit", nullable: false),
+                    password_hash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    security_stamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    concurrency_stamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    phone_number = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    phone_number_confirmed = table.Column<bool>(type: "bit", nullable: false),
+                    two_factor_enabled = table.Column<bool>(type: "bit", nullable: false),
+                    lockout_end = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    lockout_enabled = table.Column<bool>(type: "bit", nullable: false),
+                    access_failed_count = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_users", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_asp_net_users_student_student_id",
+                        column: x => x.student_id,
+                        principalTable: "student",
+                        principalColumn: "student_id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "external_transfers",
                 columns: table => new
                 {
                     transfer_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -120,23 +186,23 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_External_Transfers", x => x.transfer_id);
+                    table.PrimaryKey("pk_external_transfers", x => x.transfer_id);
                     table.CheckConstraint("chk_transfer_type", "transfer_type IN ('In','Out')");
                     table.ForeignKey(
-                        name: "FK_External_Transfers_Institution_institution_id",
+                        name: "fk_external_transfers_institution_institution_id",
                         column: x => x.institution_id,
-                        principalTable: "Institution",
+                        principalTable: "institution",
                         principalColumn: "institution_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_External_Transfers_Student_student_id",
+                        name: "fk_external_transfers_student_student_id",
                         column: x => x.student_id,
-                        principalTable: "Student",
+                        principalTable: "student",
                         principalColumn: "student_id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Plan_Disciplines",
+                name: "plan_disciplines",
                 columns: table => new
                 {
                     plan_discipline_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -149,24 +215,24 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Plan_Disciplines", x => x.plan_discipline_id);
+                    table.PrimaryKey("pk_plan_disciplines", x => x.plan_discipline_id);
                     table.CheckConstraint("chk_control_type", "control_type IN ('Exam','Credit','Coursework')");
                     table.ForeignKey(
-                        name: "FK_Plan_Disciplines_Discipline_discipline_id",
+                        name: "fk_plan_disciplines_discipline_discipline_id",
                         column: x => x.discipline_id,
-                        principalTable: "Discipline",
+                        principalTable: "discipline",
                         principalColumn: "discipline_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Plan_Disciplines_Study_Plan_plan_id",
+                        name: "fk_plan_disciplines_study_plan_plan_id",
                         column: x => x.plan_id,
-                        principalTable: "Study_Plan",
+                        principalTable: "study_plan",
                         principalColumn: "plan_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Study_Group",
+                name: "study_group",
                 columns: table => new
                 {
                     group_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -177,17 +243,102 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Study_Group", x => x.group_id);
+                    table.PrimaryKey("pk_study_group", x => x.group_id);
                     table.ForeignKey(
-                        name: "FK_Study_Group_Department_department_id",
+                        name: "fk_study_group_department_department_id",
                         column: x => x.department_id,
-                        principalTable: "Department",
+                        principalTable: "department",
                         principalColumn: "department_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Group_Plan_Assignment",
+                name: "asp_net_user_claims",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    claim_type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    claim_value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_user_claims", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_asp_net_user_claims_asp_net_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "asp_net_users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "asp_net_user_logins",
+                columns: table => new
+                {
+                    login_provider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    provider_key = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    provider_display_name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_user_logins", x => new { x.login_provider, x.provider_key });
+                    table.ForeignKey(
+                        name: "FK_asp_net_user_logins_asp_net_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "asp_net_users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "asp_net_user_roles",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    role_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_user_roles", x => new { x.user_id, x.role_id });
+                    table.ForeignKey(
+                        name: "FK_asp_net_user_roles_asp_net_roles_role_id",
+                        column: x => x.role_id,
+                        principalTable: "asp_net_roles",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_asp_net_user_roles_asp_net_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "asp_net_users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "asp_net_user_tokens",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    login_provider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_asp_net_user_tokens", x => new { x.user_id, x.login_provider, x.name });
+                    table.ForeignKey(
+                        name: "FK_asp_net_user_tokens_asp_net_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "asp_net_users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "group_plan_assignment",
                 columns: table => new
                 {
                     group_plan_assignment_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -198,23 +349,23 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Group_Plan_Assignment", x => x.group_plan_assignment_id);
+                    table.PrimaryKey("pk_group_plan_assignment", x => x.group_plan_assignment_id);
                     table.ForeignKey(
-                        name: "FK_Group_Plan_Assignment_Study_Group_group_id",
+                        name: "fk_group_plan_assignment_study_group_group_id",
                         column: x => x.group_id,
-                        principalTable: "Study_Group",
+                        principalTable: "study_group",
                         principalColumn: "group_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Group_Plan_Assignment_Study_Plan_plan_id",
+                        name: "fk_group_plan_assignment_study_plan_plan_id",
                         column: x => x.plan_id,
-                        principalTable: "Study_Plan",
+                        principalTable: "study_plan",
                         principalColumn: "plan_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student_Group_Enrollment",
+                name: "student_group_enrollment",
                 columns: table => new
                 {
                     enrollment_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -227,23 +378,23 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Student_Group_Enrollment", x => x.enrollment_id);
+                    table.PrimaryKey("pk_student_group_enrollment", x => x.enrollment_id);
                     table.ForeignKey(
-                        name: "FK_Student_Group_Enrollment_Student_student_id",
+                        name: "fk_student_group_enrollment_student_student_id",
                         column: x => x.student_id,
-                        principalTable: "Student",
+                        principalTable: "student",
                         principalColumn: "student_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Student_Group_Enrollment_Study_Group_group_id",
+                        name: "fk_student_group_enrollment_study_group_group_id",
                         column: x => x.group_id,
-                        principalTable: "Study_Group",
+                        principalTable: "study_group",
                         principalColumn: "group_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Subgroup",
+                name: "subgroup",
                 columns: table => new
                 {
                     subgroup_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -252,17 +403,17 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Subgroup", x => x.subgroup_id);
+                    table.PrimaryKey("pk_subgroup", x => x.subgroup_id);
                     table.ForeignKey(
-                        name: "FK_Subgroup_Study_Group_group_id",
+                        name: "fk_subgroup_study_group_group_id",
                         column: x => x.group_id,
-                        principalTable: "Study_Group",
+                        principalTable: "study_group",
                         principalColumn: "group_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Academic_Leave",
+                name: "academic_leave",
                 columns: table => new
                 {
                     leave_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -274,17 +425,17 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Academic_Leave", x => x.leave_id);
+                    table.PrimaryKey("pk_academic_leave", x => x.leave_id);
                     table.ForeignKey(
-                        name: "FK_Academic_Leave_Student_Group_Enrollment_enrollment_id",
+                        name: "fk_academic_leave_student_group_enrollment_enrollment_id",
                         column: x => x.enrollment_id,
-                        principalTable: "Student_Group_Enrollment",
+                        principalTable: "student_group_enrollment",
                         principalColumn: "enrollment_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student_Course_Enrollment",
+                name: "student_course_enrollment",
                 columns: table => new
                 {
                     course_enrollment_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -296,30 +447,30 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Student_Course_Enrollment", x => x.course_enrollment_id);
+                    table.PrimaryKey("pk_student_course_enrollment", x => x.course_enrollment_id);
                     table.CheckConstraint("chk_course_status", "status IN ('Planned','InProgress','Completed','Retake')");
                     table.ForeignKey(
-                        name: "FK_Student_Course_Enrollment_Group_Plan_Assignment_group_plan_assignment_id",
+                        name: "fk_student_course_enrollment_group_plan_assignment_group_plan_assignment_id",
                         column: x => x.group_plan_assignment_id,
-                        principalTable: "Group_Plan_Assignment",
+                        principalTable: "group_plan_assignment",
                         principalColumn: "group_plan_assignment_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Student_Course_Enrollment_Plan_Disciplines_plan_discipline_id",
+                        name: "fk_student_course_enrollment_plan_disciplines_plan_discipline_id",
                         column: x => x.plan_discipline_id,
-                        principalTable: "Plan_Disciplines",
+                        principalTable: "plan_disciplines",
                         principalColumn: "plan_discipline_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Student_Course_Enrollment_Student_Group_Enrollment_enrollment_id",
+                        name: "fk_student_course_enrollment_student_group_enrollment_enrollment_id",
                         column: x => x.enrollment_id,
-                        principalTable: "Student_Group_Enrollment",
+                        principalTable: "student_group_enrollment",
                         principalColumn: "enrollment_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student_Group_Transfer",
+                name: "student_group_transfer",
                 columns: table => new
                 {
                     transfer_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -330,23 +481,23 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Student_Group_Transfer", x => x.transfer_id);
+                    table.PrimaryKey("pk_student_group_transfer", x => x.transfer_id);
                     table.ForeignKey(
-                        name: "FK_Student_Group_Transfer_Student_Group_Enrollment_new_enrollment_id",
+                        name: "fk_student_group_transfer_student_group_enrollment_new_enrollment_id",
                         column: x => x.new_enrollment_id,
-                        principalTable: "Student_Group_Enrollment",
+                        principalTable: "student_group_enrollment",
                         principalColumn: "enrollment_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Student_Group_Transfer_Student_Group_Enrollment_old_enrollment_id",
+                        name: "fk_student_group_transfer_student_group_enrollment_old_enrollment_id",
                         column: x => x.old_enrollment_id,
-                        principalTable: "Student_Group_Enrollment",
+                        principalTable: "student_group_enrollment",
                         principalColumn: "enrollment_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Student_Subgroup_Enrollment",
+                name: "student_subgroup_enrollment",
                 columns: table => new
                 {
                     subgroup_enrollment_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -358,23 +509,23 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Student_Subgroup_Enrollment", x => x.subgroup_enrollment_id);
+                    table.PrimaryKey("pk_student_subgroup_enrollment", x => x.subgroup_enrollment_id);
                     table.ForeignKey(
-                        name: "FK_Student_Subgroup_Enrollment_Student_Group_Enrollment_enrollment_id",
+                        name: "fk_student_subgroup_enrollment_student_group_enrollment_enrollment_id",
                         column: x => x.enrollment_id,
-                        principalTable: "Student_Group_Enrollment",
+                        principalTable: "student_group_enrollment",
                         principalColumn: "enrollment_id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Student_Subgroup_Enrollment_Subgroup_subgroup_id",
+                        name: "fk_student_subgroup_enrollment_subgroup_subgroup_id",
                         column: x => x.subgroup_id,
-                        principalTable: "Subgroup",
+                        principalTable: "subgroup",
                         principalColumn: "subgroup_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Grade_Record",
+                name: "grade_record",
                 columns: table => new
                 {
                     grade_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -384,17 +535,17 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Grade_Record", x => x.grade_id);
+                    table.PrimaryKey("pk_grade_record", x => x.grade_id);
                     table.ForeignKey(
-                        name: "FK_Grade_Record_Student_Course_Enrollment_course_enrollment_id",
+                        name: "fk_grade_record_student_course_enrollment_course_enrollment_id",
                         column: x => x.course_enrollment_id,
-                        principalTable: "Student_Course_Enrollment",
+                        principalTable: "student_course_enrollment",
                         principalColumn: "course_enrollment_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Academic_Difference_Item",
+                name: "academic_difference_item",
                 columns: table => new
                 {
                     difference_item_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -405,29 +556,29 @@ namespace UniversityHistory.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Academic_Difference_Item", x => x.difference_item_id);
+                    table.PrimaryKey("pk_academic_difference_item", x => x.difference_item_id);
                     table.CheckConstraint("chk_diff_item_status", "status IN ('Pending','Completed','Waived')");
                     table.ForeignKey(
-                        name: "FK_Academic_Difference_Item_Plan_Disciplines_plan_discipline_id",
+                        name: "fk_academic_difference_item_plan_disciplines_plan_discipline_id",
                         column: x => x.plan_discipline_id,
-                        principalTable: "Plan_Disciplines",
+                        principalTable: "plan_disciplines",
                         principalColumn: "plan_discipline_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Academic_Difference_Item_Student_Group_Transfer_transfer_id",
+                        name: "fk_academic_difference_item_student_group_transfer_transfer_id",
                         column: x => x.transfer_id,
-                        principalTable: "Student_Group_Transfer",
+                        principalTable: "student_group_transfer",
                         principalColumn: "transfer_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
-                table: "Academic_Unit",
+                table: "academic_unit",
                 columns: new[] { "academic_unit_id", "name", "type" },
                 values: new object[] { new Guid("00000001-0000-0000-0000-000000000000"), "Факультет комп'ютерних наук та інженерії", "Faculty" });
 
             migrationBuilder.InsertData(
-                table: "Discipline",
+                table: "discipline",
                 columns: new[] { "discipline_id", "description", "discipline_name" },
                 values: new object[,]
                 {
@@ -503,7 +654,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Institution",
+                table: "institution",
                 columns: new[] { "institution_id", "city", "country", "institution_name" },
                 values: new object[,]
                 {
@@ -513,7 +664,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student",
+                table: "student",
                 columns: new[] { "student_id", "birth_date", "email", "first_name", "last_name", "patronymic", "phone" },
                 values: new object[,]
                 {
@@ -533,12 +684,12 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student",
+                table: "student",
                 columns: new[] { "student_id", "birth_date", "email", "first_name", "last_name", "patronymic", "phone", "status" },
                 values: new object[] { new Guid("0000000e-0000-0000-0000-000000000000"), new DateOnly(2005, 4, 19), "student14@campus.ua", "Ірина", "Павлюк", "Андріївна", "+38067010014", "OnLeave" });
 
             migrationBuilder.InsertData(
-                table: "Student",
+                table: "student",
                 columns: new[] { "student_id", "birth_date", "email", "first_name", "last_name", "patronymic", "phone" },
                 values: new object[,]
                 {
@@ -563,7 +714,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Study_Plan",
+                table: "study_plan",
                 columns: new[] { "plan_id", "plan_name", "specialty_code", "valid_from" },
                 values: new object[,]
                 {
@@ -573,7 +724,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Department",
+                table: "department",
                 columns: new[] { "department_id", "academic_unit_id", "name" },
                 values: new object[,]
                 {
@@ -584,7 +735,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "External_Transfers",
+                table: "external_transfers",
                 columns: new[] { "transfer_id", "institution_id", "notes", "student_id", "transfer_date", "transfer_type" },
                 values: new object[,]
                 {
@@ -593,7 +744,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Plan_Disciplines",
+                table: "plan_disciplines",
                 columns: new[] { "plan_discipline_id", "control_type", "credits", "discipline_id", "hours", "plan_id", "semester_no" },
                 values: new object[,]
                 {
@@ -706,7 +857,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Study_Group",
+                table: "study_group",
                 columns: new[] { "group_id", "date_closed", "date_created", "department_id", "group_code" },
                 values: new object[,]
                 {
@@ -719,7 +870,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Group_Plan_Assignment",
+                table: "group_plan_assignment",
                 columns: new[] { "group_plan_assignment_id", "date_from", "date_to", "group_id", "plan_id" },
                 values: new object[,]
                 {
@@ -732,7 +883,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Group_Enrollment",
+                table: "student_group_enrollment",
                 columns: new[] { "enrollment_id", "date_from", "date_to", "group_id", "reason_end", "reason_start", "student_id" },
                 values: new object[,]
                 {
@@ -773,7 +924,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Subgroup",
+                table: "subgroup",
                 columns: new[] { "subgroup_id", "group_id", "subgroup_name" },
                 values: new object[,]
                 {
@@ -792,7 +943,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Academic_Leave",
+                table: "academic_leave",
                 columns: new[] { "leave_id", "end_date", "enrollment_id", "reason", "return_reason", "start_date" },
                 values: new object[,]
                 {
@@ -801,7 +952,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -829,7 +980,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -843,7 +994,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -871,7 +1022,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -885,7 +1036,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -934,7 +1085,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -948,7 +1099,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -976,7 +1127,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -990,7 +1141,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1018,7 +1169,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1032,7 +1183,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1048,7 +1199,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1060,7 +1211,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1076,7 +1227,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1088,7 +1239,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1104,7 +1255,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1116,7 +1267,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1132,7 +1283,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1144,7 +1295,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1160,7 +1311,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1172,7 +1323,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1202,7 +1353,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1216,7 +1367,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1246,7 +1397,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1260,7 +1411,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1290,7 +1441,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1304,7 +1455,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1357,7 +1508,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1371,7 +1522,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1401,7 +1552,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1415,7 +1566,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1432,7 +1583,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1444,7 +1595,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1461,7 +1612,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1473,7 +1624,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1490,7 +1641,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1502,7 +1653,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1519,7 +1670,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1531,7 +1682,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1548,7 +1699,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1560,7 +1711,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1578,7 +1729,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1592,7 +1743,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1610,7 +1761,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1624,7 +1775,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1642,7 +1793,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1656,7 +1807,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1674,7 +1825,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1688,7 +1839,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1706,7 +1857,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1720,7 +1871,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1738,7 +1889,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1752,7 +1903,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1770,7 +1921,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1784,7 +1935,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1802,7 +1953,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1816,7 +1967,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1834,7 +1985,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1848,7 +1999,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1866,7 +2017,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[,]
                 {
@@ -1880,7 +2031,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1889,12 +2040,12 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[] { new Guid("00000fa3-0000-0000-0000-000000000000"), 2026, new Guid("00000065-0000-0000-0000-000000000000"), new Guid("00000004-0000-0000-0000-000000000000"), new Guid("0000041a-0000-0000-0000-000000000000") });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id", "status" },
                 values: new object[,]
                 {
@@ -1903,12 +2054,12 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Course_Enrollment",
+                table: "student_course_enrollment",
                 columns: new[] { "course_enrollment_id", "academic_year_start", "enrollment_id", "group_plan_assignment_id", "plan_discipline_id" },
                 values: new object[] { new Guid("00000fa6-0000-0000-0000-000000000000"), 2026, new Guid("00000066-0000-0000-0000-000000000000"), new Guid("00000006-0000-0000-0000-000000000000"), new Guid("00000439-0000-0000-0000-000000000000") });
 
             migrationBuilder.InsertData(
-                table: "Student_Group_Transfer",
+                table: "student_group_transfer",
                 columns: new[] { "transfer_id", "new_enrollment_id", "old_enrollment_id", "reason", "transfer_date" },
                 values: new object[,]
                 {
@@ -1917,7 +2068,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Student_Subgroup_Enrollment",
+                table: "student_subgroup_enrollment",
                 columns: new[] { "subgroup_enrollment_id", "date_from", "date_to", "enrollment_id", "reason", "subgroup_id" },
                 values: new object[,]
                 {
@@ -1950,7 +2101,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Academic_Difference_Item",
+                table: "academic_difference_item",
                 columns: new[] { "difference_item_id", "notes", "plan_discipline_id", "transfer_id" },
                 values: new object[,]
                 {
@@ -1960,7 +2111,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Academic_Difference_Item",
+                table: "academic_difference_item",
                 columns: new[] { "difference_item_id", "notes", "plan_discipline_id", "status", "transfer_id" },
                 values: new object[,]
                 {
@@ -1969,414 +2120,460 @@ namespace UniversityHistory.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Grade_Record",
+                table: "grade_record",
                 columns: new[] { "grade_id", "assessment_date", "course_enrollment_id", "grade_value" },
                 values: new object[,]
                 {
-                    { new Guid("00000bb9-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d1-0000-0000-0000-000000000000"), "84" },
-                    { new Guid("00000bba-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d2-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000bbb-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d3-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000bb9-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d1-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000bba-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d2-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000bbb-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d3-0000-0000-0000-000000000000"), "92" },
                     { new Guid("00000bbc-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d4-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000bbd-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d5-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000bbe-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d6-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000bbf-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d7-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000bc0-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d8-0000-0000-0000-000000000000"), "75" },
+                    { new Guid("00000bbd-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007d5-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000bbe-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d6-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000bbf-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d7-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000bc0-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d8-0000-0000-0000-000000000000"), "85" },
                     { new Guid("00000bc1-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007d9-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000bc2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007da-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000bc3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007db-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000bc4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007dc-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000bc5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007dd-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000bc6-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007de-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000bc7-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007ed-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000bc8-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007ee-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000bc9-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007ef-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000bca-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007f0-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000bcb-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007f1-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000bc2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007da-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000bc3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007db-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000bc4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007dc-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000bc5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007dd-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000bc6-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007de-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000bc7-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007ed-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000bc8-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007ee-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000bc9-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007ef-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000bca-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007f0-0000-0000-0000-000000000000"), "74" },
+                    { new Guid("00000bcb-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000007f1-0000-0000-0000-000000000000"), "92" },
                     { new Guid("00000bcc-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007f2-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000bcd-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007f3-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000bcd-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007f3-0000-0000-0000-000000000000"), "77" },
                     { new Guid("00000bce-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007f4-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000bcf-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007f5-0000-0000-0000-000000000000"), "84" },
-                    { new Guid("00000bd0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f6-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000bd1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f7-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000bd2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f8-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000bd3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f9-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000bd4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007fa-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000bd5-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000809-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000bd6-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080a-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000bd7-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080b-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000bd8-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080c-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000bd9-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080d-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000bda-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000080e-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000bdb-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000080f-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000bdc-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000810-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000bdd-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000811-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000bde-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000812-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000bdf-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000813-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000be0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000814-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000be1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000815-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000be2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000816-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000be3-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000081e-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000be4-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000081f-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000be5-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000820-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000be6-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000821-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000be7-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000822-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000be8-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000823-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000be9-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000824-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000bea-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000825-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000beb-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000826-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000bec-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000827-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000bed-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000828-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000bee-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000829-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000bef-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000082a-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000bf0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000082b-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000bf1-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083a-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000bf2-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083b-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000bf3-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083c-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000bf4-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083d-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000bf5-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083e-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000bf6-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000083f-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000bf7-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000840-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000bf8-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000841-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000bf9-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000842-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000bfa-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000843-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000bfb-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000844-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000bfc-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000845-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000bfd-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000846-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000bfe-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000847-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000bff-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000856-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000c00-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000857-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c01-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000858-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c02-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000859-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c03-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000085a-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c04-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085b-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c05-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085c-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000c06-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085d-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000c07-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085e-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c08-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000085f-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000c09-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000860-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c0a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000861-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000c0b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000862-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c0c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000863-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c0d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000872-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c0e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000873-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c0f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000874-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c10-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000875-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000c11-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000876-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000c12-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000880-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c13-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000881-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000c14-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000882-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c15-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000883-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000c16-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000884-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c17-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000088e-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000c18-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000088f-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c19-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000890-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000c1a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000891-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c1b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000892-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c1c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089c-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000c1d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089d-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c1e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089e-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000c1f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089f-0000-0000-0000-000000000000"), "84" },
-                    { new Guid("00000c20-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008a0-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c21-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008aa-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c22-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ab-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c23-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ac-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c24-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ad-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c25-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ae-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000c26-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008b8-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c27-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008b9-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000c28-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008ba-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c29-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008bb-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c2a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008bc-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000c2b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008bd-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000c2c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008be-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c2d-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008bf-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c2e-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008c0-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c2f-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008c1-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c30-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c2-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000c31-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c3-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c32-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c4-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c33-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c5-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000c34-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c6-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000c35-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d6-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000c36-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d7-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c37-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d8-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c38-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d9-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000c39-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008da-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c3a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008db-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c3b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008dc-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c3c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008dd-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c3d-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008de-0000-0000-0000-000000000000"), "84" },
-                    { new Guid("00000c3e-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008df-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000c3f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e0-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c40-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e1-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000c41-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e2-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c42-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e3-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c43-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e4-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c44-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f4-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c45-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f5-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c46-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f6-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c47-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f7-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c48-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008f8-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c49-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008f9-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c4a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fa-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000c4b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fb-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c4c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fc-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000c4d-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fd-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000c4e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008fe-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c4f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ff-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000c50-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000900-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000c51-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000901-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000c52-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000902-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000c53-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000912-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c54-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000913-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000c55-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000914-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000c56-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000915-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c57-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000916-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c58-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000917-0000-0000-0000-000000000000"), "84" },
-                    { new Guid("00000c59-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000918-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000c5a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000919-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000c5b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000091a-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000c5c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000091b-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c5d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091c-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c5e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091d-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000c5f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091e-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c60-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091f-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000c61-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000920-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c62-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000929-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000c63-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000092a-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c64-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000092b-0000-0000-0000-000000000000"), "80" },
-                    { new Guid("00000c65-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000092c-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000c66-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000092d-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c67-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000092e-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c68-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000092f-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000bcf-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000007f5-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000bd0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f6-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000bd1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f7-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000bd2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f8-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000bd3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007f9-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000bd4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000007fa-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000bd5-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000809-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000bd6-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080a-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000bd7-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080b-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000bd8-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080c-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000bd9-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000080d-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000bda-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000080e-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000bdb-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000080f-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000bdc-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000810-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000bdd-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000811-0000-0000-0000-000000000000"), "77" },
+                    { new Guid("00000bde-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000812-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000bdf-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000813-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000be0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000814-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000be1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000815-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000be2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000816-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000be3-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000081e-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000be4-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000081f-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000be5-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000820-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000be6-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000821-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000be7-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000822-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000be8-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000823-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000be9-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000824-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000bea-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000825-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000beb-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000826-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000bec-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000827-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000bed-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000828-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000bee-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000829-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000bef-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000082a-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000bf0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000082b-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000bf1-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083a-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000bf2-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083b-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000bf3-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083c-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000bf4-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083d-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000bf5-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000083e-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000bf6-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000083f-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000bf7-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000840-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000bf8-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000841-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000bf9-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000842-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000bfa-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000843-0000-0000-0000-000000000000"), "74" },
+                    { new Guid("00000bfb-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000844-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000bfc-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000845-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000bfd-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000846-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000bfe-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000847-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000bff-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000856-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000c00-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000857-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c01-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000858-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000c02-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000859-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c03-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000085a-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000c04-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085b-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c05-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085c-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000c06-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085d-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000c07-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000085e-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c08-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000085f-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c09-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000860-0000-0000-0000-000000000000"), "77" },
+                    { new Guid("00000c0a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000861-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000c0b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000862-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c0c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000863-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c0d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000872-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000c0e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000873-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000c0f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000874-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c10-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000875-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c11-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000876-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000c12-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000880-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c13-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000881-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c14-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000882-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c15-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000883-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000c16-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000884-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c17-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000088e-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c18-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000088f-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000c19-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000890-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c1a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000891-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c1b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000892-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c1c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089c-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000c1d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089d-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c1e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089e-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000c1f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000089f-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c20-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008a0-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000c21-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008aa-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000c22-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ab-0000-0000-0000-000000000000"), "74" },
+                    { new Guid("00000c23-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ac-0000-0000-0000-000000000000"), "74" },
+                    { new Guid("00000c24-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ad-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c25-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ae-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c26-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008b8-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c27-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008b9-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c28-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008ba-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000c29-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008bb-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c2a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008bc-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000c2b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008bd-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000c2c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008be-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000c2d-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008bf-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000c2e-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008c0-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c2f-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008c1-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c30-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c2-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000c31-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c3-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c32-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c4-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c33-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c5-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c34-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008c6-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000c35-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d6-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000c36-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d7-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c37-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d8-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c38-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008d9-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c39-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008da-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c3a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008db-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000c3b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008dc-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c3c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008dd-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c3d-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008de-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000c3e-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008df-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c3f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e0-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000c40-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e1-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000c41-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e2-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c42-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e3-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000c43-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008e4-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c44-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f4-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c45-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f5-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c46-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f6-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000c47-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("000008f7-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c48-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008f8-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c49-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008f9-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c4a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fa-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c4b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fb-0000-0000-0000-000000000000"), "91" },
+                    { new Guid("00000c4c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fc-0000-0000-0000-000000000000"), "74" },
+                    { new Guid("00000c4d-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("000008fd-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000c4e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008fe-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c4f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000008ff-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c50-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000900-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000c51-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000901-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c52-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000902-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c53-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000912-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c54-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000913-0000-0000-0000-000000000000"), "77" },
+                    { new Guid("00000c55-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000914-0000-0000-0000-000000000000"), "91" },
+                    { new Guid("00000c56-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000915-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c57-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000916-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c58-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000917-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c59-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000918-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000c5a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000919-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000c5b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000091a-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c5c-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000091b-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000c5d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091c-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000c5e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091d-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c5f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091e-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c60-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("0000091f-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000c61-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000920-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c62-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000929-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c63-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000092a-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000c64-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000092b-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000c65-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000092c-0000-0000-0000-000000000000"), "75" },
+                    { new Guid("00000c66-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000092d-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c67-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000092e-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c68-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000092f-0000-0000-0000-000000000000"), "77" },
                     { new Guid("00000c69-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000930-0000-0000-0000-000000000000"), "88" },
                     { new Guid("00000c6a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000931-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c6b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000932-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000c6c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000933-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c6d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000934-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c6e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000935-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c6f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000936-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c70-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000937-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c71-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000947-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000c72-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000948-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c73-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000949-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000c74-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000094a-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c75-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094b-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000c76-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094c-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c77-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094d-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c78-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094e-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000c79-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094f-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c7a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000950-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c7b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000951-0000-0000-0000-000000000000"), "84" },
-                    { new Guid("00000c7c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000952-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000c7d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000953-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000c7e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000954-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c7f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000955-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c80-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000965-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000c81-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000966-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000c82-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000967-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c83-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000968-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c84-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000974-0000-0000-0000-000000000000"), "77" },
-                    { new Guid("00000c85-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000975-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000c86-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000976-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c87-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000977-0000-0000-0000-000000000000"), "94" },
-                    { new Guid("00000c88-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000983-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c89-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000984-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000c8a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000985-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000c8b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000986-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000c8c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000992-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c8d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000993-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000c8e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000994-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c8f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000995-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c6b-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000932-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c6c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000933-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c6d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000934-0000-0000-0000-000000000000"), "91" },
+                    { new Guid("00000c6e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000935-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000c6f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000936-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000c70-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000937-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000c71-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000947-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c72-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000948-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c73-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("00000949-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c74-0000-0000-0000-000000000000"), new DateOnly(2025, 1, 20), new Guid("0000094a-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000c75-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094b-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000c76-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094c-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c77-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094d-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c78-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094e-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c79-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("0000094f-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c7a-0000-0000-0000-000000000000"), new DateOnly(2025, 6, 20), new Guid("00000950-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c7b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000951-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000c7c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000952-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c7d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000953-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c7e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000954-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000c7f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000955-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c80-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000965-0000-0000-0000-000000000000"), "85" },
+                    { new Guid("00000c81-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000966-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000c82-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000967-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000c83-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000968-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c84-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000974-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000c85-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000975-0000-0000-0000-000000000000"), "75" },
+                    { new Guid("00000c86-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000976-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c87-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000977-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c88-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000983-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000c89-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000984-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000c8a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000985-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c8b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000986-0000-0000-0000-000000000000"), "74" },
+                    { new Guid("00000c8c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000992-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c8d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000993-0000-0000-0000-000000000000"), "77" },
+                    { new Guid("00000c8e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000994-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c8f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000995-0000-0000-0000-000000000000"), "87" },
                     { new Guid("00000c90-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a1-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c91-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a2-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c92-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a3-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c93-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a4-0000-0000-0000-000000000000"), "86" },
-                    { new Guid("00000c94-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b0-0000-0000-0000-000000000000"), "91" },
-                    { new Guid("00000c95-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b1-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000c96-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b2-0000-0000-0000-000000000000"), "78" },
-                    { new Guid("00000c97-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b3-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000c98-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b4-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000c99-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c2-0000-0000-0000-000000000000"), "91" },
+                    { new Guid("00000c91-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a2-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c92-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a3-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c93-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009a4-0000-0000-0000-000000000000"), "77" },
+                    { new Guid("00000c94-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b0-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c95-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b1-0000-0000-0000-000000000000"), "84" },
+                    { new Guid("00000c96-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b2-0000-0000-0000-000000000000"), "80" },
+                    { new Guid("00000c97-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b3-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000c98-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009b4-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000c99-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c2-0000-0000-0000-000000000000"), "85" },
                     { new Guid("00000c9a-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c3-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000c9b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c4-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000c9c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c5-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000c9b-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c4-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000c9c-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c5-0000-0000-0000-000000000000"), "84" },
                     { new Guid("00000c9d-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009c6-0000-0000-0000-000000000000"), "92" },
-                    { new Guid("00000c9e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d4-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000c9f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d5-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000ca0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d6-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000ca1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d7-0000-0000-0000-000000000000"), "85" },
-                    { new Guid("00000ca2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d8-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000ca3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e6-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000ca4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e7-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000ca5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e8-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000ca6-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e9-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000ca7-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009ea-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000ca8-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009f8-0000-0000-0000-000000000000"), "88" },
-                    { new Guid("00000ca9-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009f9-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000caa-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009fa-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000cab-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009fb-0000-0000-0000-000000000000"), "74" },
-                    { new Guid("00000cac-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009fc-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000cad-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0a-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000cae-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0b-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000caf-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0c-0000-0000-0000-000000000000"), "89" },
-                    { new Guid("00000cb0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0d-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000cb1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0e-0000-0000-0000-000000000000"), "73" },
-                    { new Guid("00000cb2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1c-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000cb3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1d-0000-0000-0000-000000000000"), "95" },
-                    { new Guid("00000cb4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1e-0000-0000-0000-000000000000"), "76" },
-                    { new Guid("00000cb5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1f-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000c9e-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d4-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000c9f-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d5-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000ca0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d6-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000ca1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d7-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000ca2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009d8-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000ca3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e6-0000-0000-0000-000000000000"), "94" },
+                    { new Guid("00000ca4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e7-0000-0000-0000-000000000000"), "75" },
+                    { new Guid("00000ca5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e8-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000ca6-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009e9-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000ca7-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009ea-0000-0000-0000-000000000000"), "93" },
+                    { new Guid("00000ca8-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009f8-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000ca9-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009f9-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000caa-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009fa-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000cab-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009fb-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000cac-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("000009fc-0000-0000-0000-000000000000"), "87" },
+                    { new Guid("00000cad-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0a-0000-0000-0000-000000000000"), "76" },
+                    { new Guid("00000cae-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0b-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000caf-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0c-0000-0000-0000-000000000000"), "77" },
+                    { new Guid("00000cb0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0d-0000-0000-0000-000000000000"), "75" },
+                    { new Guid("00000cb1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a0e-0000-0000-0000-000000000000"), "92" },
+                    { new Guid("00000cb2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1c-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000cb3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1d-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000cb4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1e-0000-0000-0000-000000000000"), "86" },
+                    { new Guid("00000cb5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a1f-0000-0000-0000-000000000000"), "79" },
                     { new Guid("00000cb6-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a20-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000cb7-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a2e-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000cb8-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a2f-0000-0000-0000-000000000000"), "93" },
-                    { new Guid("00000cb9-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a30-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000cba-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a31-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000cbb-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a32-0000-0000-0000-000000000000"), "72" },
-                    { new Guid("00000cbc-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a40-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000cbd-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a41-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000cbe-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a42-0000-0000-0000-000000000000"), "75" },
-                    { new Guid("00000cbf-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a43-0000-0000-0000-000000000000"), "82" },
-                    { new Guid("00000cc0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a44-0000-0000-0000-000000000000"), "90" },
-                    { new Guid("00000cc1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a52-0000-0000-0000-000000000000"), "87" },
-                    { new Guid("00000cc2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a53-0000-0000-0000-000000000000"), "79" },
-                    { new Guid("00000cc3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a54-0000-0000-0000-000000000000"), "83" },
-                    { new Guid("00000cc4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a55-0000-0000-0000-000000000000"), "81" },
-                    { new Guid("00000cc5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a56-0000-0000-0000-000000000000"), "90" },
+                    { new Guid("00000cb7-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a2e-0000-0000-0000-000000000000"), "95" },
+                    { new Guid("00000cb8-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a2f-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000cb9-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a30-0000-0000-0000-000000000000"), "73" },
+                    { new Guid("00000cba-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a31-0000-0000-0000-000000000000"), "81" },
+                    { new Guid("00000cbb-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a32-0000-0000-0000-000000000000"), "83" },
+                    { new Guid("00000cbc-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a40-0000-0000-0000-000000000000"), "88" },
+                    { new Guid("00000cbd-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a41-0000-0000-0000-000000000000"), "91" },
+                    { new Guid("00000cbe-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a42-0000-0000-0000-000000000000"), "79" },
+                    { new Guid("00000cbf-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a43-0000-0000-0000-000000000000"), "91" },
+                    { new Guid("00000cc0-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a44-0000-0000-0000-000000000000"), "78" },
+                    { new Guid("00000cc1-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a52-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000cc2-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a53-0000-0000-0000-000000000000"), "82" },
+                    { new Guid("00000cc3-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a54-0000-0000-0000-000000000000"), "89" },
+                    { new Guid("00000cc4-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a55-0000-0000-0000-000000000000"), "72" },
+                    { new Guid("00000cc5-0000-0000-0000-000000000000"), new DateOnly(2026, 1, 20), new Guid("00000a56-0000-0000-0000-000000000000"), "88" },
                     { new Guid("00001389-0000-0000-0000-000000000000"), new DateOnly(2026, 4, 15), new Guid("00000fa5-0000-0000-0000-000000000000"), "90" }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Academic_Difference_Item_plan_discipline_id",
-                table: "Academic_Difference_Item",
+                name: "IX_academic_difference_item_plan_discipline_id",
+                table: "academic_difference_item",
                 column: "plan_discipline_id");
 
             migrationBuilder.CreateIndex(
-                name: "UX_AcademicDifferenceItem_TransferId_PlanDisciplineId",
-                table: "Academic_Difference_Item",
+                name: "ix_academic_difference_item_transfer_id_plan_discipline_id",
+                table: "academic_difference_item",
                 columns: new[] { "transfer_id", "plan_discipline_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Academic_Leave_enrollment_id",
-                table: "Academic_Leave",
+                name: "IX_academic_leave_enrollment_id",
+                table: "academic_leave",
                 column: "enrollment_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Academic_Unit_name",
-                table: "Academic_Unit",
+                name: "ix_academic_unit_name",
+                table: "academic_unit",
                 column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Department_academic_unit_id_name",
-                table: "Department",
+                name: "IX_asp_net_role_claims_role_id",
+                table: "asp_net_role_claims",
+                column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_asp_net_roles_normalized_name",
+                table: "asp_net_roles",
+                column: "normalized_name",
+                unique: true,
+                filter: "[normalized_name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_asp_net_user_claims_user_id",
+                table: "asp_net_user_claims",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_asp_net_user_logins_user_id",
+                table: "asp_net_user_logins",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_asp_net_user_roles_role_id",
+                table: "asp_net_user_roles",
+                column: "role_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_asp_net_users_normalized_email",
+                table: "asp_net_users",
+                column: "normalized_email");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_asp_net_users_normalized_user_name",
+                table: "asp_net_users",
+                column: "normalized_user_name",
+                unique: true,
+                filter: "[normalized_user_name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_asp_net_users_student_id",
+                table: "asp_net_users",
+                column: "student_id",
+                unique: true,
+                filter: "[student_id] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_department_academic_unit_id_name",
+                table: "department",
                 columns: new[] { "academic_unit_id", "name" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_External_Transfers_institution_id",
-                table: "External_Transfers",
+                name: "IX_external_transfers_institution_id",
+                table: "external_transfers",
                 column: "institution_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_External_Transfers_student_id",
-                table: "External_Transfers",
+                name: "IX_external_transfers_student_id",
+                table: "external_transfers",
                 column: "student_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Grade_Record_course_enrollment_id",
-                table: "Grade_Record",
+                name: "ix_grade_record_course_enrollment_id",
+                table: "grade_record",
                 column: "course_enrollment_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Group_Plan_Assignment_plan_id",
-                table: "Group_Plan_Assignment",
-                column: "plan_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GroupPlanAssignment_GroupId_DateFrom",
-                table: "Group_Plan_Assignment",
+                name: "ix_group_plan_assignment_group_id_date_from",
+                table: "group_plan_assignment",
                 columns: new[] { "group_id", "date_from" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Plan_Disciplines_discipline_id",
-                table: "Plan_Disciplines",
+                name: "IX_group_plan_assignment_plan_id",
+                table: "group_plan_assignment",
+                column: "plan_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_plan_disciplines_discipline_id",
+                table: "plan_disciplines",
                 column: "discipline_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Plan_Disciplines_plan_id_discipline_id",
-                table: "Plan_Disciplines",
+                name: "ix_plan_disciplines_plan_id_discipline_id",
+                table: "plan_disciplines",
                 columns: new[] { "plan_id", "discipline_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Student_Course_Enrollment_enrollment_id",
-                table: "Student_Course_Enrollment",
+                name: "IX_student_course_enrollment_enrollment_id",
+                table: "student_course_enrollment",
                 column: "enrollment_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Student_Course_Enrollment_group_plan_assignment_id",
-                table: "Student_Course_Enrollment",
+                name: "IX_student_course_enrollment_group_plan_assignment_id",
+                table: "student_course_enrollment",
                 column: "group_plan_assignment_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Student_Course_Enrollment_plan_discipline_id",
-                table: "Student_Course_Enrollment",
+                name: "IX_student_course_enrollment_plan_discipline_id",
+                table: "student_course_enrollment",
                 column: "plan_discipline_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Enrollment_GroupId_DateFrom",
-                table: "Student_Group_Enrollment",
+                name: "ix_student_group_enrollment_group_id_date_from",
+                table: "student_group_enrollment",
                 columns: new[] { "group_id", "date_from" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Student_Group_Enrollment_student_id",
-                table: "Student_Group_Enrollment",
+                name: "IX_student_group_enrollment_student_id",
+                table: "student_group_enrollment",
                 column: "student_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentGroupTransfer_NewEnrollmentId",
-                table: "Student_Group_Transfer",
+                name: "ix_student_group_transfer_new_enrollment_id",
+                table: "student_group_transfer",
                 column: "new_enrollment_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentGroupTransfer_OldEnrollmentId",
-                table: "Student_Group_Transfer",
+                name: "ix_student_group_transfer_old_enrollment_id",
+                table: "student_group_transfer",
                 column: "old_enrollment_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentSubgroupEnrollment_EnrollmentId_DateFrom",
-                table: "Student_Subgroup_Enrollment",
+                name: "ix_student_subgroup_enrollment_enrollment_id_date_from",
+                table: "student_subgroup_enrollment",
                 columns: new[] { "enrollment_id", "date_from" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_StudentSubgroupEnrollment_SubgroupId",
-                table: "Student_Subgroup_Enrollment",
-                column: "subgroup_id");
-
-            migrationBuilder.CreateIndex(
-                name: "UX_StudentSubgroupEnrollment_Open",
-                table: "Student_Subgroup_Enrollment",
+                name: "ix_student_subgroup_enrollment_open",
+                table: "student_subgroup_enrollment",
                 column: "enrollment_id",
                 unique: true,
                 filter: "[date_to] IS NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Study_Group_department_id",
-                table: "Study_Group",
+                name: "ix_student_subgroup_enrollment_subgroup_id",
+                table: "student_subgroup_enrollment",
+                column: "subgroup_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_study_group_department_id",
+                table: "study_group",
                 column: "department_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Study_Group_group_code",
-                table: "Study_Group",
+                name: "ix_study_group_group_code",
+                table: "study_group",
                 column: "group_code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subgroup_group_id",
-                table: "Subgroup",
+                name: "IX_subgroup_group_id",
+                table: "subgroup",
                 column: "group_id");
 
             migrationBuilder.Sql(StudentTimelineViewSql.Drop);
@@ -2389,58 +2586,79 @@ namespace UniversityHistory.Infrastructure.Migrations
             migrationBuilder.Sql(StudentTimelineViewSql.Drop);
 
             migrationBuilder.DropTable(
-                name: "Academic_Difference_Item");
+                name: "academic_difference_item");
 
             migrationBuilder.DropTable(
-                name: "Academic_Leave");
+                name: "academic_leave");
 
             migrationBuilder.DropTable(
-                name: "External_Transfers");
+                name: "asp_net_role_claims");
 
             migrationBuilder.DropTable(
-                name: "Grade_Record");
+                name: "asp_net_user_claims");
 
             migrationBuilder.DropTable(
-                name: "Student_Subgroup_Enrollment");
+                name: "asp_net_user_logins");
 
             migrationBuilder.DropTable(
-                name: "Student_Group_Transfer");
+                name: "asp_net_user_roles");
 
             migrationBuilder.DropTable(
-                name: "Institution");
+                name: "asp_net_user_tokens");
 
             migrationBuilder.DropTable(
-                name: "Student_Course_Enrollment");
+                name: "external_transfers");
 
             migrationBuilder.DropTable(
-                name: "Subgroup");
+                name: "grade_record");
 
             migrationBuilder.DropTable(
-                name: "Group_Plan_Assignment");
+                name: "student_subgroup_enrollment");
 
             migrationBuilder.DropTable(
-                name: "Plan_Disciplines");
+                name: "student_group_transfer");
 
             migrationBuilder.DropTable(
-                name: "Student_Group_Enrollment");
+                name: "asp_net_roles");
 
             migrationBuilder.DropTable(
-                name: "Discipline");
+                name: "asp_net_users");
 
             migrationBuilder.DropTable(
-                name: "Study_Plan");
+                name: "institution");
 
             migrationBuilder.DropTable(
-                name: "Student");
+                name: "student_course_enrollment");
 
             migrationBuilder.DropTable(
-                name: "Study_Group");
+                name: "subgroup");
 
             migrationBuilder.DropTable(
-                name: "Department");
+                name: "group_plan_assignment");
 
             migrationBuilder.DropTable(
-                name: "Academic_Unit");
+                name: "plan_disciplines");
+
+            migrationBuilder.DropTable(
+                name: "student_group_enrollment");
+
+            migrationBuilder.DropTable(
+                name: "discipline");
+
+            migrationBuilder.DropTable(
+                name: "study_plan");
+
+            migrationBuilder.DropTable(
+                name: "student");
+
+            migrationBuilder.DropTable(
+                name: "study_group");
+
+            migrationBuilder.DropTable(
+                name: "department");
+
+            migrationBuilder.DropTable(
+                name: "academic_unit");
         }
     }
 }

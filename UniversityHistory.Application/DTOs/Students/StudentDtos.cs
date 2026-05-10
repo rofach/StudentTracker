@@ -29,6 +29,19 @@ public record StudentUpdateDto(
     string? Phone
 );
 
+public record StudentAccountPasswordDto(
+    string Login,
+    string Password,
+    bool GeneratedRandomly
+);
+
+public record StudentCreatedResultDto(
+    StudentDto Student,
+    StudentAccountPasswordDto Account
+);
+
+public record ResetStudentPasswordDto(string? NewPassword);
+
 public record ChangeStatusDto(string Status);
 
 public record EnrollmentSummaryDto(

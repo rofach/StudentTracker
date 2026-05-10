@@ -22,7 +22,7 @@ public class CreateTransferDtoValidator : AppValidator<CreateTransferDto>
         When(x => !string.IsNullOrWhiteSpace(x.Notes), () =>
         {
             RuleFor(x => x.Notes!)
-                .MaximumLength(200);
+                .OptionalText(200);
         });
     }
 }
@@ -60,7 +60,7 @@ public class CloseAcademicLeaveDtoValidator : AppValidator<CloseAcademicLeaveDto
         When(x => !string.IsNullOrWhiteSpace(x.ReturnReason), () =>
         {
             RuleFor(x => x.ReturnReason!)
-                .MaximumLength(200);
+                .OptionalText(200);
         });
     }
 }
@@ -86,7 +86,7 @@ public class UpdateAcademicLeaveDtoValidator : AppValidator<UpdateAcademicLeaveD
         When(x => !string.IsNullOrWhiteSpace(x.ReturnReason), () =>
         {
             RuleFor(x => x.ReturnReason!)
-                .MaximumLength(200);
+                .OptionalText(200);
         });
     }
 }

@@ -36,13 +36,44 @@ type SubgroupOption = {
 }
 
 function todayValue(): string {
-  return new Date().toISOString().slice(0, 10)
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const day = String(now.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function isLeaveActiveOnDate(leave: AcademicLeaveDto, date: string): boolean {
+  return leave.startDate <= date && (!leave.endDate || leave.endDate >= date)
 }
 
 function mapSubgroups(items: SubgroupDto[]): SubgroupOption[] {
   return items
     .map((item) => ({ subgroupId: item.subgroupId, subgroupName: item.subgroupName }))
     .sort((left, right) => left.subgroupName.localeCompare(right.subgroupName))
+}
+
+function parseAdmissionYear(groupCode: string): number | null {
+  const suffix = groupCode.split("-").at(-1)?.trim()
+  if (!suffix || !/^\d{2}$/.test(suffix)) {
+    return null
+  }
+
+  return 2000 + Number(suffix)
+}
+
+function canMoveToGroup(currentGroupCode: string | null | undefined, targetGroupCode: string): boolean {
+  if (!currentGroupCode) {
+    return true
+  }
+
+  const currentAdmissionYear = parseAdmissionYear(currentGroupCode)
+  const targetAdmissionYear = parseAdmissionYear(targetGroupCode)
+  if (currentAdmissionYear === null || targetAdmissionYear === null) {
+    return true
+  }
+
+  return targetAdmissionYear >= currentAdmissionYear
 }
 
 function sortLeaves(items: AcademicLeaveDto[]): AcademicLeaveDto[] {
@@ -152,11 +183,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     () => student?.plans.find((item) => item.dateTo === null) ?? null,
     [student],
   )
-  const openLeave = useMemo(
-    () => student?.leaves.find((item) => item.endDate === null) ?? null,
-    [student],
-  )
   const leaves = useMemo(() => sortLeaves(student?.leaves ?? []), [student?.leaves])
+  const activeLeaveToday = useMemo(
+    () => leaves.find((item) => isLeaveActiveOnDate(item, todayValue())) ?? null,
+    [leaves],
+  )
   const selectedLeave = useMemo(
     () => leaves.find((item) => item.leaveId === selectedLeaveId) ?? leaves[0] ?? null,
     [leaves, selectedLeaveId],
@@ -244,7 +275,11 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
       return groups
     }
 
-    return groups.filter((group) => group.groupId !== currentEnrollment.groupId)
+    return groups.filter(
+      (group) =>
+        group.groupId !== currentEnrollment.groupId &&
+        canMoveToGroup(currentEnrollment.groupCode, group.groupCode),
+    )
   }, [groups, currentEnrollment])
 
   const availableSubgroupMoveTargets = useMemo(
@@ -302,7 +337,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
             <strong>Поточний план:</strong> {openPlan?.planName ?? "Немає"}
           </div>
           <div>
-            <strong>Академвідпустка:</strong> {openLeave ? `Відкрита з ${formatDate(openLeave.startDate)}` : "Немає"}
+            <strong>Академвідпустка:</strong> {activeLeaveToday ? `Активна з ${formatDate(activeLeaveToday.startDate)}` : "Немає"}
           </div>
         </div>
       </section>
@@ -471,7 +506,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               </div>
               <button
                 type="button"
-                disabled={isSaving || openLeave !== null || leaveReason.trim().length === 0}
+                disabled={isSaving || activeLeaveToday !== null || leaveReason.trim().length === 0}
                 onClick={() =>
                   void runAction(
                     () =>
@@ -487,9 +522,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
               >
                 {isSaving ? "Виконання..." : "Оформити академвідпустку"}
               </button>
-              {openLeave ? (
-                <p className="note-text">У студента вже є відкрита академвідпустка. Її можна змінити в блоці редагування нижче.</p>
-              ) : null}
             </>
           ) : (
             <StatusState tone="info" message="Академвідпустка доступна лише для активного зарахування." />
@@ -507,7 +539,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   <strong>Усього записів:</strong> {leaves.length}
                 </div>
                 <div>
-                  <strong>Активна:</strong> {openLeave ? `так, з ${formatDate(openLeave.startDate)}` : "ні"}
+                  <strong>Активна:</strong> {activeLeaveToday ? `так, з ${formatDate(activeLeaveToday.startDate)}` : "ні"}
                 </div>
               </div>
 
@@ -581,12 +613,6 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   Очистити дату завершення
                 </button>
               </div>
-
-              {selectedLeave ? (
-                <p className="note-text">
-                  Через це редагування можна і закрити відкриту відпустку, і скоригувати вже закриту.
-                </p>
-              ) : null}
             </>
           ) : (
             <StatusState tone="info" message="У студента ще немає записів про академвідпустку." />

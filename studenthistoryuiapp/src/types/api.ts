@@ -1,12 +1,32 @@
 export type EntityId = string
 
 export type DifferenceItemStatus = "Pending" | "Completed" | "Waived"
+export type UserRole = "Admin" | "Student"
 
 export type PagedResult<TItem> = {
   items: TItem[]
   page: number
   pageSize: number
   totalCount: number
+}
+
+export type LoginRequestDto = {
+  login: string
+  password: string
+}
+
+export type CurrentUserDto = {
+  userId: EntityId
+  userName: string
+  email: string | null
+  role: UserRole
+  studentId: EntityId | null
+}
+
+export type AuthSessionDto = {
+  accessToken: string
+  expiresAt: string
+  user: CurrentUserDto
 }
 
 export type StudentDto = {
@@ -18,6 +38,17 @@ export type StudentDto = {
   email: string | null
   phone: string | null
   status: string
+}
+
+export type StudentAccountPasswordDto = {
+  login: string
+  password: string
+  generatedRandomly: boolean
+}
+
+export type StudentCreatedResultDto = {
+  student: StudentDto
+  account: StudentAccountPasswordDto
 }
 
 export type EnrollmentSummaryDto = {
@@ -279,6 +310,10 @@ export type StudentUpdateDto = StudentCreateDto
 
 export type ChangeStatusDto = {
   status: string
+}
+
+export type ResetStudentPasswordDto = {
+  newPassword: string | null
 }
 
 export type EnrollStudentDto = {

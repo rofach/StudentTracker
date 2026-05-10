@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react"
-import { changeStudentStatus, getStudentById, updateStudent } from "../../api/studentsApi"
+import {
+  changeStudentStatus,
+  getStudentById,
+  resetStudentPassword,
+  updateStudent,
+} from "../../api/studentsApi"
+import { useToast } from "../../components/common/ToastCenter"
 import { PageHeader } from "../../components/common/PageHeader"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
-import type { EntityId, StudentUpdateDto } from "../../types/api"
+import type {
+  EntityId,
+  StudentAccountPasswordDto,
+  StudentUpdateDto,
+} from "../../types/api"
 import { fullName } from "../../utils/format"
 
 type AdminStudentEditPageProps = {
@@ -21,9 +31,13 @@ const emptyForm: StudentUpdateDto = {
 }
 
 export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPageProps) {
+  const { pushToast } = useToast()
   const [form, setForm] = useState<StudentUpdateDto>(emptyForm)
+  const [savedEmail, setSavedEmail] = useState<string | null>(null)
   const [statusValue, setStatusValue] = useState("Active")
   const [title, setTitle] = useState("Редагування студента")
+  const [issuedPassword, setIssuedPassword] = useState<StudentAccountPasswordDto | null>(null)
+  const [customPassword, setCustomPassword] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -49,6 +63,7 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
           email: result.email,
           phone: result.phone,
         })
+        setSavedEmail(result.email)
         setStatusValue(result.status)
       })
       .catch((err: unknown) => {
@@ -77,10 +92,14 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
     setError(null)
 
     try {
-      await updateStudent(studentId, form)
+      const updated = await updateStudent(studentId, form)
+      setSavedEmail(updated.email)
       setMessage("Базові дані студента оновлено.")
+      pushToast({ tone: "info", title: "Успішно", message: "Дані студента оновлено." })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Не вдалося оновити дані студента.")
+      const nextError = err instanceof Error ? err.message : "Не вдалося оновити дані студента."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
     } finally {
       setIsSaving(false)
     }
@@ -94,8 +113,35 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
     try {
       await changeStudentStatus(studentId, { status: statusValue })
       setMessage("Статус студента оновлено.")
+      pushToast({ tone: "info", title: "Успішно", message: "Статус студента оновлено." })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Не вдалося змінити статус студента.")
+      const nextError = err instanceof Error ? err.message : "Не вдалося змінити статус студента."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleResetPassword = async (newPassword: string | null) => {
+    setIsSaving(true)
+    setMessage(null)
+    setError(null)
+
+    try {
+      const result = await resetStudentPassword(studentId, { newPassword })
+      setIssuedPassword(result)
+      setCustomPassword("")
+      setMessage(newPassword ? "Пароль студентського акаунта оновлено." : "Новий пароль згенеровано.")
+      pushToast({
+        tone: "info",
+        title: "Успішно",
+        message: newPassword ? "Пароль студентського акаунта оновлено." : "Згенеровано новий пароль.",
+      })
+    } catch (err: unknown) {
+      const nextError = err instanceof Error ? err.message : "Не вдалося оновити пароль."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
     } finally {
       setIsSaving(false)
     }
@@ -108,6 +154,8 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
   if (error && !message) {
     return <StatusState tone="error" message={error} />
   }
+
+  const emailChanged = (form.email ?? "").trim() !== (savedEmail ?? "").trim()
 
   return (
     <div className="page-stack">
@@ -201,6 +249,60 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
             {isSaving ? "Оновлення..." : "Змінити статус"}
           </button>
         </div>
+      </section>
+
+      <section className="panel">
+        <h2>Обліковий запис</h2>
+        <div className="summary-grid">
+          <div>
+            <strong>Логін:</strong> {savedEmail ?? "-"}
+          </div>
+          <div>
+            <strong>Створення пароля:</strong> вручну або автоматично
+          </div>
+        </div>
+
+        {emailChanged ? (
+          <StatusState
+            tone="info"
+            message="Щоб змінити логін для входу, спочатку збережіть новий email у базових даних."
+          />
+        ) : null}
+
+        <div className="form-grid">
+          <label>
+            Новий пароль вручну
+            <input
+              type="text"
+              value={customPassword}
+              onChange={(event) => setCustomPassword(event.target.value)}
+              placeholder="Введіть новий пароль"
+            />
+          </label>
+        </div>
+
+        <div className="inline-actions">
+          <button
+            type="button"
+            onClick={() => handleResetPassword(customPassword.trim() || null)}
+            disabled={isSaving || emailChanged}
+          >
+            {customPassword.trim().length > 0 ? "Встановити цей пароль" : "Згенерувати новий пароль"}
+          </button>
+        </div>
+
+        {issuedPassword ? (
+          <div className="form-grid">
+            <label>
+              Логін
+              <input type="text" readOnly value={issuedPassword.login} />
+            </label>
+            <label>
+              Пароль
+              <input type="text" readOnly value={issuedPassword.password} />
+            </label>
+          </div>
+        ) : null}
       </section>
 
       {message ? <StatusState tone="info" message={message} /> : null}

@@ -17,4 +17,6 @@ public interface IUnitOfWork
     IStudentGroupTransferRepository GroupTransfers { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
+    Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken ct = default);
+    Task<TResult> ExecuteInTransactionAsync<TResult>(Func<CancellationToken, Task<TResult>> action, CancellationToken ct = default);
 }

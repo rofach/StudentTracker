@@ -91,6 +91,15 @@ public class StudentService : IStudentService
         return student.ToDto();
     }
 
+    public async Task DeleteAsync(Guid studentId, CancellationToken ct = default)
+    {
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        _unitOfWork.Students.Delete(student);
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+
     public async Task ChangeStatusAsync(Guid studentId, ChangeStatusDto dto, CancellationToken ct = default)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)

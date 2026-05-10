@@ -3,7 +3,7 @@ namespace UniversityHistory.Infrastructure.Migrations.Sql;
 internal static class StudentTimelineViewSql
 {
     public const string Create = """
-        CREATE VIEW vw_StudentTimeline
+        CREATE VIEW vw_student_timeline
         AS
         WITH transfer_diff AS (
             SELECT
@@ -12,43 +12,43 @@ internal static class StudentTimelineViewSql
                 SUM(CASE WHEN adi.status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
                 SUM(CASE WHEN adi.status = 'Completed' THEN 1 ELSE 0 END) AS completed_count,
                 SUM(CASE WHEN adi.status = 'Waived' THEN 1 ELSE 0 END) AS waived_count
-            FROM Academic_Difference_Item adi
+            FROM academic_difference_item adi
             GROUP BY adi.transfer_id
         )
         SELECT
-            timeline.StudentId,
-            timeline.EventType,
-            timeline.Description,
-            timeline.DateFrom,
-            timeline.DateTo,
-            timeline.GroupCode,
-            timeline.DepartmentName,
-            timeline.AcademicUnitName,
-            timeline.AcademicUnitType,
-            timeline.SortPriority,
-            timeline.EventKey
+            timeline.student_id,
+            timeline.event_type,
+            timeline.description,
+            timeline.date_from,
+            timeline.date_to,
+            timeline.group_code,
+            timeline.department_name,
+            timeline.academic_unit_name,
+            timeline.academic_unit_type,
+            timeline.sort_priority,
+            timeline.event_key
         FROM (
             SELECT
-                e.student_id AS StudentId,
-                'EnrollmentStart' AS EventType,
-                CONCAT('Enrollment started in group ', g.group_code, ' (', e.reason_start, ')') AS Description,
-                e.date_from AS DateFrom,
-                CAST(NULL AS date) AS DateTo,
-                g.group_code AS GroupCode,
-                d.name AS DepartmentName,
-                au.name AS AcademicUnitName,
-                au.type AS AcademicUnitType,
-                10 AS SortPriority,
-                CONCAT('EnrollmentStart:', CONVERT(nvarchar(36), e.enrollment_id)) AS EventKey
-            FROM Student_Group_Enrollment e
-            JOIN Study_Group g ON g.group_id = e.group_id
-            JOIN Department d ON d.department_id = g.department_id
-            JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id
+                e.student_id,
+                'EnrollmentStart' AS event_type,
+                CONCAT('Enrollment started in group ', g.group_code, ' (', e.reason_start, ')') AS description,
+                e.date_from,
+                CAST(NULL AS date) AS date_to,
+                g.group_code,
+                d.name AS department_name,
+                au.name AS academic_unit_name,
+                au.type AS academic_unit_type,
+                10 AS sort_priority,
+                CONCAT('EnrollmentStart:', CONVERT(nvarchar(36), e.enrollment_id)) AS event_key
+            FROM student_group_enrollment e
+            JOIN study_group g ON g.group_id = e.group_id
+            JOIN department d ON d.department_id = g.department_id
+            JOIN academic_unit au ON au.academic_unit_id = d.academic_unit_id
 
             UNION ALL
 
             SELECT
-                e.student_id AS StudentId,
+                e.student_id,
                 'EnrollmentEnd',
                 CONCAT(
                     'Enrollment ended in group ',
@@ -66,16 +66,16 @@ internal static class StudentTimelineViewSql
                 au.type,
                 20,
                 CONCAT('EnrollmentEnd:', CONVERT(nvarchar(36), e.enrollment_id))
-            FROM Student_Group_Enrollment e
-            JOIN Study_Group g ON g.group_id = e.group_id
-            JOIN Department d ON d.department_id = g.department_id
-            JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id
+            FROM student_group_enrollment e
+            JOIN study_group g ON g.group_id = e.group_id
+            JOIN department d ON d.department_id = g.department_id
+            JOIN academic_unit au ON au.academic_unit_id = d.academic_unit_id
             WHERE e.date_to IS NOT NULL
 
             UNION ALL
 
             SELECT
-                e.student_id AS StudentId,
+                e.student_id,
                 'AcademicLeaveStart',
                 CONCAT('Academic leave started: ', ISNULL(al.reason, 'No reason provided')),
                 al.start_date,
@@ -86,16 +86,16 @@ internal static class StudentTimelineViewSql
                 au.type,
                 30,
                 CONCAT('AcademicLeaveStart:', CONVERT(nvarchar(36), al.leave_id))
-            FROM Academic_Leave al
-            JOIN Student_Group_Enrollment e ON e.enrollment_id = al.enrollment_id
-            JOIN Study_Group g ON g.group_id = e.group_id
-            JOIN Department d ON d.department_id = g.department_id
-            JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id
+            FROM academic_leave al
+            JOIN student_group_enrollment e ON e.enrollment_id = al.enrollment_id
+            JOIN study_group g ON g.group_id = e.group_id
+            JOIN department d ON d.department_id = g.department_id
+            JOIN academic_unit au ON au.academic_unit_id = d.academic_unit_id
 
             UNION ALL
 
             SELECT
-                e.student_id AS StudentId,
+                e.student_id,
                 'AcademicLeaveEnd',
                 CONCAT(
                     'Academic leave ended',
@@ -112,17 +112,17 @@ internal static class StudentTimelineViewSql
                 au.type,
                 40,
                 CONCAT('AcademicLeaveEnd:', CONVERT(nvarchar(36), al.leave_id))
-            FROM Academic_Leave al
-            JOIN Student_Group_Enrollment e ON e.enrollment_id = al.enrollment_id
-            JOIN Study_Group g ON g.group_id = e.group_id
-            JOIN Department d ON d.department_id = g.department_id
-            JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id
+            FROM academic_leave al
+            JOIN student_group_enrollment e ON e.enrollment_id = al.enrollment_id
+            JOIN study_group g ON g.group_id = e.group_id
+            JOIN department d ON d.department_id = g.department_id
+            JOIN academic_unit au ON au.academic_unit_id = d.academic_unit_id
             WHERE al.end_date IS NOT NULL
 
             UNION ALL
 
             SELECT
-                e.student_id AS StudentId,
+                e.student_id,
                 'SubgroupChange',
                 CONCAT('Subgroup changed to ', sg.subgroup_name, ' (', se.reason, ')'),
                 se.date_from,
@@ -133,17 +133,17 @@ internal static class StudentTimelineViewSql
                 au.type,
                 50,
                 CONCAT('SubgroupChange:', CONVERT(nvarchar(36), se.subgroup_enrollment_id))
-            FROM Student_Subgroup_Enrollment se
-            JOIN Student_Group_Enrollment e ON e.enrollment_id = se.enrollment_id
-            JOIN Subgroup sg ON sg.subgroup_id = se.subgroup_id
-            JOIN Study_Group g ON g.group_id = e.group_id
-            JOIN Department d ON d.department_id = g.department_id
-            JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id
+            FROM student_subgroup_enrollment se
+            JOIN student_group_enrollment e ON e.enrollment_id = se.enrollment_id
+            JOIN subgroup sg ON sg.subgroup_id = se.subgroup_id
+            JOIN study_group g ON g.group_id = e.group_id
+            JOIN department d ON d.department_id = g.department_id
+            JOIN academic_unit au ON au.academic_unit_id = d.academic_unit_id
 
             UNION ALL
 
             SELECT
-                old_e.student_id AS StudentId,
+                old_e.student_id,
                 'GroupTransfer',
                 CONCAT(
                     'Transferred from group ',
@@ -173,19 +173,19 @@ internal static class StudentTimelineViewSql
                 new_au.type,
                 60,
                 CONCAT('GroupTransfer:', CONVERT(nvarchar(36), t.transfer_id))
-            FROM Student_Group_Transfer t
-            JOIN Student_Group_Enrollment old_e ON old_e.enrollment_id = t.old_enrollment_id
-            JOIN Student_Group_Enrollment new_e ON new_e.enrollment_id = t.new_enrollment_id
-            JOIN Study_Group old_g ON old_g.group_id = old_e.group_id
-            JOIN Study_Group new_g ON new_g.group_id = new_e.group_id
-            JOIN Department new_d ON new_d.department_id = new_g.department_id
-            JOIN Academic_Unit new_au ON new_au.academic_unit_id = new_d.academic_unit_id
+            FROM student_group_transfer t
+            JOIN student_group_enrollment old_e ON old_e.enrollment_id = t.old_enrollment_id
+            JOIN student_group_enrollment new_e ON new_e.enrollment_id = t.new_enrollment_id
+            JOIN study_group old_g ON old_g.group_id = old_e.group_id
+            JOIN study_group new_g ON new_g.group_id = new_e.group_id
+            JOIN department new_d ON new_d.department_id = new_g.department_id
+            JOIN academic_unit new_au ON new_au.academic_unit_id = new_d.academic_unit_id
             LEFT JOIN transfer_diff diff ON diff.transfer_id = t.transfer_id
 
             UNION ALL
 
             SELECT
-                et.student_id AS StudentId,
+                et.student_id,
                 'ExternalTransfer',
                 CONCAT(
                     et.transfer_type,
@@ -204,12 +204,12 @@ internal static class StudentTimelineViewSql
                 CAST(NULL AS nvarchar(20)),
                 70,
                 CONCAT('ExternalTransfer:', CONVERT(nvarchar(36), et.transfer_id))
-            FROM External_Transfers et
-            JOIN Institution i ON i.institution_id = et.institution_id
+            FROM external_transfers et
+            JOIN institution i ON i.institution_id = et.institution_id
         ) AS timeline;
         """;
 
     public const string Drop = """
-        DROP VIEW IF EXISTS vw_StudentTimeline;
+        DROP VIEW IF EXISTS vw_student_timeline;
         """;
 }

@@ -2,8 +2,9 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using UniversityHistory.API.Extensions;
 using UniversityHistory.API.Middleware;
-using UniversityHistory.Application.Interfaces.Services;
+using UniversityHistory.API.Services;
 using UniversityHistory.Application.Queries.GetClassmates;
 using UniversityHistory.Application.Queries.GetActiveGroups;
 using UniversityHistory.Application.Queries.GetGroupComposition;
@@ -16,11 +17,13 @@ using UniversityHistory.Application.Queries.GetStudentDisciplines;
 using UniversityHistory.Application.Queries.GetDisciplineSearch;
 using UniversityHistory.Application.Queries.GetStudentSearch;
 using UniversityHistory.Application.Queries.GetInternalTransferJournal;
+using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Rules;
 using UniversityHistory.Application.Services;
 using UniversityHistory.Application.Validation.Students;
 using UniversityHistory.Domain.Interfaces.Repositories;
 using UniversityHistory.Infrastructure.Data;
+using UniversityHistory.Infrastructure.Identity;
 using UniversityHistory.Infrastructure.Queries;
 using UniversityHistory.Infrastructure.Repositories;
 
@@ -28,6 +31,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<UniversityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddAuthModule(builder.Configuration);
 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
@@ -104,6 +108,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+await app.SeedIdentityAsync();
+
 await app.RunAsync();

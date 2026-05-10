@@ -12,7 +12,7 @@ using UniversityHistory.Infrastructure.Data;
 namespace UniversityHistory.Infrastructure.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    [Migration("20260421163643_InitialCreate")]
+    [Migration("20260508180621_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,165 @@ namespace UniversityHistory.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("concurrency_stamp");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("normalized_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_roles");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_asp_net_roles_normalized_name")
+                        .HasFilter("[normalized_name] IS NOT NULL");
+
+                    b.ToTable("asp_net_roles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("claim_type");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("claim_value");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("role_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_role_claims");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("asp_net_role_claims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("claim_type");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("claim_value");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_user_claims");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("asp_net_user_claims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("login_provider");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("provider_key");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("provider_display_name");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("LoginProvider", "ProviderKey")
+                        .HasName("pk_asp_net_user_logins");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("asp_net_user_logins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("role_id");
+
+                    b.HasKey("UserId", "RoleId")
+                        .HasName("pk_asp_net_user_roles");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("asp_net_user_roles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("login_provider");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("value");
+
+                    b.HasKey("UserId", "LoginProvider", "Name")
+                        .HasName("pk_asp_net_user_tokens");
+
+                    b.ToTable("asp_net_user_tokens", (string)null);
+                });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.AcademicDifferenceItem", b =>
                 {
@@ -53,15 +212,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("transfer_id");
 
-                    b.HasKey("DifferenceItemId");
+                    b.HasKey("DifferenceItemId")
+                        .HasName("pk_academic_difference_item");
 
                     b.HasIndex("PlanDisciplineId");
 
                     b.HasIndex("TransferId", "PlanDisciplineId")
                         .IsUnique()
-                        .HasDatabaseName("UX_AcademicDifferenceItem_TransferId_PlanDisciplineId");
+                        .HasDatabaseName("ix_academic_difference_item_transfer_id_plan_discipline_id");
 
-                    b.ToTable("Academic_Difference_Item", null, t =>
+                    b.ToTable("academic_difference_item", null, t =>
                         {
                             t.HasCheckConstraint("chk_diff_item_status", "status IN ('Pending','Completed','Waived')");
                         });
@@ -136,11 +296,12 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("start_date");
 
-                    b.HasKey("LeaveId");
+                    b.HasKey("LeaveId")
+                        .HasName("pk_academic_leave");
 
                     b.HasIndex("EnrollmentId");
 
-                    b.ToTable("Academic_Leave", (string)null);
+                    b.ToTable("academic_leave", (string)null);
 
                     b.HasData(
                         new
@@ -180,12 +341,14 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("type");
 
-                    b.HasKey("AcademicUnitId");
+                    b.HasKey("AcademicUnitId")
+                        .HasName("pk_academic_unit");
 
                     b.HasIndex("Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_academic_unit_name");
 
-                    b.ToTable("Academic_Unit", null, t =>
+                    b.ToTable("academic_unit", null, t =>
                         {
                             t.HasCheckConstraint("chk_academic_unit_type", "type IN ('Faculty','Institute')");
                         });
@@ -216,12 +379,14 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("name");
 
-                    b.HasKey("DepartmentId");
+                    b.HasKey("DepartmentId")
+                        .HasName("pk_department");
 
                     b.HasIndex("AcademicUnitId", "Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_department_academic_unit_id_name");
 
-                    b.ToTable("Department", (string)null);
+                    b.ToTable("department", (string)null);
 
                     b.HasData(
                         new
@@ -268,9 +433,10 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("discipline_name");
 
-                    b.HasKey("DisciplineId");
+                    b.HasKey("DisciplineId")
+                        .HasName("pk_discipline");
 
-                    b.ToTable("Discipline", (string)null);
+                    b.ToTable("discipline", (string)null);
 
                     b.HasData(
                         new
@@ -719,13 +885,14 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(3)")
                         .HasColumnName("transfer_type");
 
-                    b.HasKey("TransferId");
+                    b.HasKey("TransferId")
+                        .HasName("pk_external_transfers");
 
                     b.HasIndex("InstitutionId");
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("External_Transfers", null, t =>
+                    b.ToTable("external_transfers", null, t =>
                         {
                             t.HasCheckConstraint("chk_transfer_type", "transfer_type IN ('In','Out')");
                         });
@@ -772,12 +939,14 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("grade_value");
 
-                    b.HasKey("GradeId");
+                    b.HasKey("GradeId")
+                        .HasName("pk_grade_record");
 
                     b.HasIndex("CourseEnrollmentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_grade_record_course_enrollment_id");
 
-                    b.ToTable("Grade_Record", (string)null);
+                    b.ToTable("grade_record", (string)null);
 
                     b.HasData(
                         new
@@ -785,21 +954,21 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000bb9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007d1-0000-0000-0000-000000000000"),
-                            GradeValue = "84"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000bba-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007d2-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000bbb-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007d3-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "92"
                         },
                         new
                         {
@@ -813,28 +982,28 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000bbd-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007d5-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000bbe-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000007d6-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000bbf-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000007d7-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000007d8-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "85"
                         },
                         new
                         {
@@ -848,70 +1017,70 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000bc2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007da-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007db-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007dc-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007dd-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc6-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007de-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc7-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007ed-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc8-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007ee-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000bc9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007ef-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000bca-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007f0-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "74"
                         },
                         new
                         {
                             GradeId = new Guid("00000bcb-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000007f1-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "92"
                         },
                         new
                         {
@@ -925,7 +1094,7 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000bcd-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000007f3-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "77"
                         },
                         new
                         {
@@ -939,1078 +1108,1078 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000bcf-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000007f5-0000-0000-0000-000000000000"),
-                            GradeValue = "84"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007f6-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd1-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007f7-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007f8-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007f9-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000007fa-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000809-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd6-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000080a-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd7-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000080b-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd8-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000080c-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000bd9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000080d-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000bda-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000080e-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000bdb-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000080f-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000bdc-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000810-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000bdd-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000811-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "77"
                         },
                         new
                         {
                             GradeId = new Guid("00000bde-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000812-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000bdf-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000813-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000be0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000814-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000be1-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000815-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000be2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000816-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000be3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000081e-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000be4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000081f-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000be5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000820-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000be6-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000821-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000be7-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000822-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000be8-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000823-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000be9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000824-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000bea-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000825-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000beb-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000826-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000bec-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000827-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000bed-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000828-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000bee-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000829-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000bef-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000082a-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000082b-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf1-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000083a-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000083b-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000083c-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000083d-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000083e-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf6-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000083f-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf7-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000840-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf8-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000841-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000bf9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000842-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000bfa-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000843-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "74"
                         },
                         new
                         {
                             GradeId = new Guid("00000bfb-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000844-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000bfc-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000845-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000bfd-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000846-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000bfe-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000847-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000bff-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000856-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000c00-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000857-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c01-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000858-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000c02-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000859-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c03-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000085a-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000c04-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000085b-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c05-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000085c-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000c06-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000085d-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000c07-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000085e-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c08-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000085f-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c09-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000860-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "77"
                         },
                         new
                         {
                             GradeId = new Guid("00000c0a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000861-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000c0b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000862-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c0c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000863-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c0d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000872-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000c0e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000873-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000c0f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000874-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c10-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000875-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c11-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000876-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000c12-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000880-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c13-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000881-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c14-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000882-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c15-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000883-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000c16-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000884-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c17-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000088e-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c18-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000088f-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000c19-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000890-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c1a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000891-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c1b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000892-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c1c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000089c-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000c1d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000089d-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c1e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000089e-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000c1f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000089f-0000-0000-0000-000000000000"),
-                            GradeValue = "84"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000c20-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008a0-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000c21-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008aa-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000c22-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008ab-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "74"
                         },
                         new
                         {
                             GradeId = new Guid("00000c23-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008ac-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "74"
                         },
                         new
                         {
                             GradeId = new Guid("00000c24-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008ad-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c25-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008ae-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c26-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008b8-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c27-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008b9-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c28-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008ba-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000c29-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008bb-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c2a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008bc-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000c2b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008bd-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000c2c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008be-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000c2d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008bf-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000c2e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008c0-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c2f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008c1-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c30-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008c2-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000c31-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008c3-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c32-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008c4-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c33-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008c5-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c34-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008c6-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000c35-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008d6-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000c36-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008d7-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c37-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008d8-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c38-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008d9-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c39-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008da-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c3a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008db-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000c3b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008dc-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c3c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008dd-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c3d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008de-0000-0000-0000-000000000000"),
-                            GradeValue = "84"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000c3e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008df-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c3f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008e0-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000c40-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008e1-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000c41-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008e2-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c42-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008e3-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000c43-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008e4-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c44-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008f4-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c45-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008f5-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c46-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008f6-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000c47-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("000008f7-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c48-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008f8-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c49-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008f9-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c4a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008fa-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c4b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008fb-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "91"
                         },
                         new
                         {
                             GradeId = new Guid("00000c4c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008fc-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "74"
                         },
                         new
                         {
                             GradeId = new Guid("00000c4d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("000008fd-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000c4e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008fe-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c4f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000008ff-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c50-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000900-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000c51-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000901-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c52-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000902-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c53-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000912-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c54-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000913-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "77"
                         },
                         new
                         {
                             GradeId = new Guid("00000c55-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000914-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "91"
                         },
                         new
                         {
                             GradeId = new Guid("00000c56-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000915-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c57-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000916-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c58-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000917-0000-0000-0000-000000000000"),
-                            GradeValue = "84"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c59-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000918-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000c5a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000919-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000c5b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000091a-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c5c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000091b-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000c5d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000091c-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000c5e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000091d-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c5f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000091e-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c60-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("0000091f-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000c61-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000920-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c62-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000929-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000c63-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000092a-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000c64-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000092b-0000-0000-0000-000000000000"),
-                            GradeValue = "80"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000c65-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000092c-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "75"
                         },
                         new
                         {
                             GradeId = new Guid("00000c66-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000092d-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c67-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000092e-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c68-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000092f-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "77"
                         },
                         new
                         {
@@ -2031,259 +2200,259 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000c6b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000932-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c6c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000933-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c6d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000934-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "91"
                         },
                         new
                         {
                             GradeId = new Guid("00000c6e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000935-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000c6f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000936-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000c70-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000937-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000c71-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000947-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c72-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000948-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c73-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("00000949-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c74-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 1, 20),
                             CourseEnrollmentId = new Guid("0000094a-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000c75-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000094b-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000c76-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000094c-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000c77-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000094d-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c78-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000094e-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000c79-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("0000094f-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000c7a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2025, 6, 20),
                             CourseEnrollmentId = new Guid("00000950-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c7b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000951-0000-0000-0000-000000000000"),
-                            GradeValue = "84"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000c7c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000952-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c7d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000953-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c7e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000954-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000c7f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000955-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c80-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000965-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "85"
                         },
                         new
                         {
                             GradeId = new Guid("00000c81-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000966-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000c82-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000967-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000c83-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000968-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c84-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000974-0000-0000-0000-000000000000"),
-                            GradeValue = "77"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000c85-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000975-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "75"
                         },
                         new
                         {
                             GradeId = new Guid("00000c86-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000976-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c87-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000977-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c88-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000983-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000c89-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000984-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000c8a-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000985-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c8b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000986-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "74"
                         },
                         new
                         {
                             GradeId = new Guid("00000c8c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000992-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c8d-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000993-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "77"
                         },
                         new
                         {
                             GradeId = new Guid("00000c8e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000994-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c8f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000995-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "87"
                         },
                         new
                         {
@@ -2297,63 +2466,63 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000c91-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009a2-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000c92-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009a3-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000c93-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009a4-0000-0000-0000-000000000000"),
-                            GradeValue = "86"
+                            GradeValue = "77"
                         },
                         new
                         {
                             GradeId = new Guid("00000c94-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009b0-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c95-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009b1-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "84"
                         },
                         new
                         {
                             GradeId = new Guid("00000c96-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009b2-0000-0000-0000-000000000000"),
-                            GradeValue = "78"
+                            GradeValue = "80"
                         },
                         new
                         {
                             GradeId = new Guid("00000c97-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009b3-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000c98-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009b4-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000c99-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009c2-0000-0000-0000-000000000000"),
-                            GradeValue = "91"
+                            GradeValue = "85"
                         },
                         new
                         {
@@ -2367,14 +2536,14 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000c9b-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009c4-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000c9c-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009c5-0000-0000-0000-000000000000"),
-                            GradeValue = "92"
+                            GradeValue = "84"
                         },
                         new
                         {
@@ -2388,168 +2557,168 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000c9e-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009d4-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000c9f-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009d5-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009d6-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca1-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009d7-0000-0000-0000-000000000000"),
-                            GradeValue = "85"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009d8-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009e6-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "94"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009e7-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "75"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009e8-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca6-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009e9-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca7-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009ea-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "93"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca8-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009f8-0000-0000-0000-000000000000"),
-                            GradeValue = "88"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000ca9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009f9-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000caa-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009fa-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000cab-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009fb-0000-0000-0000-000000000000"),
-                            GradeValue = "74"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000cac-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("000009fc-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "87"
                         },
                         new
                         {
                             GradeId = new Guid("00000cad-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a0a-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "76"
                         },
                         new
                         {
                             GradeId = new Guid("00000cae-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a0b-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000caf-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a0c-0000-0000-0000-000000000000"),
-                            GradeValue = "89"
+                            GradeValue = "77"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a0d-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "75"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb1-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a0e-0000-0000-0000-000000000000"),
-                            GradeValue = "73"
+                            GradeValue = "92"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a1c-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "90"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a1d-0000-0000-0000-000000000000"),
-                            GradeValue = "95"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a1e-0000-0000-0000-000000000000"),
-                            GradeValue = "76"
+                            GradeValue = "86"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a1f-0000-0000-0000-000000000000"),
-                            GradeValue = "94"
+                            GradeValue = "79"
                         },
                         new
                         {
@@ -2563,105 +2732,105 @@ namespace UniversityHistory.Infrastructure.Migrations
                             GradeId = new Guid("00000cb7-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a2e-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "95"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb8-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a2f-0000-0000-0000-000000000000"),
-                            GradeValue = "93"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000cb9-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a30-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "73"
                         },
                         new
                         {
                             GradeId = new Guid("00000cba-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a31-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "81"
                         },
                         new
                         {
                             GradeId = new Guid("00000cbb-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a32-0000-0000-0000-000000000000"),
-                            GradeValue = "72"
+                            GradeValue = "83"
                         },
                         new
                         {
                             GradeId = new Guid("00000cbc-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a40-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "88"
                         },
                         new
                         {
                             GradeId = new Guid("00000cbd-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a41-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "91"
                         },
                         new
                         {
                             GradeId = new Guid("00000cbe-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a42-0000-0000-0000-000000000000"),
-                            GradeValue = "75"
+                            GradeValue = "79"
                         },
                         new
                         {
                             GradeId = new Guid("00000cbf-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a43-0000-0000-0000-000000000000"),
-                            GradeValue = "82"
+                            GradeValue = "91"
                         },
                         new
                         {
                             GradeId = new Guid("00000cc0-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a44-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "78"
                         },
                         new
                         {
                             GradeId = new Guid("00000cc1-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a52-0000-0000-0000-000000000000"),
-                            GradeValue = "87"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000cc2-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a53-0000-0000-0000-000000000000"),
-                            GradeValue = "79"
+                            GradeValue = "82"
                         },
                         new
                         {
                             GradeId = new Guid("00000cc3-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a54-0000-0000-0000-000000000000"),
-                            GradeValue = "83"
+                            GradeValue = "89"
                         },
                         new
                         {
                             GradeId = new Guid("00000cc4-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a55-0000-0000-0000-000000000000"),
-                            GradeValue = "81"
+                            GradeValue = "72"
                         },
                         new
                         {
                             GradeId = new Guid("00000cc5-0000-0000-0000-000000000000"),
                             AssessmentDate = new DateOnly(2026, 1, 20),
                             CourseEnrollmentId = new Guid("00000a56-0000-0000-0000-000000000000"),
-                            GradeValue = "90"
+                            GradeValue = "88"
                         },
                         new
                         {
@@ -2695,15 +2864,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("plan_id");
 
-                    b.HasKey("GroupPlanAssignmentId");
+                    b.HasKey("GroupPlanAssignmentId")
+                        .HasName("pk_group_plan_assignment");
 
                     b.HasIndex("PlanId");
 
                     b.HasIndex("GroupId", "DateFrom")
                         .IsUnique()
-                        .HasDatabaseName("IX_GroupPlanAssignment_GroupId_DateFrom");
+                        .HasDatabaseName("ix_group_plan_assignment_group_id_date_from");
 
-                    b.ToTable("Group_Plan_Assignment", (string)null);
+                    b.ToTable("group_plan_assignment", (string)null);
 
                     b.HasData(
                         new
@@ -2773,9 +2943,10 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)")
                         .HasColumnName("institution_name");
 
-                    b.HasKey("InstitutionId");
+                    b.HasKey("InstitutionId")
+                        .HasName("pk_institution");
 
-                    b.ToTable("Institution", (string)null);
+                    b.ToTable("institution", (string)null);
 
                     b.HasData(
                         new
@@ -2835,14 +3006,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("semester_no");
 
-                    b.HasKey("PlanDisciplineId");
+                    b.HasKey("PlanDisciplineId")
+                        .HasName("pk_plan_disciplines");
 
                     b.HasIndex("DisciplineId");
 
                     b.HasIndex("PlanId", "DisciplineId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_plan_disciplines_plan_id_discipline_id");
 
-                    b.ToTable("Plan_Disciplines", null, t =>
+                    b.ToTable("plan_disciplines", null, t =>
                         {
                             t.HasCheckConstraint("chk_control_type", "control_type IN ('Exam','Credit','Coursework')");
                         });
@@ -3956,9 +4129,10 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnName("status")
                         .HasDefaultValueSql("'Active'");
 
-                    b.HasKey("StudentId");
+                    b.HasKey("StudentId")
+                        .HasName("pk_student");
 
-                    b.ToTable("Student", null, t =>
+                    b.ToTable("student", null, t =>
                         {
                             t.HasCheckConstraint("chk_student_status", "status IN ('Active','OnLeave','Expelled','Graduated')");
                         });
@@ -4349,7 +4523,8 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnName("status")
                         .HasDefaultValueSql("'Planned'");
 
-                    b.HasKey("CourseEnrollmentId");
+                    b.HasKey("CourseEnrollmentId")
+                        .HasName("pk_student_course_enrollment");
 
                     b.HasIndex("EnrollmentId");
 
@@ -4357,7 +4532,7 @@ namespace UniversityHistory.Infrastructure.Migrations
 
                     b.HasIndex("PlanDisciplineId");
 
-                    b.ToTable("Student_Course_Enrollment", null, t =>
+                    b.ToTable("student_course_enrollment", null, t =>
                         {
                             t.HasCheckConstraint("chk_course_status", "status IN ('Planned','InProgress','Completed','Retake')");
                         });
@@ -10384,14 +10559,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("student_id");
 
-                    b.HasKey("EnrollmentId");
+                    b.HasKey("EnrollmentId")
+                        .HasName("pk_student_group_enrollment");
 
                     b.HasIndex("StudentId");
 
                     b.HasIndex("GroupId", "DateFrom")
-                        .HasDatabaseName("IX_Enrollment_GroupId_DateFrom");
+                        .HasDatabaseName("ix_student_group_enrollment_group_id_date_from");
 
-                    b.ToTable("Student_Group_Enrollment", (string)null);
+                    b.ToTable("student_group_enrollment", (string)null);
 
                     b.HasData(
                         new
@@ -10697,15 +10873,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("transfer_date");
 
-                    b.HasKey("TransferId");
+                    b.HasKey("TransferId")
+                        .HasName("pk_student_group_transfer");
 
                     b.HasIndex("NewEnrollmentId")
-                        .HasDatabaseName("IX_StudentGroupTransfer_NewEnrollmentId");
+                        .HasDatabaseName("ix_student_group_transfer_new_enrollment_id");
 
                     b.HasIndex("OldEnrollmentId")
-                        .HasDatabaseName("IX_StudentGroupTransfer_OldEnrollmentId");
+                        .HasDatabaseName("ix_student_group_transfer_old_enrollment_id");
 
-                    b.ToTable("Student_Group_Transfer", (string)null);
+                    b.ToTable("student_group_transfer", (string)null);
 
                     b.HasData(
                         new
@@ -10755,20 +10932,21 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("subgroup_id");
 
-                    b.HasKey("SubgroupEnrollmentId");
+                    b.HasKey("SubgroupEnrollmentId")
+                        .HasName("pk_student_subgroup_enrollment");
 
                     b.HasIndex("EnrollmentId")
                         .IsUnique()
-                        .HasDatabaseName("UX_StudentSubgroupEnrollment_Open")
+                        .HasDatabaseName("ix_student_subgroup_enrollment_open")
                         .HasFilter("[date_to] IS NULL");
 
                     b.HasIndex("SubgroupId")
-                        .HasDatabaseName("IX_StudentSubgroupEnrollment_SubgroupId");
+                        .HasDatabaseName("ix_student_subgroup_enrollment_subgroup_id");
 
                     b.HasIndex("EnrollmentId", "DateFrom")
-                        .HasDatabaseName("IX_StudentSubgroupEnrollment_EnrollmentId_DateFrom");
+                        .HasDatabaseName("ix_student_subgroup_enrollment_enrollment_id_date_from");
 
-                    b.ToTable("Student_Subgroup_Enrollment", (string)null);
+                    b.ToTable("student_subgroup_enrollment", (string)null);
 
                     b.HasData(
                         new
@@ -11008,14 +11186,16 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("group_code");
 
-                    b.HasKey("GroupId");
+                    b.HasKey("GroupId")
+                        .HasName("pk_study_group");
 
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("GroupCode")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_study_group_group_code");
 
-                    b.ToTable("Study_Group", (string)null);
+                    b.ToTable("study_group", (string)null);
 
                     b.HasData(
                         new
@@ -11084,9 +11264,10 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("valid_from");
 
-                    b.HasKey("PlanId");
+                    b.HasKey("PlanId")
+                        .HasName("pk_study_plan");
 
-                    b.ToTable("Study_Plan", (string)null);
+                    b.ToTable("study_plan", (string)null);
 
                     b.HasData(
                         new
@@ -11129,11 +11310,12 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("subgroup_name");
 
-                    b.HasKey("SubgroupId");
+                    b.HasKey("SubgroupId")
+                        .HasName("pk_subgroup");
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("Subgroup", (string)null);
+                    b.ToTable("subgroup", (string)null);
 
                     b.HasData(
                         new
@@ -11214,54 +11396,196 @@ namespace UniversityHistory.Infrastructure.Migrations
                 {
                     b.Property<string>("AcademicUnitName")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("AcademicUnitName");
+                        .HasColumnName("academic_unit_name");
 
                     b.Property<string>("AcademicUnitType")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("AcademicUnitType");
+                        .HasColumnName("academic_unit_type");
 
                     b.Property<DateOnly>("DateFrom")
                         .HasColumnType("date")
-                        .HasColumnName("DateFrom");
+                        .HasColumnName("date_from");
 
                     b.Property<DateOnly?>("DateTo")
                         .HasColumnType("date")
-                        .HasColumnName("DateTo");
+                        .HasColumnName("date_to");
 
                     b.Property<string>("DepartmentName")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("DepartmentName");
+                        .HasColumnName("department_name");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Description");
+                        .HasColumnName("description");
 
                     b.Property<string>("EventKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("EventKey");
+                        .HasColumnName("event_key");
 
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("EventType");
+                        .HasColumnName("event_type");
 
                     b.Property<string>("GroupCode")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("GroupCode");
+                        .HasColumnName("group_code");
 
                     b.Property<int>("SortPriority")
                         .HasColumnType("int")
-                        .HasColumnName("SortPriority");
+                        .HasColumnName("sort_priority");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("StudentId");
+                        .HasColumnName("student_id");
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_StudentTimeline", (string)null);
+                    b.ToView("vw_student_timeline", (string)null);
+                });
+
+            modelBuilder.Entity("UniversityHistory.Infrastructure.Identity.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int")
+                        .HasColumnName("access_failed_count");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("concurrency_stamp");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("email");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit")
+                        .HasColumnName("email_confirmed");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("lockout_enabled");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("lockout_end");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("normalized_email");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("normalized_user_name");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("phone_number");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit")
+                        .HasColumnName("phone_number_confirmed");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("security_stamp");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("student_id");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("two_factor_enabled");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("user_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asp_net_users");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("ix_asp_net_users_normalized_email");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_asp_net_users_normalized_user_name")
+                        .HasFilter("[normalized_user_name] IS NOT NULL");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_asp_net_users_student_id")
+                        .HasFilter("[student_id] IS NOT NULL");
+
+                    b.ToTable("asp_net_users", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("UniversityHistory.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("UniversityHistory.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniversityHistory.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("UniversityHistory.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.AcademicDifferenceItem", b =>
@@ -11270,13 +11594,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("PlanDisciplineId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_academic_difference_item_plan_disciplines_plan_discipline_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.StudentGroupTransfer", "Transfer")
                         .WithMany("DifferenceItems")
                         .HasForeignKey("TransferId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_academic_difference_item_student_group_transfer_transfer_id");
 
                     b.Navigation("PlanDiscipline");
 
@@ -11289,7 +11615,8 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("AcademicLeaves")
                         .HasForeignKey("EnrollmentId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_academic_leave_student_group_enrollment_enrollment_id");
 
                     b.Navigation("Enrollment");
                 });
@@ -11300,7 +11627,8 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("Departments")
                         .HasForeignKey("AcademicUnitId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_department_academic_unit_academic_unit_id");
 
                     b.Navigation("AcademicUnit");
                 });
@@ -11311,13 +11639,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("Transfers")
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_external_transfers_institution_institution_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.Student", "Student")
                         .WithMany("ExternalTransfers")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_external_transfers_student_student_id");
 
                     b.Navigation("Institution");
 
@@ -11330,7 +11660,8 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("GradeRecords")
                         .HasForeignKey("CourseEnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_grade_record_student_course_enrollment_course_enrollment_id");
 
                     b.Navigation("CourseEnrollment");
                 });
@@ -11341,13 +11672,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("PlanAssignments")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_group_plan_assignment_study_group_group_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.StudyPlan", "Plan")
                         .WithMany("GroupPlanAssignments")
                         .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_group_plan_assignment_study_plan_plan_id");
 
                     b.Navigation("Group");
 
@@ -11360,13 +11693,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("PlanDisciplines")
                         .HasForeignKey("DisciplineId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_plan_disciplines_discipline_discipline_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.StudyPlan", "Plan")
                         .WithMany("PlanDisciplines")
                         .HasForeignKey("PlanId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_plan_disciplines_study_plan_plan_id");
 
                     b.Navigation("Discipline");
 
@@ -11379,19 +11714,22 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("CourseEnrollments")
                         .HasForeignKey("EnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_course_enrollment_student_group_enrollment_enrollment_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.GroupPlanAssignment", "GroupPlanAssignment")
                         .WithMany("StudentCourseEnrollments")
                         .HasForeignKey("GroupPlanAssignmentId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_course_enrollment_group_plan_assignment_group_plan_assignment_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.PlanDiscipline", "PlanDiscipline")
                         .WithMany("CourseEnrollments")
                         .HasForeignKey("PlanDisciplineId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_course_enrollment_plan_disciplines_plan_discipline_id");
 
                     b.Navigation("Enrollment");
 
@@ -11406,13 +11744,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("Enrollments")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_enrollment_study_group_group_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.Student", "Student")
                         .WithMany("Enrollments")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_enrollment_student_student_id");
 
                     b.Navigation("Group");
 
@@ -11425,13 +11765,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("NewEnrollmentId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_transfer_student_group_enrollment_new_enrollment_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.StudentGroupEnrollment", "OldEnrollment")
                         .WithMany()
                         .HasForeignKey("OldEnrollmentId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_transfer_student_group_enrollment_old_enrollment_id");
 
                     b.Navigation("NewEnrollment");
 
@@ -11444,13 +11786,15 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("SubgroupEnrollments")
                         .HasForeignKey("EnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_subgroup_enrollment_student_group_enrollment_enrollment_id");
 
                     b.HasOne("UniversityHistory.Domain.Entities.Subgroup", "Subgroup")
                         .WithMany("SubgroupEnrollments")
                         .HasForeignKey("SubgroupId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_student_subgroup_enrollment_subgroup_subgroup_id");
 
                     b.Navigation("Enrollment");
 
@@ -11463,7 +11807,8 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("Groups")
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_study_group_department_department_id");
 
                     b.Navigation("Department");
                 });
@@ -11474,9 +11819,19 @@ namespace UniversityHistory.Infrastructure.Migrations
                         .WithMany("Subgroups")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_subgroup_study_group_group_id");
 
                     b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("UniversityHistory.Infrastructure.Identity.ApplicationUser", b =>
+                {
+                    b.HasOne("UniversityHistory.Domain.Entities.Student", null)
+                        .WithOne()
+                        .HasForeignKey("UniversityHistory.Infrastructure.Identity.ApplicationUser", "StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("fk_asp_net_users_student_student_id");
                 });
 
             modelBuilder.Entity("UniversityHistory.Domain.Entities.AcademicUnit", b =>

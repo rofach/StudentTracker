@@ -1,8 +1,9 @@
 import { useState } from "react"
 import { createStudent } from "../../api/studentsApi"
+import { useToast } from "../../components/common/ToastCenter"
 import { PageHeader } from "../../components/common/PageHeader"
 import { StatusState } from "../../components/common/StatusState"
-import type { StudentCreateDto } from "../../types/api"
+import type { StudentAccountPasswordDto, StudentCreateDto, StudentCreatedResultDto } from "../../types/api"
 
 type AdminStudentCreatePageProps = {
   navigate: (path: string) => void
@@ -17,23 +18,60 @@ const emptyForm: StudentCreateDto = {
   phone: null,
 }
 
+function AccountPasswordPanel({
+  account,
+  studentId,
+  navigate,
+}: {
+  account: StudentAccountPasswordDto
+  studentId: string
+  navigate: (path: string) => void
+}) {
+  return (
+    <section className="panel">
+      <h2>Обліковий запис створено</h2>
+      <p>Збережіть ці дані зараз. Після переходу зі сторінки пароль більше не показуватиметься.</p>
+
+      <div className="form-grid">
+        <label>
+          Логін
+          <input type="text" readOnly value={account.login} />
+        </label>
+        <label>
+          Пароль
+          <input type="text" readOnly value={account.password} />
+        </label>
+      </div>
+
+      <div className="inline-actions">
+        <button type="button" onClick={() => navigate(`/admin/students/${studentId}`)}>
+          Перейти до картки студента
+        </button>
+      </div>
+    </section>
+  )
+}
+
 export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps) {
+  const { pushToast } = useToast()
   const [form, setForm] = useState<StudentCreateDto>(emptyForm)
-  const [message, setMessage] = useState<string | null>(null)
+  const [createdResult, setCreatedResult] = useState<StudentCreatedResultDto | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   const handleCreate = async () => {
     setIsSaving(true)
-    setMessage(null)
     setError(null)
 
     try {
       const created = await createStudent(form)
-      setMessage("Студента успішно створено.")
-      navigate(`/admin/students/${created.studentId}`)
+      setCreatedResult(created)
+      setForm(emptyForm)
+      pushToast({ tone: "info", title: "Успішно", message: "Студента створено, акаунт згенеровано." })
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Не вдалося створити студента.")
+      const nextError = err instanceof Error ? err.message : "Не вдалося створити студента."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
     } finally {
       setIsSaving(false)
     }
@@ -43,13 +81,21 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
     <div className="page-stack">
       <PageHeader
         title="Новий студент"
-        description="Нова картка студента."
+        description="Створення картки студента."
         actions={
           <button type="button" onClick={() => navigate("/admin/students")}>
             Назад до списку
           </button>
         }
       />
+
+      {createdResult ? (
+        <AccountPasswordPanel
+          account={createdResult.account}
+          studentId={createdResult.student.studentId}
+          navigate={navigate}
+        />
+      ) : null}
 
       <section className="panel">
         <h2>Базові дані</h2>
@@ -106,7 +152,7 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
 
         <div className="inline-actions">
           <button type="button" onClick={handleCreate} disabled={isSaving}>
-            {isSaving ? "Збереження..." : "Створити студента"}
+            {isSaving ? "Створення..." : "Створити студента"}
           </button>
           <button type="button" onClick={() => navigate("/admin/students")}>
             Скасувати
@@ -114,7 +160,6 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
         </div>
       </section>
 
-      {message ? <StatusState tone="info" message={message} /> : null}
       {error ? <StatusState tone="error" message={error} /> : null}
     </div>
   )

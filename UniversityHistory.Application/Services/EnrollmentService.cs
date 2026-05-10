@@ -103,6 +103,8 @@ public class EnrollmentService : IEnrollmentService
         if (dto.MoveDate <= current.DateFrom)
             throw new DomainException("Move date cannot be before the current enrollment's start date.");
 
+        EnsureTargetGroupIsNotOlder(current.Group.GroupCode, newGroup.GroupCode);
+
         var activePlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(dto.NewGroupId, dto.MoveDate, ct)
             ?? throw new DomainException("Target group has no active study plan on the transfer date.");
 
@@ -364,6 +366,28 @@ public class EnrollmentService : IEnrollmentService
         currentSemesterStart.Month >= 8
             ? new DateOnly(currentSemesterStart.Year + 1, 2, 1)
             : new DateOnly(currentSemesterStart.Year, 9, 1);
+
+    private static void EnsureTargetGroupIsNotOlder(string currentGroupCode, string targetGroupCode)
+    {
+        var currentAdmissionYear = ParseAdmissionYear(currentGroupCode);
+        var targetAdmissionYear = ParseAdmissionYear(targetGroupCode);
+
+        if (targetAdmissionYear < currentAdmissionYear)
+        {
+            throw new DomainException(
+                $"Cannot transfer from group {currentGroupCode} to older group {targetGroupCode}. " +
+                "Target group course cannot be greater than the current one.");
+        }
+    }
+
+    private static int ParseAdmissionYear(string groupCode)
+    {
+        var suffix = groupCode.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).LastOrDefault();
+        if (suffix is null || suffix.Length != 2 || !int.TryParse(suffix, out var shortYear))
+            throw new DomainException($"Cannot determine course from group code '{groupCode}'.");
+
+        return 2000 + shortYear;
+    }
 
     private void OpenSubgroupEnrollment(Guid enrollmentId, Guid subgroupId, DateOnly dateFrom, string reason)
     {
