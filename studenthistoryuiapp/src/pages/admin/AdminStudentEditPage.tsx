@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import {
   changeStudentStatus,
+  deleteStudent,
   getStudentById,
   resetStudentPassword,
   updateStudent,
@@ -140,6 +141,32 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
       })
     } catch (err: unknown) {
       const nextError = err instanceof Error ? err.message : "Не вдалося оновити пароль."
+      setError(nextError)
+      pushToast({ tone: "error", message: nextError })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteStudent = async () => {
+    const confirmed = window.confirm(
+      "Видалити студента разом із пов'язаними зарахуваннями, підгрупами, оцінками, академвідпустками, зовнішніми переведеннями та обліковим записом?",
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setIsSaving(true)
+    setMessage(null)
+    setError(null)
+
+    try {
+      await deleteStudent(studentId)
+      pushToast({ tone: "info", title: "Успішно", message: "Студента видалено." })
+      navigate("/admin/students")
+    } catch (err: unknown) {
+      const nextError = err instanceof Error ? err.message : "Не вдалося видалити студента."
       setError(nextError)
       pushToast({ tone: "error", message: nextError })
     } finally {
@@ -303,6 +330,13 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
             </label>
           </div>
         ) : null}
+      </section>
+
+      <section className="panel">
+        <h2>Видалення студента</h2>
+        <button type="button" className="button-danger" onClick={handleDeleteStudent} disabled={isSaving}>
+          {isSaving ? "Виконання..." : "Видалити студента"}
+        </button>
       </section>
 
       {message ? <StatusState tone="info" message={message} /> : null}

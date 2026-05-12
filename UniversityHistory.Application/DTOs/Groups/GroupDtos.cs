@@ -128,3 +128,11 @@ public record StudentGroupTransferDetailDto(
     string Reason,
     IEnumerable<AcademicDifferenceItemDto> DifferenceItems
 );
+
+public record CreateGroupDto(
+    string GroupCode,
+    Guid DepartmentId,
+    DateOnly DateCreated
+);
+
+public record UpdateGroupDto(string GroupCode);

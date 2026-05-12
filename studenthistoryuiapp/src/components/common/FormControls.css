@@ -47,6 +47,17 @@ button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
+.button-danger {
+  border-color: rgba(155, 55, 55, 0.3);
+  background: #fff1ef;
+  color: #8d2d2d;
+}
+
+.button-danger:hover:not(:disabled) {
+  border-color: rgba(155, 55, 55, 0.45);
+  background: #ffe6e1;
+}
+
 .filters-row {
   display: flex;
   flex-wrap: wrap;

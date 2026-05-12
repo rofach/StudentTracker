@@ -30,6 +30,8 @@ function getCuratedDescription(item: TimelineEventDto): string {
   switch (item.eventType) {
     case "EnrollmentStart":
       return item.groupCode ? `Зараховано до групи ${item.groupCode}` : "Початок зарахування"
+    case "EnrollmentEnd":
+      return item.groupCode ? `Завершення зарахування в групі ${item.groupCode}` : "Завершення зарахування"
     case "AcademicLeaveStart":
       return "Початок академвідпустки"
     case "AcademicLeaveEnd":
@@ -94,7 +96,7 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
       return []
     }
 
-    return data.items.filter((item) => item.eventType !== "EnrollmentEnd")
+    return data.items
   }, [data])
 
   const hasLoadedData = data !== null
@@ -125,8 +127,7 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
                 <tr>
                   <th>Подія</th>
                   <th>Опис</th>
-                  <th>Дата від</th>
-                  <th>Дата до</th>
+                  <th>Дата</th>
                   <th>Група</th>
                   <th>Кафедра</th>
                   <th>Підрозділ</th>
@@ -138,7 +139,6 @@ export function StudentHistoryPage({ studentId }: StudentHistoryPageProps) {
                     <td>{getEventLabel(item.eventType)}</td>
                     <td>{getCuratedDescription(item)}</td>
                     <td>{formatDate(item.dateFrom)}</td>
-                    <td>{formatDate(item.dateTo)}</td>
                     <td>{item.groupCode ?? "—"}</td>
                     <td>{item.departmentName ?? "—"}</td>
                     <td>{item.academicUnitName ?? "—"}</td>

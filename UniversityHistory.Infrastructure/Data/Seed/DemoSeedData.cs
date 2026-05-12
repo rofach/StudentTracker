@@ -593,8 +593,7 @@ internal static class DemoSeedData
                     DisciplineId = disciplineIdByName[course.Name],
                     SemesterNo = semester,
                     ControlType = course.ControlType,
-                    Credits = course.Credits,
-                    Hours = (int)(course.Credits * 30m)
+                    Credits = course.Credits
                 });
 
                 semesterCredits += course.Credits;

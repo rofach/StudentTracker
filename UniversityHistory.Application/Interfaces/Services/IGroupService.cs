@@ -8,5 +8,7 @@ public interface IGroupService
     Task<IEnumerable<ActiveGroupDto>> GetActiveGroupsAsync(DateOnly? date = null, CancellationToken ct = default);
     Task<PagedResult<GroupStudentDto>> GetStudentsInGroupAsync(Guid groupId, DateOnly? date = null, int page = 1, int pageSize = 20, CancellationToken ct = default);
     Task<IEnumerable<SubgroupDto>> GetSubgroupsAsync(Guid groupId, CancellationToken ct = default);
+    Task<ActiveGroupDto> CreateGroupAsync(CreateGroupDto dto, CancellationToken ct = default);
+    Task<ActiveGroupDto> UpdateGroupAsync(Guid groupId, UpdateGroupDto dto, CancellationToken ct = default);
 }
 

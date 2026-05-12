@@ -14,7 +14,6 @@ type AppShellProps = {
 
 export function AppShell({
   areaTitle,
-  areaSubtitle,
   menuItems,
   activePath,
   onNavigate,
@@ -26,7 +25,6 @@ export function AppShell({
       <aside className="sidebar">
         <div className="sidebar__brand">
           <h1>{areaTitle}</h1>
-          <p>{areaSubtitle}</p>
         </div>
 
         <nav className="sidebar__menu" aria-label="Головне меню">

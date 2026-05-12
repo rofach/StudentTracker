@@ -156,7 +156,7 @@ export function AdminMovementReportsPage() {
 
   return (
     <div className="page-stack">
-      <PageHeader title="Рух студентів" description="Звіти по академрізниці та внутрішніх переведеннях." />
+      <PageHeader title="Рух студентів" />
 
       <section className="panel">
         <div className="section-heading">

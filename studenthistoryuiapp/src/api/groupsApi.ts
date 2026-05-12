@@ -2,12 +2,14 @@ import type {
   ActiveGroupDto,
   AssignGroupPlanDto,
   ChangeGroupPlanDto,
+  CreateGroupDto,
   EntityId,
   GroupCompositionMemberDto,
   GroupPlanAssignmentDto,
   GroupStudentDto,
   PagedResult,
   SubgroupDto,
+  UpdateGroupDto,
 } from "../types/api"
 import { fetchJson, postJson, putJson } from "./http"
 
@@ -43,4 +45,12 @@ export function assignGroupPlan(groupId: EntityId, dto: AssignGroupPlanDto): Pro
 
 export function changeCurrentGroupPlan(groupId: EntityId, dto: ChangeGroupPlanDto): Promise<GroupPlanAssignmentDto> {
   return putJson<GroupPlanAssignmentDto>(`/groups/${groupId}/plans/current`, dto)
+}
+
+export function createGroup(dto: CreateGroupDto): Promise<ActiveGroupDto> {
+  return postJson<ActiveGroupDto>("/groups", dto)
+}
+
+export function updateGroup(groupId: EntityId, dto: UpdateGroupDto): Promise<ActiveGroupDto> {
+  return putJson<ActiveGroupDto>(`/groups/${groupId}`, dto)
 }

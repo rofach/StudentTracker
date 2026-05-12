@@ -53,6 +53,17 @@ public class GroupsController : ControllerBase
     public async Task<IActionResult> GetPlanHistory(Guid id, CancellationToken ct) =>
         Ok(await _planService.GetGroupPlanHistoryAsync(id, ct));
 
+    [HttpPost]
+    public async Task<IActionResult> CreateGroup([FromBody] CreateGroupDto dto, CancellationToken ct)
+    {
+        var result = await _groupService.CreateGroupAsync(dto, ct);
+        return CreatedAtAction(nameof(GetActiveGroups), result);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateGroup(Guid id, [FromBody] UpdateGroupDto dto, CancellationToken ct) =>
+        Ok(await _groupService.UpdateGroupAsync(id, dto, ct));
+
     [HttpPost("{id:guid}/plans")]
     public async Task<IActionResult> AssignPlan(Guid id, [FromBody] AssignGroupPlanDto dto, CancellationToken ct)
     {

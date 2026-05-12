@@ -81,6 +81,14 @@ public class StudentsController : ControllerBase
     }
 
     [Authorize(Roles = AuthRoles.Admin)]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        await _studentService.DeleteAsync(id, ct);
+        return NoContent();
+    }
+
+    [Authorize(Roles = AuthRoles.Admin)]
     [HttpPost("{id:guid}/account/reset-password")]
     public async Task<IActionResult> ResetPassword(Guid id, [FromBody] ResetStudentPasswordDto dto, CancellationToken ct)
     {
@@ -89,10 +97,18 @@ public class StudentsController : ControllerBase
     }
 
     [Authorize(Roles = AuthRoles.Admin)]
-    [HttpPut("{id:guid}/status")]
-    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] ChangeStatusDto dto, CancellationToken ct)
+    [HttpPost("{id:guid}/expel")]
+    public async Task<IActionResult> Expel(Guid id, [FromBody] ExpelStudentDto dto, CancellationToken ct)
     {
-        await _studentService.ChangeStatusAsync(id, dto, ct);
+        await _studentService.ExpelStudentAsync(id, dto, ct);
+        return NoContent();
+    }
+
+    [Authorize(Roles = AuthRoles.Admin)]
+    [HttpPost("{id:guid}/graduate")]
+    public async Task<IActionResult> Graduate(Guid id, [FromBody] GraduateStudentDto dto, CancellationToken ct)
+    {
+        await _studentService.GraduateStudentAsync(id, dto, ct);
         return NoContent();
     }
 

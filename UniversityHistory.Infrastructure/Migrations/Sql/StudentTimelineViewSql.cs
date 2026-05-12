@@ -33,7 +33,7 @@ internal static class StudentTimelineViewSql
                 'EnrollmentStart' AS event_type,
                 CONCAT('Enrollment started in group ', g.group_code, ' (', e.reason_start, ')') AS description,
                 e.date_from,
-                CAST(NULL AS date) AS date_to,
+                e.date_to,
                 g.group_code,
                 d.name AS department_name,
                 au.name AS academic_unit_name,
@@ -118,6 +118,7 @@ internal static class StudentTimelineViewSql
             JOIN department d ON d.department_id = g.department_id
             JOIN academic_unit au ON au.academic_unit_id = d.academic_unit_id
             WHERE al.end_date IS NOT NULL
+              AND al.end_date <= CAST(GETDATE() AS date)
 
             UNION ALL
 
@@ -126,7 +127,7 @@ internal static class StudentTimelineViewSql
                 'SubgroupChange',
                 CONCAT('Subgroup changed to ', sg.subgroup_name, ' (', se.reason, ')'),
                 se.date_from,
-                CAST(NULL AS date),
+                se.date_to,
                 g.group_code,
                 d.name,
                 au.name,

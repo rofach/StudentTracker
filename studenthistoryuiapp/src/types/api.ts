@@ -253,14 +253,12 @@ export type AddPlanDisciplineDto = {
   disciplineId: EntityId
   semesterNo: number
   controlType: string
-  hours: number
   credits: number
 }
 
 export type UpdatePlanDisciplineDto = {
   semesterNo: number
   controlType: string
-  hours: number
   credits: number
 }
 
@@ -376,6 +374,16 @@ export type ChangeGroupPlanDto = {
   newPlanDateFrom: string
 }
 
+export type CreateGroupDto = {
+  groupCode: string
+  departmentId: EntityId
+  dateCreated: string
+}
+
+export type UpdateGroupDto = {
+  groupCode: string
+}
+
 export type CreateStudyPlanDto = {
   specialtyCode: string
   planName: string | null
@@ -469,4 +477,12 @@ export type InternalTransferJournalItemDto = {
   differenceItemsPending: number
   differenceItemsCompleted: number
   differenceItemsWaived: number
+}
+
+export type ExpelStudentDto = {
+  reason: string
+}
+
+export type GraduateStudentDto = {
+  reason: string
 }

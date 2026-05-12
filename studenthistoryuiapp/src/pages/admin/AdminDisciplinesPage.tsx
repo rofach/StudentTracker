@@ -111,7 +111,7 @@ export function AdminDisciplinesPage() {
 
   return (
     <div className="page-stack">
-      <PageHeader title="Предмети" description="Пошук і керування переліком дисциплін." />
+      <PageHeader title="Предмети"/>
 
       <section className="panel">
         <h2>Новий предмет</h2>

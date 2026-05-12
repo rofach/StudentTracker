@@ -33,15 +33,20 @@ const controlTypeLabels: Record<string, string> = {
   Coursework: "Курсова робота",
 }
 
+const HOURS_PER_CREDIT = 30
+
 function formatControlType(controlType: string) {
   return controlTypeLabels[controlType] ?? controlType
+}
+
+function calculateHours(credits: number) {
+  return Math.round(credits * HOURS_PER_CREDIT)
 }
 
 const emptyDisciplineForm: AddPlanDisciplineDto = {
   disciplineId: "",
   semesterNo: 1,
   controlType: "",
-  hours: 0,
   credits: 0,
 }
 
@@ -59,7 +64,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
   const [editForm, setEditForm] = useState<UpdatePlanDisciplineDto>({
     semesterNo: 1,
     controlType: "",
-    hours: 0,
     credits: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -143,7 +147,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
     setEditForm({
       semesterNo: selectedDiscipline.semesterNo,
       controlType: selectedDiscipline.controlType,
-      hours: selectedDiscipline.hours,
       credits: selectedDiscipline.credits,
     })
   }, [selectedDiscipline])
@@ -274,8 +277,8 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                 <input
                   type="number"
                   min={0}
-                  value={addForm.hours}
-                  onChange={(event) => setAddForm((prev) => ({ ...prev, hours: Number(event.target.value) || 0 }))}
+                  value={calculateHours(addForm.credits)}
+                  readOnly
                 />
               </label>
               <label>
@@ -333,7 +336,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                       <td>{item.disciplineName}</td>
                       <td>{item.semesterNo}</td>
                       <td>{formatControlType(item.controlType)}</td>
-                      <td>{item.hours}</td>
+                      <td>{calculateHours(item.credits)}</td>
                       <td>{item.credits}</td>
                     </tr>
                   ))}
@@ -373,8 +376,8 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                       <input
                         type="number"
                         min={0}
-                        value={editForm.hours}
-                        onChange={(event) => setEditForm((prev) => ({ ...prev, hours: Number(event.target.value) || 0 }))}
+                        value={calculateHours(editForm.credits)}
+                        readOnly
                       />
                     </label>
                     <label>
