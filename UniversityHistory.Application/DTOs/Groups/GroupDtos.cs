@@ -28,7 +28,8 @@ public record ActiveGroupDto(
     string AcademicUnitName,
     string AcademicUnitType,
     DateOnly DateCreated,
-    DateOnly? DateClosed
+    DateOnly? DateClosed,
+    int? CourseYear
 );
 
 public record SubgroupDto(

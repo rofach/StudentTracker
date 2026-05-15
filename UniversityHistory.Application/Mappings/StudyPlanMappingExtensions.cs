@@ -26,7 +26,7 @@ public static class StudyPlanMappingExtensions
 
     public static PlanDisciplineDto ToDto(this PlanDiscipline pd) =>
         new(pd.PlanId, pd.DisciplineId, pd.Discipline.DisciplineName,
-            pd.SemesterNo, pd.ControlType.ToString(), CalculateHours(pd.Credits), pd.Credits);
+            pd.SemesterNo, pd.ControlType.ToString(), pd.Credits);
 
     public static GroupPlanAssignmentDto ToDto(this GroupPlanAssignment a) =>
         new(a.GroupPlanAssignmentId, a.GroupId, a.PlanId,

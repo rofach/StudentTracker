@@ -1,4 +1,5 @@
 using UniversityHistory.Application.DTOs;
+using UniversityHistory.Application.Utilities;
 using UniversityHistory.Domain.Entities;
 
 namespace UniversityHistory.Application.Mappings;
@@ -41,6 +42,8 @@ public static class StudentMappingExtensions
             .ThenByDescending(se => se.SubgroupEnrollmentId)
             .FirstOrDefault();
 
+        var referenceDate = enrollment.DateTo ?? DateOnly.FromDateTime(DateTime.Today);
+
         return new EnrollmentSummaryDto(
             enrollment.EnrollmentId,
             enrollment.GroupId,
@@ -50,7 +53,9 @@ public static class StudentMappingExtensions
             enrollment.DateFrom,
             enrollment.DateTo,
             currentSubgroup?.SubgroupId,
-            currentSubgroup?.Subgroup.SubgroupName);
+            currentSubgroup?.Subgroup.SubgroupName,
+            enrollment.Group.DateCreated,
+            CourseYearCalculator.Calculate(enrollment.Group.DateCreated, referenceDate));
     }
 
     public static StudentDetailDto ToDto(

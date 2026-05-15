@@ -333,6 +333,9 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
             <strong>Активна група:</strong> {currentEnrollment?.groupCode ?? "Немає"}
           </div>
           <div>
+            <strong>Курс:</strong> {currentEnrollment?.courseYear != null ? `${currentEnrollment.courseYear} курс` : "—"}
+          </div>
+          <div>
             <strong>Підгрупа:</strong> {currentEnrollment?.subgroupName ?? "Немає"}
           </div>
           <div>

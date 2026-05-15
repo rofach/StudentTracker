@@ -55,7 +55,9 @@ public record EnrollmentSummaryDto(
     DateOnly DateFrom,
     DateOnly? DateTo,
     Guid? SubgroupId,
-    string? SubgroupName
+    string? SubgroupName,
+    DateOnly GroupDateCreated,
+    int? CourseYear
 );
 
 public record StudentDetailDto(

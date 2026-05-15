@@ -3,6 +3,7 @@ using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Queries.GetActiveGroups;
 using UniversityHistory.Application.Queries.GetGroupComposition;
 using UniversityHistory.Application.Queries.GetStudentsInGroup;
+using UniversityHistory.Application.Utilities;
 using UniversityHistory.Domain.Entities;
 using UniversityHistory.Domain.Exceptions;
 using UniversityHistory.Domain.Interfaces.Repositories;
@@ -100,6 +101,7 @@ public class GroupService : IGroupService
             g.Department?.AcademicUnit?.Name ?? string.Empty,
             g.Department?.AcademicUnit?.Type.ToString() ?? string.Empty,
             g.DateCreated,
-            g.DateClosed);
+            g.DateClosed,
+            CourseYearCalculator.Calculate(g.DateCreated));
 }
 

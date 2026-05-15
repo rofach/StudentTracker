@@ -39,7 +39,6 @@ public record PlanDisciplineDto(
     string DisciplineName,
     int SemesterNo,
     string ControlType,
-    int Hours,
     decimal Credits
 );
 

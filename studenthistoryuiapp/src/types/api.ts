@@ -61,6 +61,8 @@ export type EnrollmentSummaryDto = {
   dateTo: string | null
   subgroupId: EntityId | null
   subgroupName: string | null
+  groupDateCreated: string
+  courseYear: number | null
 }
 
 export type GroupPlanAssignmentDto = {
@@ -200,6 +202,7 @@ export type ActiveGroupDto = {
   academicUnitType: string
   dateCreated: string
   dateClosed: string | null
+  courseYear: number | null
 }
 
 export type SubgroupDto = {
@@ -245,7 +248,6 @@ export type PlanDisciplineDto = {
   disciplineName: string
   semesterNo: number
   controlType: string
-  hours: number
   credits: number
 }
 
@@ -305,10 +307,6 @@ export type StudentCreateDto = {
 }
 
 export type StudentUpdateDto = StudentCreateDto
-
-export type ChangeStatusDto = {
-  status: string
-}
 
 export type ResetStudentPasswordDto = {
   newPassword: string | null

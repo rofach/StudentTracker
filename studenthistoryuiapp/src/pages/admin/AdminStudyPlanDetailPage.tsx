@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { getDisciplines } from "../../api/disciplinesApi"
 import {
   addPlanDiscipline,
@@ -33,14 +33,8 @@ const controlTypeLabels: Record<string, string> = {
   Coursework: "Курсова робота",
 }
 
-const HOURS_PER_CREDIT = 30
-
 function formatControlType(controlType: string) {
   return controlTypeLabels[controlType] ?? controlType
-}
-
-function calculateHours(credits: number) {
-  return Math.round(credits * HOURS_PER_CREDIT)
 }
 
 const emptyDisciplineForm: AddPlanDisciplineDto = {
@@ -273,15 +267,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                 />
               </label>
               <label>
-                Години
-                <input
-                  type="number"
-                  min={0}
-                  value={calculateHours(addForm.credits)}
-                  readOnly
-                />
-              </label>
-              <label>
                 Кредити
                 <input
                   type="number"
@@ -322,7 +307,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                     <th>Назва</th>
                     <th>Семестр</th>
                     <th>Контроль</th>
-                    <th>Години</th>
                     <th>Кредити</th>
                   </tr>
                 </thead>
@@ -336,7 +320,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                       <td>{item.disciplineName}</td>
                       <td>{item.semesterNo}</td>
                       <td>{formatControlType(item.controlType)}</td>
-                      <td>{calculateHours(item.credits)}</td>
                       <td>{item.credits}</td>
                     </tr>
                   ))}
@@ -369,15 +352,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                         type="text"
                         value={editForm.controlType}
                         onChange={(event) => setEditForm((prev) => ({ ...prev, controlType: event.target.value }))}
-                      />
-                    </label>
-                    <label>
-                      Години
-                      <input
-                        type="number"
-                        min={0}
-                        value={calculateHours(editForm.credits)}
-                        readOnly
                       />
                     </label>
                     <label>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import {
-  changeStudentStatus,
   deleteStudent,
   getStudentById,
   resetStudentPassword,
@@ -35,7 +34,6 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
   const { pushToast } = useToast()
   const [form, setForm] = useState<StudentUpdateDto>(emptyForm)
   const [savedEmail, setSavedEmail] = useState<string | null>(null)
-  const [statusValue, setStatusValue] = useState("Active")
   const [title, setTitle] = useState("Редагування студента")
   const [issuedPassword, setIssuedPassword] = useState<StudentAccountPasswordDto | null>(null)
   const [customPassword, setCustomPassword] = useState("")
@@ -65,7 +63,6 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
           phone: result.phone,
         })
         setSavedEmail(result.email)
-        setStatusValue(result.status)
       })
       .catch((err: unknown) => {
         if (!isActive) {
@@ -106,23 +103,6 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
     }
   }
 
-  const handleChangeStatus = async () => {
-    setIsSaving(true)
-    setMessage(null)
-    setError(null)
-
-    try {
-      await changeStudentStatus(studentId, { status: statusValue })
-      setMessage("Статус студента оновлено.")
-      pushToast({ tone: "info", title: "Успішно", message: "Статус студента оновлено." })
-    } catch (err: unknown) {
-      const nextError = err instanceof Error ? err.message : "Не вдалося змінити статус студента."
-      setError(nextError)
-      pushToast({ tone: "error", message: nextError })
-    } finally {
-      setIsSaving(false)
-    }
-  }
 
   const handleResetPassword = async (newPassword: string | null) => {
     setIsSaving(true)
@@ -259,24 +239,6 @@ export function AdminStudentEditPage({ studentId, navigate }: AdminStudentEditPa
         </button>
       </section>
 
-      <section className="panel">
-        <h2>Статус</h2>
-        <div className="filters-row">
-          <label>
-            Поточний статус
-            <select value={statusValue} onChange={(event) => setStatusValue(event.target.value)}>
-              <option value="Active">Активний</option>
-              <option value="OnLeave">Академвідпустка</option>
-              <option value="Expelled">Відрахований</option>
-              <option value="Graduated">Випускник</option>
-            </select>
-          </label>
-
-          <button type="button" onClick={handleChangeStatus} disabled={isSaving}>
-            {isSaving ? "Оновлення..." : "Змінити статус"}
-          </button>
-        </div>
-      </section>
 
       <section className="panel">
         <h2>Обліковий запис</h2>

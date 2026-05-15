@@ -334,6 +334,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                   <thead>
                     <tr>
                       <th>Код</th>
+                      <th>Курс</th>
                       <th>Кафедра</th>
                       <th>Підрозділ</th>
                     </tr>
@@ -346,6 +347,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                         onClick={() => { setSelectedGroupId(group.groupId); setIsEditing(false) }}
                       >
                         <td>{group.groupCode}</td>
+                        <td>{group.courseYear != null ? `${group.courseYear} курс` : "—"}</td>
                         <td>{group.departmentName}</td>
                         <td>{group.academicUnitName}</td>
                       </tr>
