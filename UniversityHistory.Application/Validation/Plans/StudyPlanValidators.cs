@@ -81,11 +81,8 @@ public class AddPlanDisciplineDtoValidator : AppValidator<AddPlanDisciplineDto>
             .NotEmpty()
             .IsEnumName(typeof(ControlType), caseSensitive: false);
 
-        RuleFor(x => x.Hours)
-            .NotEmpty();
-
         RuleFor(x => x.Credits)
-            .NotEmpty();
+            .GreaterThan(0);
     }
 }
 
@@ -100,11 +97,8 @@ public class UpdatePlanDisciplineDtoValidator : AppValidator<UpdatePlanDisciplin
             .NotEmpty()
             .IsEnumName(typeof(ControlType), caseSensitive: false);
 
-        RuleFor(x => x.Hours)
-            .NotEmpty();
-
         RuleFor(x => x.Credits)
-            .NotEmpty();
+            .GreaterThan(0);
     }
 }
 

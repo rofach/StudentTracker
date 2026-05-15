@@ -42,7 +42,9 @@ public record StudentCreatedResultDto(
 
 public record ResetStudentPasswordDto(string? NewPassword);
 
-public record ChangeStatusDto(string Status);
+public record ExpelStudentDto(string Reason);
+
+public record GraduateStudentDto(string Reason);
 
 public record EnrollmentSummaryDto(
     Guid EnrollmentId,
@@ -53,7 +55,9 @@ public record EnrollmentSummaryDto(
     DateOnly DateFrom,
     DateOnly? DateTo,
     Guid? SubgroupId,
-    string? SubgroupName
+    string? SubgroupName,
+    DateOnly GroupDateCreated,
+    int? CourseYear
 );
 
 public record StudentDetailDto(

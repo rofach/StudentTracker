@@ -1,7 +1,6 @@
 import type {
   AcademicDifferenceItemDto,
   AverageGradeDto,
-  ChangeStatusDto,
   ClassmateDto,
   CloseAcademicLeaveDto,
   CloseEnrollmentDto,
@@ -9,8 +8,10 @@ import type {
   EntityId,
   EnrollStudentDto,
   EnrollmentSummaryDto,
+  ExpelStudentDto,
   ExternalTransferDto,
   GradeDto,
+  GraduateStudentDto,
   MoveStudentDto,
   MoveStudentToSubgroupDto,
   PagedResult,
@@ -32,7 +33,7 @@ import type {
   UpdateAcademicLeaveDto,
   AssignSubgroupDto,
 } from "../types/api"
-import { fetchJson, patchJson, postJson, putJson } from "./http"
+import { deleteJson, fetchJson, patchJson, postJson, putJson } from "./http"
 import { getActiveGroups } from "./groupsApi"
 
 export function getStudents(page: number, pageSize: number): Promise<PagedResult<StudentDto>> {
@@ -61,6 +62,10 @@ export function updateStudent(studentId: EntityId, dto: StudentUpdateDto): Promi
   return putJson<StudentDto>(`/students/${studentId}`, dto)
 }
 
+export function deleteStudent(studentId: EntityId): Promise<void> {
+  return deleteJson(`/students/${studentId}`)
+}
+
 export function resetStudentPassword(
   studentId: EntityId,
   dto: ResetStudentPasswordDto,
@@ -68,8 +73,12 @@ export function resetStudentPassword(
   return postJson<StudentAccountPasswordDto>(`/students/${studentId}/account/reset-password`, dto)
 }
 
-export function changeStudentStatus(studentId: EntityId, dto: ChangeStatusDto): Promise<void> {
-  return putJson<void>(`/students/${studentId}/status`, dto)
+export function expelStudent(studentId: EntityId, dto: ExpelStudentDto): Promise<void> {
+  return postJson<void>(`/students/${studentId}/expel`, dto)
+}
+
+export function graduateStudent(studentId: EntityId, dto: GraduateStudentDto): Promise<void> {
+  return postJson<void>(`/students/${studentId}/graduate`, dto)
 }
 
 export function getStudentDetails(studentId: EntityId): Promise<StudentDetailDto> {

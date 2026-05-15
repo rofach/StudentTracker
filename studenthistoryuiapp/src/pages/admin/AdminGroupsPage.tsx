@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { assignGroupPlan, changeCurrentGroupPlan, getActiveGroups, getGroupComposition, getGroupPlanHistory } from "../../api/groupsApi"
+import { createGroup, updateGroup, assignGroupPlan, changeCurrentGroupPlan, getActiveGroups, getGroupComposition, getGroupPlanHistory } from "../../api/groupsApi"
+import { getDepartments } from "../../api/structureApi"
 import { getStudyPlans } from "../../api/studyPlansApi"
 import { PageHeader } from "../../components/common/PageHeader"
 import { PaginationControls } from "../../components/common/PaginationControls"
@@ -8,6 +9,7 @@ import { StatusState } from "../../components/common/StatusState"
 import { useToast } from "../../components/common/ToastCenter"
 import type {
   ActiveGroupDto,
+  DepartmentDto,
   EntityId,
   GroupCompositionMemberDto,
   GroupPlanAssignmentDto,
@@ -33,6 +35,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
   const [compositionPageSize, setCompositionPageSize] = useState(20)
   const [composition, setComposition] = useState<PagedResult<GroupCompositionMemberDto> | null>(null)
   const [studyPlans, setStudyPlans] = useState<StudyPlanDto[]>([])
+  const [departments, setDepartments] = useState<DepartmentDto[]>([])
   const [planHistory, setPlanHistory] = useState<GroupPlanAssignmentDto[]>([])
   const [selectedPlanId, setSelectedPlanId] = useState<EntityId | "">("")
   const [planDateFrom, setPlanDateFrom] = useState(todayValue())
@@ -45,6 +48,16 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
   const [hasLoadedPlanHistory, setHasLoadedPlanHistory] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [createCode, setCreateCode] = useState("")
+  const [createDeptId, setCreateDeptId] = useState<EntityId | "">("")
+  const [createDate, setCreateDate] = useState(todayValue())
+  const [isCreating, setIsCreating] = useState(false)
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [editCode, setEditCode] = useState("")
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+
   useEffect(() => {
     let isActive = true
     setIsGroupsLoading(true)
@@ -52,67 +65,41 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
 
     getActiveGroups(date || undefined)
       .then((result) => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setGroups(result)
         setSelectedGroupId((current) => {
-          if (result.length === 0) {
-            return null
-          }
-
-          if (current && result.some((group) => group.groupId === current)) {
-            return current
-          }
-
+          if (result.length === 0) return null
+          if (current && result.some((g) => g.groupId === current)) return current
           return result[0].groupId
         })
         setHasLoadedGroups(true)
       })
       .catch((err: unknown) => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setError(err instanceof Error ? err.message : "Не вдалося завантажити групи.")
         setHasLoadedGroups(true)
       })
       .finally(() => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setIsGroupsLoading(false)
       })
 
-    return () => {
-      isActive = false
-    }
+    return () => { isActive = false }
   }, [date])
 
   useEffect(() => {
     let isActive = true
-
-    getStudyPlans()
-      .then((result) => {
-        if (!isActive) {
-          return
-        }
-
-        setStudyPlans(result)
+    Promise.all([getStudyPlans(), getDepartments()])
+      .then(([plans, depts]) => {
+        if (!isActive) return
+        setStudyPlans(plans)
+        setDepartments(depts)
       })
       .catch((err: unknown) => {
-        if (!isActive) {
-          return
-        }
-
-        setError(err instanceof Error ? err.message : "Не вдалося завантажити навчальні плани.")
+        if (!isActive) return
+        setError(err instanceof Error ? err.message : "Не вдалося завантажити довідники.")
       })
-
-    return () => {
-      isActive = false
-    }
+    return () => { isActive = false }
   }, [])
 
   useEffect(() => {
@@ -121,42 +108,24 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
       setHasLoadedComposition(false)
       return
     }
-
     let isActive = true
     setIsCompositionLoading(true)
-
-    getGroupComposition(selectedGroupId, {
-      date: date || undefined,
-      page: compositionPage,
-      pageSize: compositionPageSize,
-    })
+    getGroupComposition(selectedGroupId, { date: date || undefined, page: compositionPage, pageSize: compositionPageSize })
       .then((result) => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setComposition(result)
         setHasLoadedComposition(true)
       })
       .catch((err: unknown) => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setError(err instanceof Error ? err.message : "Не вдалося завантажити склад групи.")
         setHasLoadedComposition(true)
       })
       .finally(() => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setIsCompositionLoading(false)
       })
-
-    return () => {
-      isActive = false
-    }
+    return () => { isActive = false }
   }, [selectedGroupId, date, compositionPage, compositionPageSize])
 
   useEffect(() => {
@@ -165,47 +134,32 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
       setHasLoadedPlanHistory(false)
       return
     }
-
     let isActive = true
     setIsPlanHistoryLoading(true)
-
     getGroupPlanHistory(selectedGroupId)
       .then((result) => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setPlanHistory(result)
         setHasLoadedPlanHistory(true)
       })
       .catch((err: unknown) => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setError(err instanceof Error ? err.message : "Не вдалося завантажити історію планів групи.")
         setHasLoadedPlanHistory(true)
       })
       .finally(() => {
-        if (!isActive) {
-          return
-        }
-
+        if (!isActive) return
         setIsPlanHistoryLoading(false)
       })
-
-    return () => {
-      isActive = false
-    }
+    return () => { isActive = false }
   }, [selectedGroupId])
 
   const selectedGroup = useMemo(
-    () => groups.find((group) => group.groupId === selectedGroupId) ?? null,
+    () => groups.find((g) => g.groupId === selectedGroupId) ?? null,
     [groups, selectedGroupId],
   )
-
   const currentPlan = useMemo(
-    () => planHistory.find((assignment) => assignment.dateTo === null) ?? null,
+    () => planHistory.find((a) => a.dateTo === null) ?? null,
     [planHistory],
   )
 
@@ -217,37 +171,68 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
   const isPlanHistoryRefreshing = isPlanHistoryLoading && hasLoadedPlanHistory
 
   const savePlan = async () => {
-    if (!selectedGroupId || selectedPlanId === "") {
-      return
-    }
-
+    if (!selectedGroupId || selectedPlanId === "") return
     setIsPlanSaving(true)
     setError(null)
-
     try {
       if (currentPlan) {
-        await changeCurrentGroupPlan(selectedGroupId, {
-          newPlanId: selectedPlanId,
-          newPlanDateFrom: planDateFrom,
-        })
+        await changeCurrentGroupPlan(selectedGroupId, { newPlanId: selectedPlanId, newPlanDateFrom: planDateFrom })
         pushToast({ tone: "info", title: "Успішно", message: "Поточний план групи змінено." })
       } else {
-        await assignGroupPlan(selectedGroupId, {
-          planId: selectedPlanId,
-          dateFrom: planDateFrom,
-        })
+        await assignGroupPlan(selectedGroupId, { planId: selectedPlanId, dateFrom: planDateFrom })
         pushToast({ tone: "info", title: "Успішно", message: "План групі призначено." })
       }
-
       const updatedHistory = await getGroupPlanHistory(selectedGroupId)
       setPlanHistory(updatedHistory)
       setHasLoadedPlanHistory(true)
     } catch (err: unknown) {
-      const nextError = err instanceof Error ? err.message : "Не вдалося зберегти план групи."
-      setError(nextError)
-      pushToast({ tone: "error", message: nextError })
+      const msg = err instanceof Error ? err.message : "Не вдалося зберегти план групи."
+      setError(msg)
+      pushToast({ tone: "error", message: msg })
     } finally {
       setIsPlanSaving(false)
+    }
+  }
+
+  const handleCreate = async () => {
+    if (!createCode.trim() || !createDeptId || !createDate) return
+    setIsCreating(true)
+    setError(null)
+    try {
+      const created = await createGroup({ groupCode: createCode.trim(), departmentId: createDeptId, dateCreated: createDate })
+      pushToast({ tone: "info", title: "Успішно", message: `Групу ${created.groupCode} створено.` })
+      setShowCreateForm(false)
+      setCreateCode("")
+      setCreateDeptId("")
+      setCreateDate(todayValue())
+      const updated = await getActiveGroups(date || undefined)
+      setGroups(updated)
+      setSelectedGroupId(created.groupId)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Не вдалося створити групу."
+      setError(msg)
+      pushToast({ tone: "error", message: msg })
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  const handleUpdate = async () => {
+    if (!selectedGroupId || !editCode.trim()) return
+    setIsSavingEdit(true)
+    setError(null)
+    try {
+      const updated = await updateGroup(selectedGroupId, { groupCode: editCode.trim() })
+      pushToast({ tone: "info", title: "Успішно", message: `Код групи змінено на ${updated.groupCode}.` })
+      setIsEditing(false)
+      const refreshed = await getActiveGroups(date || undefined)
+      setGroups(refreshed)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Не вдалося оновити групу."
+      setError(msg)
+      pushToast({ tone: "error", message: msg })
+    } finally {
+      setIsSavingEdit(false)
     }
   }
 
@@ -255,13 +240,64 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
     <div className="page-stack">
       <PageHeader
         title="Групи"
-        description="Склад груп і навчальні плани."
         actions={
-          <button type="button" onClick={() => navigate("/admin/study-plans")}>
-            Навчальні плани
-          </button>
+          <>
+            <button type="button" onClick={() => setShowCreateForm((v) => !v)}>
+              {showCreateForm ? "Скасувати" : "Нова група"}
+            </button>
+            <button type="button" onClick={() => navigate("/admin/study-plans")}>
+              Навчальні плани
+            </button>
+          </>
         }
       />
+
+      {showCreateForm ? (
+        <section className="panel">
+          <h2>Нова група</h2>
+          <div className="form-grid">
+            <label>
+              Код групи
+              <input
+                id="create-group-code"
+                type="text"
+                value={createCode}
+                maxLength={20}
+                placeholder="Напр. КС-25"
+                onChange={(e) => setCreateCode(e.target.value)}
+              />
+            </label>
+            <label>
+              Кафедра
+              <select id="create-group-dept" value={createDeptId} onChange={(e) => setCreateDeptId(e.target.value)}>
+                <option value="">Оберіть кафедру</option>
+                {departments.map((d) => (
+                  <option key={d.departmentId} value={d.departmentId}>
+                    {d.name} ({d.academicUnitName})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Дата створення
+              <input
+                id="create-group-date"
+                type="date"
+                value={createDate}
+                onChange={(e) => setCreateDate(e.target.value)}
+              />
+            </label>
+          </div>
+          <button
+            id="create-group-submit"
+            type="button"
+            disabled={isCreating || !createCode.trim() || !createDeptId || !createDate}
+            onClick={() => void handleCreate()}
+          >
+            {isCreating ? "Збереження..." : "Створити групу"}
+          </button>
+        </section>
+      ) : null}
 
       <section className="panel">
         <div className="filters-row">
@@ -298,6 +334,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                   <thead>
                     <tr>
                       <th>Код</th>
+                      <th>Курс</th>
                       <th>Кафедра</th>
                       <th>Підрозділ</th>
                     </tr>
@@ -307,9 +344,10 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                       <tr
                         key={group.groupId}
                         className={selectedGroupId === group.groupId ? "row-selected" : ""}
-                        onClick={() => setSelectedGroupId(group.groupId)}
+                        onClick={() => { setSelectedGroupId(group.groupId); setIsEditing(false) }}
                       >
                         <td>{group.groupCode}</td>
+                        <td>{group.courseYear != null ? `${group.courseYear} курс` : "—"}</td>
                         <td>{group.departmentName}</td>
                         <td>{group.academicUnitName}</td>
                       </tr>
@@ -326,17 +364,47 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
               <div className="page-stack">
                 <div className="summary-grid summary-grid--compact">
                   <div>
-                    <strong>Група:</strong> {selectedGroup.groupCode}
+                    <strong>Група:</strong>{" "}
+                    {isEditing ? (
+                      <input
+                        id="edit-group-code"
+                        type="text"
+                        value={editCode}
+                        maxLength={20}
+                        onChange={(e) => setEditCode(e.target.value)}
+                        style={{ display: "inline", width: "auto" }}
+                      />
+                    ) : (
+                      selectedGroup.groupCode
+                    )}
                   </div>
-                  <div>
-                    <strong>Кафедра:</strong> {selectedGroup.departmentName}
-                  </div>
-                  <div>
-                    <strong>Підрозділ:</strong> {selectedGroup.academicUnitName}
-                  </div>
-                  <div>
-                    <strong>Створено:</strong> {formatDate(selectedGroup.dateCreated)}
-                  </div>
+                  <div><strong>Кафедра:</strong> {selectedGroup.departmentName}</div>
+                  <div><strong>Підрозділ:</strong> {selectedGroup.academicUnitName}</div>
+                  <div><strong>Створено:</strong> {formatDate(selectedGroup.dateCreated)}</div>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {isEditing ? (
+                    <>
+                      <button
+                        id="edit-group-save"
+                        type="button"
+                        disabled={isSavingEdit || !editCode.trim()}
+                        onClick={() => void handleUpdate()}
+                      >
+                        {isSavingEdit ? "Збереження..." : "Зберегти"}
+                      </button>
+                      <button type="button" onClick={() => setIsEditing(false)}>Скасувати</button>
+                    </>
+                  ) : (
+                    <button
+                      id="edit-group-start"
+                      type="button"
+                      onClick={() => { setEditCode(selectedGroup.groupCode); setIsEditing(true) }}
+                    >
+                      Редагувати код
+                    </button>
+                  )}
                 </div>
 
                 <section className="panel panel--inner">
@@ -344,27 +412,18 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                     <h3>Навчальний план групи</h3>
                     {isPlanHistoryRefreshing ? <span className="loading-inline">Оновлення...</span> : null}
                   </div>
-
                   {isPlanHistoryInitialLoading ? <Spinner label="Завантаження історії планів..." /> : null}
-
                   {!isPlanHistoryInitialLoading ? (
                     <div className="page-stack">
                       <div className="summary-grid summary-grid--compact">
-                        <div>
-                          <strong>Поточний план:</strong> {currentPlan?.planName ?? "Не призначено"}
-                        </div>
-                        <div>
-                          <strong>Спеціальність:</strong> {currentPlan?.specialtyCode ?? "—"}
-                        </div>
-                        <div>
-                          <strong>Діє з:</strong> {formatDate(currentPlan?.dateFrom ?? null)}
-                        </div>
+                        <div><strong>Поточний план:</strong> {currentPlan?.planName ?? "Не призначено"}</div>
+                        <div><strong>Спеціальність:</strong> {currentPlan?.specialtyCode ?? "—"}</div>
+                        <div><strong>Діє з:</strong> {formatDate(currentPlan?.dateFrom ?? null)}</div>
                       </div>
-
                       <div className="form-grid">
                         <label>
                           План
-                          <select value={selectedPlanId} onChange={(event) => setSelectedPlanId(event.target.value)}>
+                          <select value={selectedPlanId} onChange={(e) => setSelectedPlanId(e.target.value)}>
                             <option value="">Оберіть план</option>
                             {studyPlans.map((plan) => (
                               <option key={plan.planId} value={plan.planId}>
@@ -375,14 +434,12 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                         </label>
                         <label>
                           {currentPlan ? "Нова дата початку" : "Дата початку"}
-                          <input type="date" value={planDateFrom} onChange={(event) => setPlanDateFrom(event.target.value)} />
+                          <input type="date" value={planDateFrom} onChange={(e) => setPlanDateFrom(e.target.value)} />
                         </label>
                       </div>
-
                       <button type="button" disabled={isPlanSaving || selectedPlanId === ""} onClick={() => void savePlan()}>
                         {isPlanSaving ? "Збереження..." : currentPlan ? "Змінити план групи" : "Призначити план групі"}
                       </button>
-
                       {planHistory.length > 0 ? (
                         <div className="table-wrap table-wrap--compact">
                           <table>
@@ -395,12 +452,12 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                               </tr>
                             </thead>
                             <tbody>
-                              {planHistory.map((assignment) => (
-                                <tr key={assignment.groupPlanAssignmentId}>
-                                  <td>{assignment.planName ?? `План ${assignment.planId}`}</td>
-                                  <td>{assignment.specialtyCode}</td>
-                                  <td>{formatDate(assignment.dateFrom)}</td>
-                                  <td>{formatDate(assignment.dateTo)}</td>
+                              {planHistory.map((a) => (
+                                <tr key={a.groupPlanAssignmentId}>
+                                  <td>{a.planName ?? `План ${a.planId}`}</td>
+                                  <td>{a.specialtyCode}</td>
+                                  <td>{formatDate(a.dateFrom)}</td>
+                                  <td>{formatDate(a.dateTo)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -418,12 +475,10 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                     <h3>Склад групи</h3>
                     {isCompositionRefreshing ? <span className="loading-inline">Оновлення...</span> : null}
                   </div>
-
                   {isCompositionInitialLoading ? <Spinner label="Завантаження складу..." /> : null}
                   {!isCompositionLoading && composition && composition.items.length === 0 ? (
                     <StatusState tone="info" message="Для обраної групи склад не знайдено." />
                   ) : null}
-
                   {composition && composition.items.length > 0 ? (
                     <>
                       <div className="table-wrap table-wrap--compact">
@@ -440,9 +495,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                           <tbody>
                             {composition.items.map((member) => (
                               <tr key={`${member.studentId}-${member.dateFrom}`}>
-                                <td>
-                                  {member.lastName} {member.firstName}
-                                </td>
+                                <td>{member.lastName} {member.firstName}</td>
                                 <td>{member.email ?? "—"}</td>
                                 <td>{member.subgroupName ?? "—"}</td>
                                 <td>{formatDate(member.dateFrom)}</td>
@@ -452,7 +505,6 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
                           </tbody>
                         </table>
                       </div>
-
                       <PaginationControls
                         page={composition.page}
                         pageSize={composition.pageSize}

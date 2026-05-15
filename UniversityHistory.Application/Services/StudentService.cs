@@ -93,28 +93,74 @@ public class StudentService : IStudentService
 
     public async Task DeleteAsync(Guid studentId, CancellationToken ct = default)
     {
-        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
-            ?? throw new NotFoundException(nameof(Student), studentId);
+        await _unitOfWork.ExecuteInTransactionAsync(async innerCt =>
+        {
+            var student = await _unitOfWork.Students.GetByIdAsync(studentId, innerCt)
+                ?? throw new NotFoundException(nameof(Student), studentId);
 
-        _unitOfWork.Students.Delete(student);
-        await _unitOfWork.SaveChangesAsync(ct);
+            await _unitOfWork.GroupTransfers.RemoveByStudentIdAsync(studentId, innerCt);
+            _unitOfWork.Students.Delete(student);
+            await _unitOfWork.SaveChangesAsync(innerCt);
+        }, ct);
     }
 
-    public async Task ChangeStatusAsync(Guid studentId, ChangeStatusDto dto, CancellationToken ct = default)
+public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, CancellationToken ct = default)
     {
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
-        var newStatus = Enum.Parse<StudentStatus>(dto.Status, ignoreCase: true);
+        if (student.Status is StudentStatus.Graduated)
+            throw new DomainException("Випущеного студента не можна відрахувати.");
 
-        if (student.Status is StudentStatus.Expelled or StudentStatus.Graduated)
-        {
-            throw new DomainException($"Cannot change status of a student with terminal status '{student.Status}'.");
-        }
+        if (student.Status is StudentStatus.Expelled)
+            throw new DomainException("Студент вже відрахований.");
 
-        student.Status = newStatus;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var leaves = await _unitOfWork.AcademicLeaves.GetByStudentIdAsync(studentId, ct);
+        var hasOpenLeave = leaves.Any(l => l.StartDate <= today && (!l.EndDate.HasValue || l.EndDate.Value >= today));
+        if (hasOpenLeave)
+            throw new DomainException("Перед відрахуванням необхідно закрити активну академвідпустку.");
+
+        student.Status = StudentStatus.Expelled;
         _unitOfWork.Students.Update(student);
+        await CloseOpenEnrollmentAsync(studentId, today, dto.Reason, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    public async Task GraduateStudentAsync(Guid studentId, GraduateStudentDto dto, CancellationToken ct = default)
+    {
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        if (student.Status is StudentStatus.Graduated)
+            throw new DomainException("Студент вже випущений.");
+
+        if (student.Status is not StudentStatus.Active)
+            throw new DomainException("Випустити можна лише активного студента. Спочатку закрийте академвідпустку або поновіть студента.");
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        student.Status = StudentStatus.Graduated;
+        _unitOfWork.Students.Update(student);
+        await CloseOpenEnrollmentAsync(studentId, today, dto.Reason, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    private async Task CloseOpenEnrollmentAsync(Guid studentId, DateOnly date, string reason, CancellationToken ct)
+    {
+        var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
+        var open = enrollments.FirstOrDefault(e => !e.DateTo.HasValue);
+        if (open is null) return;
+
+        open.DateTo = date;
+        open.ReasonEnd = reason;
+        _unitOfWork.Enrollments.Update(open);
+
+        var openSubgroup = await _unitOfWork.SubgroupEnrollments.GetOpenByEnrollmentIdAsync(open.EnrollmentId, ct);
+        if (openSubgroup is not null)
+        {
+            openSubgroup.DateTo = date;
+            _unitOfWork.SubgroupEnrollments.Update(openSubgroup);
+        }
     }
 
     public async Task<StudentDetailDto> GetDetailAsync(Guid studentId, CancellationToken ct = default)
@@ -125,11 +171,14 @@ public class StudentService : IStudentService
         var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
         var movements = await _movementService.GetMovementsAsync(studentId, ct);
 
+        var groupIds = enrollments.Select(e => e.GroupId).Distinct().ToList();
+        var allGroupPlans = (await _unitOfWork.GroupPlanAssignments.GetByGroupIdsAsync(groupIds, ct))
+            .ToLookup(gpa => gpa.GroupId);
+
         var plans = new List<GroupPlanAssignmentDto>();
         foreach (var enrollment in enrollments)
         {
-            var groupPlans = await _unitOfWork.GroupPlanAssignments.GetByGroupIdAsync(enrollment.GroupId, ct);
-            foreach (var gpa in groupPlans)
+            foreach (var gpa in allGroupPlans[enrollment.GroupId])
             {
                 var enrollEnd = enrollment.DateTo ?? DateOnly.MaxValue;
                 var planEnd   = gpa.DateTo ?? DateOnly.MaxValue;

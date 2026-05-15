@@ -5,8 +5,10 @@ import {
   closeEnrollment,
   createAcademicLeave,
   enrollStudent,
+  expelStudent,
   getSelectableGroups,
   getStudentDetails,
+  graduateStudent,
   moveEnrollmentSubgroup,
   moveStudentToGroup,
   updateAcademicLeave,
@@ -121,6 +123,9 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [subgroupMoveId, setSubgroupMoveId] = useState<EntityId | "">("")
   const [subgroupMoveDate, setSubgroupMoveDate] = useState(todayValue())
   const [subgroupMoveReason, setSubgroupMoveReason] = useState("Переведення до підгрупи")
+
+  const [expelReason, setExpelReason] = useState("")
+  const [graduateReason, setGraduateReason] = useState("Успішне завершення навчання")
 
   async function loadData() {
     const [studentResult, groupsResult] = await Promise.all([
@@ -326,6 +331,9 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
           </div>
           <div>
             <strong>Активна група:</strong> {currentEnrollment?.groupCode ?? "Немає"}
+          </div>
+          <div>
+            <strong>Курс:</strong> {currentEnrollment?.courseYear != null ? `${currentEnrollment.courseYear} курс` : "—"}
           </div>
           <div>
             <strong>Підгрупа:</strong> {currentEnrollment?.subgroupName ?? "Немає"}
@@ -705,6 +713,83 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 }
               >
                 {isSaving ? "Виконання..." : "Призначити підгрупу"}
+              </button>
+            </>
+          )}
+        </section>
+      </div>
+
+      <div className="content-grid content-grid--two-columns">
+        <section className="panel">
+          <h2>Відрахування студента</h2>
+          {student.status === "Graduated" ? (
+            <StatusState tone="info" message="Випущеного студента не можна відрахувати." />
+          ) : student.status === "Expelled" ? (
+            <StatusState tone="info" message="Студент вже відрахований. Щоб поновити — зарахуйте до групи." />
+          ) : activeLeaveToday ? (
+            <StatusState tone="info" message="Перед відрахуванням необхідно закрити активну академвідпустку." />
+          ) : (
+            <>
+              <div className="form-grid">
+                <label>
+                  Причина відрахування
+                  <input
+                    id="expel-reason"
+                    type="text"
+                    value={expelReason}
+                    onChange={(e) => setExpelReason(e.target.value)}
+                    placeholder="Напр. За власним бажанням"
+                  />
+                </label>
+              </div>
+              <button
+                id="expel-submit"
+                type="button"
+                disabled={isSaving || expelReason.trim().length === 0}
+                onClick={() =>
+                  void runAction(
+                    () => expelStudent(studentId, { reason: expelReason.trim() }),
+                    "Студента відраховано.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Відрахувати студента"}
+              </button>
+            </>
+          )}
+        </section>
+
+        <section className="panel">
+          <h2>Випуск студента</h2>
+          {student.status === "Graduated" ? (
+            <StatusState tone="info" message="Студент вже випущений." />
+          ) : student.status !== "Active" ? (
+            <StatusState tone="info" message="Випустити можна лише активного студента. Спочатку закрийте академвідпустку або поновіть студента." />
+          ) : (
+            <>
+              <div className="form-grid">
+                <label>
+                  Причина / примітка
+                  <input
+                    id="graduate-reason"
+                    type="text"
+                    value={graduateReason}
+                    onChange={(e) => setGraduateReason(e.target.value)}
+                  />
+                </label>
+              </div>
+              <button
+                id="graduate-submit"
+                type="button"
+                disabled={isSaving || graduateReason.trim().length === 0}
+                onClick={() =>
+                  void runAction(
+                    () => graduateStudent(studentId, { reason: graduateReason.trim() }),
+                    "Студента випущено.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Випустити студента"}
               </button>
             </>
           )}

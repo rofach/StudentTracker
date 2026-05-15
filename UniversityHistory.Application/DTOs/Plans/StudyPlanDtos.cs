@@ -39,7 +39,6 @@ public record PlanDisciplineDto(
     string DisciplineName,
     int SemesterNo,
     string ControlType,
-    int Hours,
     decimal Credits
 );
 
@@ -47,14 +46,12 @@ public record AddPlanDisciplineDto(
     Guid DisciplineId,
     int SemesterNo,
     string ControlType,
-    int Hours,
     decimal Credits
 );
 
 public record UpdatePlanDisciplineDto(
     int SemesterNo,
     string ControlType,
-    int Hours,
     decimal Credits
 );
 

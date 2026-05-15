@@ -22,6 +22,18 @@ public class StudentGroupTransferRepository : IStudentGroupTransferRepository
         _db.AcademicDifferenceItems.AddRange(items);
     }
 
+    public async Task RemoveByStudentIdAsync(Guid studentId, CancellationToken ct = default)
+    {
+        var transfers = await _db.StudentGroupTransfers
+            .Where(t => t.OldEnrollment.StudentId == studentId)
+            .ToListAsync(ct);
+
+        if (transfers.Count == 0)
+            return;
+
+        _db.StudentGroupTransfers.RemoveRange(transfers);
+    }
+
     public async Task<StudentGroupTransfer?> GetByIdAsync(Guid transferId, CancellationToken ct = default)
     {
         return await _db.StudentGroupTransfers

@@ -23,7 +23,10 @@ public class GetActiveGroupsQueryHandler : IGetActiveGroupsQueryHandler
                 au.name             AS AcademicUnitName,
                 au.type             AS AcademicUnitType,
                 g.date_created      AS DateCreated,
-                g.date_closed       AS DateClosed
+                g.date_closed       AS DateClosed,
+                CASE WHEN MONTH(GETDATE()) >= 9 THEN YEAR(GETDATE()) ELSE YEAR(GETDATE()) - 1 END
+                - CASE WHEN MONTH(g.date_created) >= 9 THEN YEAR(g.date_created) ELSE YEAR(g.date_created) - 1 END
+                + 1                 AS CourseYear
             FROM Study_Group g
             JOIN Department d   ON d.department_id    = g.department_id
             JOIN Academic_Unit au ON au.academic_unit_id = d.academic_unit_id

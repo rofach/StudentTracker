@@ -5,6 +5,8 @@ namespace UniversityHistory.Application.Mappings;
 
 public static class StudyPlanMappingExtensions
 {
+    private const int HoursPerCredit = 30;
+
     public static StudyPlan ToEntity(this CreateStudyPlanDto dto) =>
         new() { SpecialtyCode = dto.SpecialtyCode, PlanName = dto.PlanName, ValidFrom = dto.ValidFrom };
 
@@ -19,16 +21,17 @@ public static class StudyPlanMappingExtensions
             DisciplineId = dto.DisciplineId,
             SemesterNo = dto.SemesterNo,
             ControlType = controlType,
-            Hours = dto.Hours,
             Credits = dto.Credits
         };
 
     public static PlanDisciplineDto ToDto(this PlanDiscipline pd) =>
         new(pd.PlanId, pd.DisciplineId, pd.Discipline.DisciplineName,
-            pd.SemesterNo, pd.ControlType.ToString(), pd.Hours, pd.Credits);
+            pd.SemesterNo, pd.ControlType.ToString(), pd.Credits);
 
     public static GroupPlanAssignmentDto ToDto(this GroupPlanAssignment a) =>
         new(a.GroupPlanAssignmentId, a.GroupId, a.PlanId,
             a.Plan.SpecialtyCode, a.Plan.PlanName, a.DateFrom, a.DateTo);
+
+    private static int CalculateHours(decimal credits) => (int)(credits * HoursPerCredit);
 }
 

@@ -15,7 +15,11 @@ public class GroupRepository : IGroupRepository
 
     public async Task<StudyGroup?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _db.StudyGroups.Include(g => g.Subgroups).FirstOrDefaultAsync(g => g.GroupId == id, ct);
+        return await _db.StudyGroups
+            .Include(g => g.Subgroups)
+            .Include(g => g.Department)
+                .ThenInclude(d => d.AcademicUnit)
+            .FirstOrDefaultAsync(g => g.GroupId == id, ct);
     }
 
     public async Task<IEnumerable<StudyGroup>> GetAllAsync(CancellationToken ct = default)
@@ -27,6 +31,17 @@ public class GroupRepository : IGroupRepository
     {
         _db.StudyGroups.Add(group);
         return group;
+    }
+
+    public async Task<bool> GroupCodeExistsAsync(string groupCode, Guid? excludeId, CancellationToken ct = default)
+    {
+        return await _db.StudyGroups
+            .AnyAsync(g => g.GroupCode == groupCode && g.GroupId != excludeId, ct);
+    }
+
+    public void Update(StudyGroup group)
+    {
+        _db.StudyGroups.Update(group);
     }
 }
 

@@ -40,6 +40,16 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IEnumerable<GroupPlanAssignment>> GetByGroupIdsAsync(IEnumerable<Guid> groupIds, CancellationToken ct = default)
+    {
+        return await _db.GroupPlanAssignments
+            .AsNoTracking()
+            .Include(a => a.Plan)
+            .Where(a => groupIds.Contains(a.GroupId))
+            .OrderBy(a => a.DateFrom)
+            .ToListAsync(ct);
+    }
+
     public async Task<bool> HasOverlapAsync(Guid groupId, DateOnly dateFrom, DateOnly? dateTo, Guid? excludeId = null, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments.AnyAsync(a =>

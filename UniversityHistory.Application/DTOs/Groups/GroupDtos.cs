@@ -28,7 +28,8 @@ public record ActiveGroupDto(
     string AcademicUnitName,
     string AcademicUnitType,
     DateOnly DateCreated,
-    DateOnly? DateClosed
+    DateOnly? DateClosed,
+    int? CourseYear
 );
 
 public record SubgroupDto(
@@ -128,3 +129,11 @@ public record StudentGroupTransferDetailDto(
     string Reason,
     IEnumerable<AcademicDifferenceItemDto> DifferenceItems
 );
+
+public record CreateGroupDto(
+    string GroupCode,
+    Guid DepartmentId,
+    DateOnly DateCreated
+);
+
+public record UpdateGroupDto(string GroupCode);

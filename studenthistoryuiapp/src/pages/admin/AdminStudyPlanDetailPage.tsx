@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { getDisciplines } from "../../api/disciplinesApi"
 import {
   addPlanDiscipline,
@@ -41,7 +41,6 @@ const emptyDisciplineForm: AddPlanDisciplineDto = {
   disciplineId: "",
   semesterNo: 1,
   controlType: "",
-  hours: 0,
   credits: 0,
 }
 
@@ -59,7 +58,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
   const [editForm, setEditForm] = useState<UpdatePlanDisciplineDto>({
     semesterNo: 1,
     controlType: "",
-    hours: 0,
     credits: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -143,7 +141,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
     setEditForm({
       semesterNo: selectedDiscipline.semesterNo,
       controlType: selectedDiscipline.controlType,
-      hours: selectedDiscipline.hours,
       credits: selectedDiscipline.credits,
     })
   }, [selectedDiscipline])
@@ -270,15 +267,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                 />
               </label>
               <label>
-                Години
-                <input
-                  type="number"
-                  min={0}
-                  value={addForm.hours}
-                  onChange={(event) => setAddForm((prev) => ({ ...prev, hours: Number(event.target.value) || 0 }))}
-                />
-              </label>
-              <label>
                 Кредити
                 <input
                   type="number"
@@ -319,7 +307,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                     <th>Назва</th>
                     <th>Семестр</th>
                     <th>Контроль</th>
-                    <th>Години</th>
                     <th>Кредити</th>
                   </tr>
                 </thead>
@@ -333,7 +320,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                       <td>{item.disciplineName}</td>
                       <td>{item.semesterNo}</td>
                       <td>{formatControlType(item.controlType)}</td>
-                      <td>{item.hours}</td>
                       <td>{item.credits}</td>
                     </tr>
                   ))}
@@ -366,15 +352,6 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                         type="text"
                         value={editForm.controlType}
                         onChange={(event) => setEditForm((prev) => ({ ...prev, controlType: event.target.value }))}
-                      />
-                    </label>
-                    <label>
-                      Години
-                      <input
-                        type="number"
-                        min={0}
-                        value={editForm.hours}
-                        onChange={(event) => setEditForm((prev) => ({ ...prev, hours: Number(event.target.value) || 0 }))}
                       />
                     </label>
                     <label>

@@ -59,13 +59,23 @@ public class StudentUpdateDtoValidator : AppValidator<StudentUpdateDto>
     }
 }
 
-public class ChangeStatusDtoValidator : AppValidator<ChangeStatusDto>
+public class ExpelStudentDtoValidator : AppValidator<ExpelStudentDto>
 {
-    public ChangeStatusDtoValidator()
+    public ExpelStudentDtoValidator()
     {
-        RuleFor(x => x.Status)
+        RuleFor(x => x.Reason)
             .NotEmpty()
-            .IsEnumName(typeof(StudentStatus), caseSensitive: false);
+            .MaximumLength(200);
+    }
+}
+
+public class GraduateStudentDtoValidator : AppValidator<GraduateStudentDto>
+{
+    public GraduateStudentDtoValidator()
+    {
+        RuleFor(x => x.Reason)
+            .NotEmpty()
+            .MaximumLength(200);
     }
 }
 

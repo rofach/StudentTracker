@@ -136,7 +136,7 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
                 .WithOne()
                 .HasForeignKey<ApplicationUser>(user => user.StudentId)
                 .HasConstraintName("fk_asp_net_users_student_student_id")
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Student>(e =>
@@ -265,7 +265,6 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
             e.ToTable(t => t.HasCheckConstraint(
                 "chk_control_type",
                 "control_type IN ('Exam','Credit','Coursework')"));
-            e.Property(pd => pd.Hours).HasColumnName("hours").IsRequired();
             e.Property(pd => pd.Credits).HasColumnName("credits").HasPrecision(4, 2).IsRequired();
             e.HasOne(pd => pd.Plan).WithMany(p => p.PlanDisciplines)
                 .HasForeignKey(pd => pd.PlanId)
@@ -341,7 +340,7 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
             e.HasOne(l => l.Enrollment).WithMany(en => en.AcademicLeaves)
                 .HasForeignKey(l => l.EnrollmentId)
                 .HasConstraintName("fk_academic_leave_student_group_enrollment_enrollment_id")
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ExternalTransfer>(e =>
@@ -364,7 +363,7 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
             e.HasOne(t => t.Student).WithMany(s => s.ExternalTransfers)
                 .HasForeignKey(t => t.StudentId)
                 .HasConstraintName("fk_external_transfers_student_student_id")
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
             e.HasOne(t => t.Institution).WithMany(i => i.Transfers)
                 .HasForeignKey(t => t.InstitutionId)
                 .HasConstraintName("fk_external_transfers_institution_institution_id")

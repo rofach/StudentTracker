@@ -57,7 +57,7 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
 
   const currentPlan = useMemo(() => data?.plans.find((item) => item.dateTo === null) ?? data?.plans[0] ?? null, [data])
 
-  const openLeave = useMemo(() => data?.leaves.find((item) => item.endDate === null) ?? null, [data])
+
 
   if (isLoading) {
     return <Spinner label="Завантаження даних студента..." />
@@ -113,6 +113,9 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
             <div>
               <strong>Підгрупа:</strong> {formatNullable(currentEnrollment.subgroupName)}
             </div>
+            <div>
+              <strong>Зараховано з:</strong> {formatDate(currentEnrollment.dateFrom)}
+            </div>
           </div>
         ) : (
           <StatusState tone="info" message="Немає активного зарахування до групи." />
@@ -136,23 +139,101 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
       </section>
 
       <section className="panel">
-        <h2>Академвідпустка</h2>
-        {openLeave ? (
-          <div className="summary-grid">
-            <div>
-              <strong>Початок:</strong> {formatDate(openLeave.startDate)}
-            </div>
-            <div>
-              <strong>Причина:</strong> {formatNullable(openLeave.reason)}
-            </div>
-            <div>
-              <strong>Заплановане завершення:</strong> {formatDate(openLeave.endDate)}
-            </div>
-          </div>
+        <h2>Академвідпустки</h2>
+        {data.leaves.length === 0 ? (
+          <StatusState tone="info" message="Академвідпусток не було." />
         ) : (
-          <StatusState tone="info" message="Зараз немає відкритої академвідпустки." />
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Початок</th>
+                  <th>Завершення</th>
+                  <th>Причина</th>
+                  <th>Причина повернення</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.leaves.map((leave) => (
+                  <tr key={leave.leaveId}>
+                    <td>{formatDate(leave.startDate)}</td>
+                    <td>
+                      {leave.endDate
+                        ? `${formatDate(leave.endDate)} (${leave.returnReason !== null ? "Фактичне" : "Планове"})`
+                        : "—"}
+                    </td>
+                    <td>{leave.reason ?? "—"}</td>
+                    <td>{leave.returnReason ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
+
+      <section className="panel">
+        <h2>Історія зарахувань</h2>
+        {data.enrollments.length === 0 ? (
+          <StatusState tone="info" message="Зарахувань немає." />
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Група</th>
+                  <th>Підгрупа</th>
+                  <th>Кафедра</th>
+                  <th>Дата від</th>
+                  <th>Дата до</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.enrollments.map((e) => (
+                  <tr key={e.enrollmentId}>
+                    <td>{e.groupCode}</td>
+                    <td>{e.subgroupName ?? "—"}</td>
+                    <td>{e.departmentName}</td>
+                    <td>{formatDate(e.dateFrom)}</td>
+                    <td>{e.dateTo ? formatDate(e.dateTo) : "Активне"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>Навчальні плани</h2>
+        {data.plans.length === 0 ? (
+          <StatusState tone="info" message="Навчальних планів немає." />
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>План</th>
+                  <th>Спеціальність</th>
+                  <th>Діє з</th>
+                  <th>Діє до</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.plans.map((p) => (
+                  <tr key={p.groupPlanAssignmentId}>
+                    <td>{p.planName ?? "—"}</td>
+                    <td>{p.specialtyCode}</td>
+                    <td>{formatDate(p.dateFrom)}</td>
+                    <td>{p.dateTo ? formatDate(p.dateTo) : "Активний"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
 
       <section className="panel">
         <h2>Внутрішні переведення</h2>

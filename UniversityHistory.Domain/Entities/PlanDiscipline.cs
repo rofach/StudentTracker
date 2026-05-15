@@ -9,7 +9,6 @@ public class PlanDiscipline
     public Guid DisciplineId { get; set; }
     public int SemesterNo { get; set; }
     public ControlType ControlType { get; set; }
-    public int Hours { get; set; }
     public decimal Credits { get; set; }
 
     public StudyPlan Plan { get; set; } = null!;

@@ -93,7 +93,6 @@ public class StudyPlanService : IStudyPlanService
         var controlType = Enum.Parse<ControlType>(dto.ControlType, ignoreCase: true);
         pd.SemesterNo = dto.SemesterNo;
         pd.ControlType = controlType;
-        pd.Hours = dto.Hours;
         pd.Credits = dto.Credits;
         _unitOfWork.StudyPlans.UpdatePlanDiscipline(pd);
         await _unitOfWork.SaveChangesAsync(ct);
