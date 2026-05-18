@@ -25,14 +25,14 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
         {
             rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
                 SELECT DISTINCT
-                    ce.course_enrollment_id                                                  AS CourseEnrollmentId,
-                    pd.discipline_id                                                        AS DisciplineId,
-                    d.discipline_name                                                       AS DisciplineName,
-                    pd.semester_no                                                          AS SemesterNo,
-                    ce.academic_year_start                                                  AS AcademicYearStart,
+                    ce.course_enrollment_id  AS CourseEnrollmentId,
+                    pd.discipline_id AS DisciplineId,
+                    d.discipline_name AS DisciplineName,
+                    pd.semester_no AS SemesterNo,
+                    ce.academic_year_start AS AcademicYearStart,
                     CAST(ce.academic_year_start AS nvarchar(4))
                         + N'/'
-                        + CAST(ce.academic_year_start + 1 AS nvarchar(4))                  AS AcademicYearLabel,
+                        + CAST(ce.academic_year_start + 1 AS nvarchar(4)) AS AcademicYearLabel,
                     CAST(CASE
                         WHEN EXISTS (
                             SELECT 1
@@ -47,7 +47,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
                               AND pd_inner.discipline_id = pd.discipline_id
                         ) THEN 1
                         ELSE 0
-                    END AS bit)                                                             AS HasGrade
+                    END AS bit) AS HasGrade
                 FROM Student_Course_Enrollment ce
                 JOIN Student_Group_Enrollment e
                     ON e.enrollment_id = ce.enrollment_id
@@ -74,14 +74,14 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
         {
             rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
                 SELECT DISTINCT
-                    ce.course_enrollment_id                                                  AS CourseEnrollmentId,
-                    pd.discipline_id                                                        AS DisciplineId,
-                    d.discipline_name                                                       AS DisciplineName,
-                    pd.semester_no                                                          AS SemesterNo,
-                    ce.academic_year_start                                                  AS AcademicYearStart,
+                    ce.course_enrollment_id AS CourseEnrollmentId,
+                    pd.discipline_id AS DisciplineId,
+                    d.discipline_name AS DisciplineName,
+                    pd.semester_no AS SemesterNo,
+                    ce.academic_year_start AS AcademicYearStart,
                     CAST(ce.academic_year_start AS nvarchar(4))
                         + N'/'
-                        + CAST(ce.academic_year_start + 1 AS nvarchar(4))                  AS AcademicYearLabel,
+                        + CAST(ce.academic_year_start + 1 AS nvarchar(4))  AS AcademicYearLabel,
                     CAST(CASE
                         WHEN EXISTS (
                             SELECT 1
@@ -96,7 +96,7 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
                               AND pd_inner.discipline_id = pd.discipline_id
                         ) THEN 1
                         ELSE 0
-                    END AS bit)                                                             AS HasGrade
+                    END AS bit) AS HasGrade
                 FROM Student_Course_Enrollment ce
                 JOIN Student_Group_Enrollment e
                     ON e.enrollment_id = ce.enrollment_id

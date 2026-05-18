@@ -24,14 +24,9 @@ public class StudentGroupTransferRepository : IStudentGroupTransferRepository
 
     public async Task RemoveByStudentIdAsync(Guid studentId, CancellationToken ct = default)
     {
-        var transfers = await _db.StudentGroupTransfers
-            .Where(t => t.OldEnrollment.StudentId == studentId)
-            .ToListAsync(ct);
-
-        if (transfers.Count == 0)
-            return;
-
-        _db.StudentGroupTransfers.RemoveRange(transfers);
+        await _db.StudentGroupTransfers
+            .Where(t => t.OldEnrollment.StudentId == studentId || t.NewEnrollment.StudentId == studentId)
+            .ExecuteDeleteAsync(ct);
     }
 
     public async Task<StudentGroupTransfer?> GetByIdAsync(Guid transferId, CancellationToken ct = default)
