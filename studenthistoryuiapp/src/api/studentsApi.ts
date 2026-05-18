@@ -12,6 +12,8 @@ import type {
   ExternalTransferDto,
   GradeDto,
   GraduateStudentDto,
+  CreateTransferredStudentDto,
+  ReturnStudentFromExternalTransferDto,
   MoveStudentDto,
   MoveStudentToSubgroupDto,
   PagedResult,
@@ -28,6 +30,7 @@ import type {
   StudentMovementDto,
   StudentUpdateDto,
   TimelineEventDto,
+  TransferStudentOutDto,
   UpsertGradeDto,
   UpdateDifferenceItemDto,
   UpdateAcademicLeaveDto,
@@ -56,6 +59,10 @@ export function getStudentById(studentId: EntityId): Promise<StudentDto> {
 
 export function createStudent(dto: StudentCreateDto): Promise<StudentCreatedResultDto> {
   return postJson<StudentCreatedResultDto>("/students", dto)
+}
+
+export function createTransferredStudent(dto: CreateTransferredStudentDto): Promise<StudentCreatedResultDto> {
+  return postJson<StudentCreatedResultDto>("/students/transferred-in", dto)
 }
 
 export function updateStudent(studentId: EntityId, dto: StudentUpdateDto): Promise<StudentDto> {
@@ -119,8 +126,13 @@ export function getStudentMovements(studentId: EntityId): Promise<StudentMovemen
   return fetchJson<StudentMovementDto>(`/students/${studentId}/movements`)
 }
 
-export function getStudentDisciplines(studentId: EntityId): Promise<StudentDisciplineOptionDto[]> {
-  return fetchJson<StudentDisciplineOptionDto[]>(`/students/${studentId}/disciplines`)
+export function getStudentDisciplines(
+  studentId: EntityId,
+  currentPlanOnly = false,
+): Promise<StudentDisciplineOptionDto[]> {
+  return fetchJson<StudentDisciplineOptionDto[]>(`/students/${studentId}/disciplines`, undefined, {
+    currentPlanOnly,
+  })
 }
 
 export function getStudentGrades(
@@ -152,6 +164,20 @@ export function upsertStudentGrade(
 
 export function getStudentTransfers(studentId: EntityId): Promise<ExternalTransferDto[]> {
   return getStudentDetails(studentId).then((result) => result.transfers)
+}
+
+export function transferStudentOut(
+  studentId: EntityId,
+  dto: TransferStudentOutDto,
+): Promise<ExternalTransferDto> {
+  return postJson<ExternalTransferDto>(`/students/${studentId}/transfer-out`, dto)
+}
+
+export function returnStudentFromExternalTransfer(
+  studentId: EntityId,
+  dto: ReturnStudentFromExternalTransferDto,
+): Promise<StudentDto> {
+  return postJson<StudentDto>(`/students/${studentId}/return-from-external-transfer`, dto)
 }
 
 export function getStudentGroupTransfers(studentId: EntityId): Promise<StudentGroupTransferDto[]> {

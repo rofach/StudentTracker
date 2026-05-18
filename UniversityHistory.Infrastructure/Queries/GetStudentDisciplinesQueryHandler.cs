@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Queries.GetStudentDisciplines;
 using UniversityHistory.Domain.Exceptions;
@@ -19,42 +19,96 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
 
         var studentId = query.StudentId;
 
-        var rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
-            SELECT DISTINCT
-                ce.course_enrollment_id                                                  AS CourseEnrollmentId,
-                pd.discipline_id                                                        AS DisciplineId,
-                d.discipline_name                                                       AS DisciplineName,
-                pd.semester_no                                                          AS SemesterNo,
-                ce.academic_year_start                                                  AS AcademicYearStart,
-                CAST(ce.academic_year_start AS nvarchar(4))
-                    + N'/'
-                    + CAST(ce.academic_year_start + 1 AS nvarchar(4))                  AS AcademicYearLabel,
-                CAST(CASE
-                    WHEN EXISTS (
-                        SELECT 1
-                        FROM Grade_Record gr
-                        JOIN Student_Course_Enrollment ce_inner
-                            ON ce_inner.course_enrollment_id = gr.course_enrollment_id
-                        JOIN Plan_Disciplines pd_inner
-                            ON pd_inner.plan_discipline_id = ce_inner.plan_discipline_id
-                        JOIN Student_Group_Enrollment e_inner
-                            ON e_inner.enrollment_id = ce_inner.enrollment_id
-                        WHERE e_inner.student_id = {studentId}
-                          AND pd_inner.discipline_id = pd.discipline_id
-                    ) THEN 1
-                    ELSE 0
-                END AS bit)                                                             AS HasGrade
-            FROM Student_Course_Enrollment ce
-            JOIN Student_Group_Enrollment e
-                ON e.enrollment_id = ce.enrollment_id
-            JOIN Plan_Disciplines pd
-                ON pd.plan_discipline_id = ce.plan_discipline_id
-            JOIN Discipline d
-                ON d.discipline_id = pd.discipline_id
-            WHERE e.student_id = {studentId}
-            ORDER BY pd.semester_no, d.discipline_name
-            """)
-            .ToListAsync(ct);
+        IReadOnlyList<StudentDisciplineOptionRaw> rawItems;
+
+        if (query.CurrentPlanOnly)
+        {
+            rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
+                SELECT DISTINCT
+                    ce.course_enrollment_id                                                  AS CourseEnrollmentId,
+                    pd.discipline_id                                                        AS DisciplineId,
+                    d.discipline_name                                                       AS DisciplineName,
+                    pd.semester_no                                                          AS SemesterNo,
+                    ce.academic_year_start                                                  AS AcademicYearStart,
+                    CAST(ce.academic_year_start AS nvarchar(4))
+                        + N'/'
+                        + CAST(ce.academic_year_start + 1 AS nvarchar(4))                  AS AcademicYearLabel,
+                    CAST(CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM Grade_Record gr
+                            JOIN Student_Course_Enrollment ce_inner
+                                ON ce_inner.course_enrollment_id = gr.course_enrollment_id
+                            JOIN Plan_Disciplines pd_inner
+                                ON pd_inner.plan_discipline_id = ce_inner.plan_discipline_id
+                            JOIN Student_Group_Enrollment e_inner
+                                ON e_inner.enrollment_id = ce_inner.enrollment_id
+                            WHERE e_inner.student_id = {studentId}
+                              AND pd_inner.discipline_id = pd.discipline_id
+                        ) THEN 1
+                        ELSE 0
+                    END AS bit)                                                             AS HasGrade
+                FROM Student_Course_Enrollment ce
+                JOIN Student_Group_Enrollment e
+                    ON e.enrollment_id = ce.enrollment_id
+                JOIN Plan_Disciplines pd
+                    ON pd.plan_discipline_id = ce.plan_discipline_id
+                JOIN Discipline d
+                    ON d.discipline_id = pd.discipline_id
+                INNER JOIN (
+                    SELECT TOP 1 gpa.plan_id
+                    FROM Group_Plan_Assignment gpa
+                    JOIN Student_Group_Enrollment sge ON sge.group_id = gpa.group_id
+                    WHERE sge.student_id = {studentId}
+                      AND sge.date_to IS NULL
+                      AND gpa.date_from <= CAST(GETDATE() AS date)
+                      AND (gpa.date_to IS NULL OR gpa.date_to >= CAST(GETDATE() AS date))
+                    ORDER BY gpa.date_from DESC
+                ) current_plan ON current_plan.plan_id = pd.plan_id
+                WHERE e.student_id = {studentId}
+                ORDER BY pd.semester_no, d.discipline_name
+                """)
+                .ToListAsync(ct);
+        }
+        else
+        {
+            rawItems = await _db.Database.SqlQuery<StudentDisciplineOptionRaw>($"""
+                SELECT DISTINCT
+                    ce.course_enrollment_id                                                  AS CourseEnrollmentId,
+                    pd.discipline_id                                                        AS DisciplineId,
+                    d.discipline_name                                                       AS DisciplineName,
+                    pd.semester_no                                                          AS SemesterNo,
+                    ce.academic_year_start                                                  AS AcademicYearStart,
+                    CAST(ce.academic_year_start AS nvarchar(4))
+                        + N'/'
+                        + CAST(ce.academic_year_start + 1 AS nvarchar(4))                  AS AcademicYearLabel,
+                    CAST(CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM Grade_Record gr
+                            JOIN Student_Course_Enrollment ce_inner
+                                ON ce_inner.course_enrollment_id = gr.course_enrollment_id
+                            JOIN Plan_Disciplines pd_inner
+                                ON pd_inner.plan_discipline_id = ce_inner.plan_discipline_id
+                            JOIN Student_Group_Enrollment e_inner
+                                ON e_inner.enrollment_id = ce_inner.enrollment_id
+                            WHERE e_inner.student_id = {studentId}
+                              AND pd_inner.discipline_id = pd.discipline_id
+                        ) THEN 1
+                        ELSE 0
+                    END AS bit)                                                             AS HasGrade
+                FROM Student_Course_Enrollment ce
+                JOIN Student_Group_Enrollment e
+                    ON e.enrollment_id = ce.enrollment_id
+                JOIN Plan_Disciplines pd
+                    ON pd.plan_discipline_id = ce.plan_discipline_id
+                JOIN Discipline d
+                    ON d.discipline_id = pd.discipline_id
+                WHERE e.student_id = {studentId}
+                ORDER BY pd.semester_no, d.discipline_name
+                """)
+                .ToListAsync(ct);
+        }
 
         return rawItems
             .Select(item => new StudentDisciplineOptionDto(
@@ -79,4 +133,3 @@ public class GetStudentDisciplinesQueryHandler : IGetStudentDisciplinesQueryHand
         public bool HasGrade { get; set; }
     }
 }
-

@@ -20,6 +20,17 @@ public static class StudentMappingExtensions
         };
     }
 
+    public static StudentCreateDto ToStudentCreateDto(this CreateTransferredStudentDto dto)
+    {
+        return new StudentCreateDto(
+            dto.FirstName,
+            dto.LastName,
+            dto.Patronymic,
+            dto.BirthDate,
+            dto.Email,
+            dto.Phone);
+    }
+
     public static StudentDto ToDto(this Student student)
     {
         return new StudentDto(

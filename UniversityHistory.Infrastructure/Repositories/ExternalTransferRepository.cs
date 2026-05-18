@@ -22,15 +22,29 @@ public class ExternalTransferRepository : IExternalTransferRepository
             .ToListAsync(ct);
     }
 
+    public async Task<IEnumerable<Institution>> GetInstitutionsAsync(CancellationToken ct = default)
+    {
+        return await _db.Institutions.AsNoTracking()
+            .OrderBy(i => i.InstitutionName)
+            .ToListAsync(ct);
+    }
+
     public async Task<Institution?> GetInstitutionByIdAsync(Guid institutionId, CancellationToken ct = default)
     {
-        return await _db.Institutions.FindAsync(new object[] { institutionId }, ct);
+        return await _db.Institutions
+            .FirstOrDefaultAsync(i => i.InstitutionId == institutionId, ct);
     }
 
     public ExternalTransfer Add(ExternalTransfer transfer)
     {
         _db.ExternalTransfers.Add(transfer);
         return transfer;
+    }
+    
+    public Institution AddInstitution(Institution institution)
+    {
+        _db.Institutions.Add(institution);
+        return institution;
     }
 }
 

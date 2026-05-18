@@ -23,7 +23,7 @@ public class GetAverageGradeQueryHandler : IGetAverageGradeQueryHandler
 
         var result = await _db.Database.SqlQuery<AverageGradeRaw>($"""
             SELECT
-                AVG(TRY_CAST(gr.grade_value AS DECIMAL(10,2)))  AS Average,
+                AVG(CAST(gr.grade_value AS DECIMAL(10,2)))  AS Average,
                 COUNT(gr.grade_id)                              AS GradeCount
             FROM Grade_Record gr
             JOIN Student_Course_Enrollment ce  ON ce.course_enrollment_id = gr.course_enrollment_id
@@ -33,7 +33,7 @@ public class GetAverageGradeQueryHandler : IGetAverageGradeQueryHandler
               AND ({semesterNo}   IS NULL OR pd.semester_no         = {semesterNo})
               AND ({disciplineId} IS NULL OR pd.discipline_id       = {disciplineId})
               AND ({academicYear} IS NULL OR ce.academic_year_start = {academicYear})
-              AND TRY_CAST(gr.grade_value AS DECIMAL(10,2)) IS NOT NULL
+              AND gr.grade_value IS NOT NULL
             """)
             .FirstAsync(ct);
 

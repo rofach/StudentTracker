@@ -1,12 +1,28 @@
-import { useState } from "react"
-import { createStudent } from "../../api/studentsApi"
+import { useEffect, useState } from "react"
+import { getGroupSubgroups } from "../../api/groupsApi"
+import { getInstitutions } from "../../api/institutionsApi"
+import { createStudent, createTransferredStudent, getSelectableGroups } from "../../api/studentsApi"
 import { useToast } from "../../components/common/ToastCenter"
 import { PageHeader } from "../../components/common/PageHeader"
 import { StatusState } from "../../components/common/StatusState"
-import type { StudentAccountPasswordDto, StudentCreateDto, StudentCreatedResultDto } from "../../types/api"
+import type {
+  ActiveGroupDto,
+  CreateTransferredStudentDto,
+  EntityId,
+  InstitutionDto,
+  StudentAccountPasswordDto,
+  StudentCreateDto,
+  StudentCreatedResultDto,
+  SubgroupDto,
+} from "../../types/api"
 
 type AdminStudentCreatePageProps = {
   navigate: (path: string) => void
+}
+
+type SubgroupOption = {
+  subgroupId: EntityId
+  subgroupName: string
 }
 
 const emptyForm: StudentCreateDto = {
@@ -16,6 +32,21 @@ const emptyForm: StudentCreateDto = {
   birthDate: null,
   email: null,
   phone: null,
+}
+
+const emptyTransferredForm: CreateTransferredStudentDto = {
+  ...emptyForm,
+  institutionId: "",
+  groupId: "",
+  subgroupId: null,
+  dateFrom: "",
+  notes: null,
+}
+
+function mapSubgroups(items: SubgroupDto[]): SubgroupOption[] {
+  return items
+    .map((item) => ({ subgroupId: item.subgroupId, subgroupName: item.subgroupName }))
+    .sort((left, right) => left.subgroupName.localeCompare(right.subgroupName))
 }
 
 function AccountPasswordPanel({
@@ -55,18 +86,105 @@ function AccountPasswordPanel({
 export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps) {
   const { pushToast } = useToast()
   const [form, setForm] = useState<StudentCreateDto>(emptyForm)
+  const [isTransferredIn, setIsTransferredIn] = useState(false)
+  const [transferredForm, setTransferredForm] = useState<CreateTransferredStudentDto>(emptyTransferredForm)
+  const [institutions, setInstitutions] = useState<InstitutionDto[]>([])
+  const [groups, setGroups] = useState<ActiveGroupDto[]>([])
+  const [subgroupOptions, setSubgroupOptions] = useState<SubgroupOption[]>([])
   const [createdResult, setCreatedResult] = useState<StudentCreatedResultDto | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingReferences, setIsLoadingReferences] = useState(true)
+
+  useEffect(() => {
+    let isActive = true
+
+    Promise.all([getInstitutions(), getSelectableGroups()])
+      .then(([institutionsResult, groupsResult]) => {
+        if (!isActive) {
+          return
+        }
+
+        setInstitutions(institutionsResult)
+        setGroups(groupsResult)
+        setTransferredForm((prev) => ({
+          ...prev,
+          institutionId: prev.institutionId || institutionsResult[0]?.institutionId || "",
+          groupId: prev.groupId || groupsResult[0]?.groupId || "",
+        }))
+      })
+      .catch((err: unknown) => {
+        if (!isActive) {
+          return
+        }
+
+        setError(err instanceof Error ? err.message : "Не вдалося завантажити довідкові дані.")
+      })
+      .finally(() => {
+        if (!isActive) {
+          return
+        }
+
+        setIsLoadingReferences(false)
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isTransferredIn || !transferredForm.groupId) {
+      setSubgroupOptions([])
+      setTransferredForm((prev) => ({ ...prev, subgroupId: null }))
+      return
+    }
+
+    let isActive = true
+
+    getGroupSubgroups(transferredForm.groupId)
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        const options = mapSubgroups(result)
+        setSubgroupOptions(options)
+        setTransferredForm((prev) => ({
+          ...prev,
+          subgroupId:
+            prev.subgroupId && options.some((option) => option.subgroupId === prev.subgroupId)
+              ? prev.subgroupId
+              : null,
+        }))
+      })
+      .catch(() => {
+        if (!isActive) {
+          return
+        }
+
+        setSubgroupOptions([])
+        setTransferredForm((prev) => ({ ...prev, subgroupId: null }))
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [isTransferredIn, transferredForm.groupId])
 
   const handleCreate = async () => {
     setIsSaving(true)
     setError(null)
 
     try {
-      const created = await createStudent(form)
+      const created = isTransferredIn
+        ? await createTransferredStudent({ ...transferredForm, ...form })
+        : await createStudent(form)
+
       setCreatedResult(created)
       setForm(emptyForm)
+      setTransferredForm(emptyTransferredForm)
+      setIsTransferredIn(false)
       pushToast({ tone: "info", title: "Успішно", message: "Студента створено, акаунт згенеровано." })
     } catch (err: unknown) {
       const nextError = err instanceof Error ? err.message : "Не вдалося створити студента."
@@ -150,8 +268,96 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
           </label>
         </div>
 
+        <div className="form-grid">
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              checked={isTransferredIn}
+              onChange={(event) => setIsTransferredIn(event.target.checked)}
+            />
+            Створити студента як переведеного з іншого університету
+          </label>
+        </div>
+
+        {isTransferredIn ? (
+          <div className="form-grid">
+            <label>
+              Заклад, з якого переведено
+              <select
+                value={transferredForm.institutionId}
+                onChange={(event) =>
+                  setTransferredForm((prev) => ({ ...prev, institutionId: event.target.value }))
+                }
+              >
+                <option value="">Оберіть заклад</option>
+                {institutions.map((institution) => (
+                  <option key={institution.institutionId} value={institution.institutionId}>
+                    {institution.institutionName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Група для зарахування
+              <select
+                value={transferredForm.groupId}
+                onChange={(event) =>
+                  setTransferredForm((prev) => ({
+                    ...prev,
+                    groupId: event.target.value,
+                    subgroupId: null,
+                  }))
+                }
+              >
+                <option value="">Оберіть групу</option>
+                {groups.map((group) => (
+                  <option key={group.groupId} value={group.groupId}>
+                    {group.groupCode} ({group.departmentName})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Підгрупа
+              <select
+                value={transferredForm.subgroupId ?? ""}
+                onChange={(event) =>
+                  setTransferredForm((prev) => ({ ...prev, subgroupId: event.target.value || null }))
+                }
+              >
+                <option value="">Без підгрупи</option>
+                {subgroupOptions.map((subgroup) => (
+                  <option key={subgroup.subgroupId} value={subgroup.subgroupId}>
+                    {subgroup.subgroupName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Дата зарахування
+              <input
+                type="date"
+                value={transferredForm.dateFrom}
+                onChange={(event) =>
+                  setTransferredForm((prev) => ({ ...prev, dateFrom: event.target.value }))
+                }
+              />
+            </label>
+            <label>
+              Примітка
+              <input
+                type="text"
+                value={transferredForm.notes ?? ""}
+                onChange={(event) =>
+                  setTransferredForm((prev) => ({ ...prev, notes: event.target.value || null }))
+                }
+              />
+            </label>
+          </div>
+        ) : null}
+
         <div className="inline-actions">
-          <button type="button" onClick={handleCreate} disabled={isSaving}>
+          <button type="button" onClick={handleCreate} disabled={isSaving || isLoadingReferences}>
             {isSaving ? "Створення..." : "Створити студента"}
           </button>
           <button type="button" onClick={() => navigate("/admin/students")}>

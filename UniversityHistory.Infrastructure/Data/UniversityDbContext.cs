@@ -225,8 +225,6 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
             e.HasKey(i => i.InstitutionId).HasName("pk_institution");
             e.Property(i => i.InstitutionId).HasColumnName("institution_id");
             e.Property(i => i.InstitutionName).HasColumnName("institution_name").HasMaxLength(200).IsRequired();
-            e.Property(i => i.City).HasColumnName("city").HasMaxLength(100);
-            e.Property(i => i.Country).HasColumnName("country").HasMaxLength(100);
         });
 
         modelBuilder.Entity<Discipline>(e =>
@@ -428,7 +426,7 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
             e.HasKey(gr => gr.GradeId).HasName("pk_grade_record");
             e.Property(gr => gr.GradeId).HasColumnName("grade_id");
             e.Property(gr => gr.CourseEnrollmentId).HasColumnName("course_enrollment_id");
-            e.Property(gr => gr.GradeValue).HasColumnName("grade_value").HasMaxLength(20).IsRequired();
+            e.Property(gr => gr.GradeValue).HasColumnName("grade_value").IsRequired();
             e.Property(gr => gr.AssessmentDate).HasColumnName("assessment_date").IsRequired();
             e.HasIndex(gr => gr.CourseEnrollmentId).IsUnique().HasDatabaseName("ix_grade_record_course_enrollment_id");
             e.HasOne(gr => gr.CourseEnrollment).WithMany(ce => ce.GradeRecords)

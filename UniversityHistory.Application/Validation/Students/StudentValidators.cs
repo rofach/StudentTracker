@@ -59,6 +59,42 @@ public class StudentUpdateDtoValidator : AppValidator<StudentUpdateDto>
     }
 }
 
+public class CreateTransferredStudentDtoValidator : AppValidator<CreateTransferredStudentDto>
+{
+    public CreateTransferredStudentDtoValidator()
+    {
+        RuleFor(x => x.FirstName)
+            .RequiredPersonName();
+
+        RuleFor(x => x.LastName)
+            .RequiredPersonName();
+
+        RuleFor(x => x.Patronymic)
+            .OptionalPersonName();
+
+        RuleFor(x => x.Email)
+            .RequiredEmailAddressEx();
+
+        When(x => x.BirthDate.HasValue, () =>
+        {
+            RuleFor(x => x.BirthDate!.Value)
+                .NotInFuture();
+        });
+
+        RuleFor(x => x.Phone)
+            .OptionalPhoneNumber();
+
+        RuleFor(x => x.InstitutionId)
+            .NotEmpty();
+
+        RuleFor(x => x.GroupId)
+            .NotEmpty();
+
+        RuleFor(x => x.DateFrom)
+            .NotDefaultDate();
+    }
+}
+
 public class ExpelStudentDtoValidator : AppValidator<ExpelStudentDto>
 {
     public ExpelStudentDtoValidator()

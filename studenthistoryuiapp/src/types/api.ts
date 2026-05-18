@@ -91,6 +91,11 @@ export type ExternalTransferDto = {
   notes: string | null
 }
 
+export type InstitutionDto = {
+  institutionId: EntityId
+  institutionName: string
+}
+
 export type StudentInternalTransferSummaryDto = {
   transferId: EntityId
   transferDate: string
@@ -306,6 +311,14 @@ export type StudentCreateDto = {
   phone: string | null
 }
 
+export type CreateTransferredStudentDto = StudentCreateDto & {
+  institutionId: EntityId
+  groupId: EntityId
+  subgroupId: EntityId | null
+  dateFrom: string
+  notes: string | null
+}
+
 export type StudentUpdateDto = StudentCreateDto
 
 export type ResetStudentPasswordDto = {
@@ -360,6 +373,22 @@ export type UpdateAcademicLeaveDto = {
   endDate: string | null
   reason: string
   returnReason: string | null
+}
+
+export type TransferStudentOutDto = {
+  institutionId: EntityId
+  transferDate: string
+  reasonEnd: string
+  notes: string | null
+}
+
+export type ReturnStudentFromExternalTransferDto = {
+  institutionId: EntityId
+  groupId: EntityId
+  subgroupId: EntityId | null
+  dateFrom: string
+  reasonStart: string
+  notes: string | null
 }
 
 export type AssignGroupPlanDto = {

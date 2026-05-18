@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { getGroupSubgroups } from "../../api/groupsApi"
+import { createInstitution, getInstitutions } from "../../api/institutionsApi"
 import {
   assignEnrollmentSubgroup,
   closeEnrollment,
@@ -11,6 +12,8 @@ import {
   graduateStudent,
   moveEnrollmentSubgroup,
   moveStudentToGroup,
+  returnStudentFromExternalTransfer,
+  transferStudentOut,
   updateAcademicLeave,
 } from "../../api/studentsApi"
 import { PageHeader } from "../../components/common/PageHeader"
@@ -21,6 +24,7 @@ import type {
   AcademicLeaveDto,
   ActiveGroupDto,
   EntityId,
+  InstitutionDto,
   StudentDetailDto,
   SubgroupDto,
 } from "../../types/api"
@@ -92,6 +96,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const { pushToast } = useToast()
   const [student, setStudent] = useState<StudentDetailDto | null>(null)
   const [groups, setGroups] = useState<ActiveGroupDto[]>([])
+  const [institutions, setInstitutions] = useState<InstitutionDto[]>([])
   const [subgroupOptions, setSubgroupOptions] = useState<SubgroupOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -127,14 +132,30 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [expelReason, setExpelReason] = useState("")
   const [graduateReason, setGraduateReason] = useState("Успішне завершення навчання")
 
+  const [transferOutInstitutionId, setTransferOutInstitutionId] = useState<EntityId | "custom" | "">("")
+  const [transferOutNewInstitutionName, setTransferOutNewInstitutionName] = useState("")
+  const [transferOutDate, setTransferOutDate] = useState(todayValue())
+  const [transferOutReasonEnd, setTransferOutReasonEnd] = useState("Переведення до іншого закладу")
+  const [transferOutNotes, setTransferOutNotes] = useState("")
+
+  const [returnInstitutionId, setReturnInstitutionId] = useState<EntityId | "custom" | "">("")
+  const [returnNewInstitutionName, setReturnNewInstitutionName] = useState("")
+  const [returnGroupId, setReturnGroupId] = useState<EntityId | "">("")
+  const [returnSubgroupId, setReturnSubgroupId] = useState<EntityId | "">("")
+  const [returnDate, setReturnDate] = useState(todayValue())
+  const [returnReasonStart, setReturnReasonStart] = useState("Поновлення після переведення")
+  const [returnNotes, setReturnNotes] = useState("")
+
   async function loadData() {
-    const [studentResult, groupsResult] = await Promise.all([
+    const [studentResult, groupsResult, institutionsResult] = await Promise.all([
       getStudentDetails(studentId),
       getSelectableGroups(),
+      getInstitutions(),
     ])
 
     setStudent(studentResult)
     setGroups(groupsResult)
+    setInstitutions(institutionsResult)
   }
 
   async function runAction(action: () => Promise<void>, successMessage: string) {
@@ -713,6 +734,217 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                 }
               >
                 {isSaving ? "Виконання..." : "Призначити підгрупу"}
+              </button>
+            </>
+          )}
+        </section>
+      </div>
+
+      <div className="content-grid content-grid--two-columns">
+        <section className="panel">
+          <h2>Переведення до іншого закладу</h2>
+          {currentEnrollment ? (
+            <>
+              <div className="form-grid">
+                <label>
+                  Заклад
+                  <select
+                    value={transferOutInstitutionId}
+                    onChange={(event) => setTransferOutInstitutionId(event.target.value)}
+                  >
+                    <option value="">-- Оберіть заклад --</option>
+                    {institutions.map((institution) => (
+                      <option key={institution.institutionId} value={institution.institutionId}>
+                        {institution.institutionName}
+                      </option>
+                    ))}
+                    <option value="custom">-- Інший (створити новий) --</option>
+                  </select>
+                </label>
+                {transferOutInstitutionId === "custom" && (
+                  <label>
+                    Назва нового закладу
+                    <input
+                      type="text"
+                      value={transferOutNewInstitutionName}
+                      onChange={(event) => setTransferOutNewInstitutionName(event.target.value)}
+                      placeholder="Введіть назву"
+                    />
+                  </label>
+                )}
+                <label>
+                  Дата переведення
+                  <input
+                    type="date"
+                    value={transferOutDate}
+                    onChange={(event) => setTransferOutDate(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Причина відрахування
+                  <input
+                    type="text"
+                    value={transferOutReasonEnd}
+                    onChange={(event) => setTransferOutReasonEnd(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Примітка
+                  <input
+                    type="text"
+                    value={transferOutNotes}
+                    onChange={(event) => setTransferOutNotes(event.target.value)}
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                disabled={
+                  isSaving ||
+                  transferOutInstitutionId === "" ||
+                  (transferOutInstitutionId === "custom" && transferOutNewInstitutionName.trim().length === 0) ||
+                  transferOutReasonEnd.trim().length === 0
+                }
+                onClick={() =>
+                  void runAction(
+                    async () => {
+                      let finalInstitutionId = transferOutInstitutionId
+                      if (finalInstitutionId === "custom") {
+                        const newInst = await createInstitution(transferOutNewInstitutionName.trim())
+                        finalInstitutionId = newInst.institutionId
+                      }
+                      await transferStudentOut(studentId, {
+                        institutionId: finalInstitutionId as string,
+                        transferDate: transferOutDate,
+                        reasonEnd: transferOutReasonEnd.trim(),
+                        notes: transferOutNotes.trim() || null,
+                      })
+                    },
+                    "Студента переведено до іншого закладу.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Перевести до іншого закладу"}
+              </button>
+            </>
+          ) : (
+            <StatusState tone="info" message="Перед переведенням потрібне активне зарахування." />
+          )}
+        </section>
+
+        <section className="panel">
+          <h2>Поновлення після переведення</h2>
+          {currentEnrollment ? (
+            <StatusState tone="info" message="Перед поновленням необхідно закрити поточне зарахування." />
+          ) : student.status !== "Expelled" ? (
+            <StatusState tone="info" message="Студент не відрахований (поновлювати можна лише відрахованих або переведених студентів)." />
+          ) : (
+            <>
+              <div className="form-grid">
+                <label>
+                  З якого закладу
+                  <select
+                    value={returnInstitutionId}
+                    onChange={(event) => setReturnInstitutionId(event.target.value)}
+                  >
+                    <option value="">-- Оберіть заклад --</option>
+                    {institutions.map((institution) => (
+                      <option key={institution.institutionId} value={institution.institutionId}>
+                        {institution.institutionName}
+                      </option>
+                    ))}
+                    <option value="custom">-- Інший (створити новий) --</option>
+                  </select>
+                </label>
+                {returnInstitutionId === "custom" && (
+                  <label>
+                    Назва нового закладу
+                    <input
+                      type="text"
+                      value={returnNewInstitutionName}
+                      onChange={(event) => setReturnNewInstitutionName(event.target.value)}
+                      placeholder="Введіть назву"
+                    />
+                  </label>
+                )}
+                <label>
+                  Цільова група
+                  <select value={returnGroupId} onChange={(event) => setReturnGroupId(event.target.value)}>
+                    <option value="">Оберіть групу</option>
+                    {groups.map((group) => (
+                      <option key={group.groupId} value={group.groupId}>
+                        {group.groupCode} ({group.departmentName})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Цільова підгрупа
+                  <select value={returnSubgroupId} onChange={(event) => setReturnSubgroupId(event.target.value)}>
+                    <option value="">Без підгрупи</option>
+                    {subgroupOptions.map((option) => (
+                      <option key={option.subgroupId} value={option.subgroupId}>
+                        {option.subgroupName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Дата поновлення
+                  <input
+                    type="date"
+                    value={returnDate}
+                    onChange={(event) => setReturnDate(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Причина поновлення
+                  <input
+                    type="text"
+                    value={returnReasonStart}
+                    onChange={(event) => setReturnReasonStart(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Примітка
+                  <input
+                    type="text"
+                    value={returnNotes}
+                    onChange={(event) => setReturnNotes(event.target.value)}
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                disabled={
+                  isSaving ||
+                  returnInstitutionId === "" ||
+                  (returnInstitutionId === "custom" && returnNewInstitutionName.trim().length === 0) ||
+                  returnGroupId === "" ||
+                  returnReasonStart.trim().length === 0
+                }
+                onClick={() =>
+                  void runAction(
+                    async () => {
+                      let finalInstitutionId = returnInstitutionId
+                      if (finalInstitutionId === "custom") {
+                        const newInst = await createInstitution(returnNewInstitutionName.trim())
+                        finalInstitutionId = newInst.institutionId
+                      }
+                      await returnStudentFromExternalTransfer(studentId, {
+                        institutionId: finalInstitutionId as string,
+                        groupId: returnGroupId,
+                        subgroupId: returnSubgroupId || null,
+                        dateFrom: returnDate,
+                        reasonStart: returnReasonStart.trim(),
+                        notes: returnNotes.trim() || null,
+                      })
+                    },
+                    "Студента поновлено після переведення.",
+                  )
+                }
+              >
+                {isSaving ? "Виконання..." : "Поновити студента"}
               </button>
             </>
           )}

@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using UniversityHistory.API.Extensions;
 using UniversityHistory.API.Middleware;
 using UniversityHistory.API.Services;
+using UniversityHistory.API.HostedServices;
 using UniversityHistory.Application.Queries.GetClassmates;
 using UniversityHistory.Application.Queries.GetActiveGroups;
 using UniversityHistory.Application.Queries.GetGroupComposition;
@@ -71,8 +72,10 @@ builder.Services.AddScoped<IStudyProcessRule, StudyProcessRule>();
 builder.Services.AddScoped<IDisciplineService, DisciplineService>();
 builder.Services.AddScoped<IAcademicUnitService, AcademicUnitService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IInstitutionService, InstitutionService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddHostedService<DailyStatusUpdateBackgroundService>();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidatorsFromAssemblyContaining<StudentCreateDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();

@@ -139,6 +139,7 @@ function AppContent() {
   return (
     <AppShell
       areaTitle={area === "admin" ? "Адмін-панель" : "Кабінет студента"}
+      areaSubtitle=""
       menuItems={menuItems}
       activePath={activeItem.path}
       onNavigate={navigate}

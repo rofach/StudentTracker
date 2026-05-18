@@ -73,6 +73,14 @@ public class StudentsController : ControllerBase
     }
 
     [Authorize(Roles = AuthRoles.Admin)]
+    [HttpPost("transferred-in")]
+    public async Task<IActionResult> CreateTransferredIn([FromBody] CreateTransferredStudentDto dto, CancellationToken ct)
+    {
+        var created = await _studentAccountService.CreateTransferredStudentAsync(dto, ct);
+        return CreatedAtAction(nameof(GetById), new { id = created.Student.StudentId }, created);
+    }
+
+    [Authorize(Roles = AuthRoles.Admin)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] StudentUpdateDto dto, CancellationToken ct)
     {
@@ -188,6 +196,25 @@ public class StudentsController : ControllerBase
     }
 
     [Authorize(Roles = AuthRoles.Admin)]
+    [HttpPost("{id:guid}/transfer-out")]
+    public async Task<IActionResult> TransferOut(Guid id, [FromBody] TransferStudentOutDto dto, CancellationToken ct)
+    {
+        var result = await _movementService.TransferOutAsync(id, dto, ct);
+        return CreatedAtAction(nameof(GetMovements), new { id }, result);
+    }
+
+    [Authorize(Roles = AuthRoles.Admin)]
+    [HttpPost("{id:guid}/return-from-external-transfer")]
+    public async Task<IActionResult> ReturnFromExternalTransfer(
+        Guid id,
+        [FromBody] ReturnStudentFromExternalTransferDto dto,
+        CancellationToken ct)
+    {
+        var result = await _movementService.ReturnFromExternalTransferAsync(id, dto, ct);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = AuthRoles.Admin)]
     [HttpPost("{id:guid}/leaves")]
     public async Task<IActionResult> CreateLeave(Guid id, [FromBody] CreateLeaveDto dto, CancellationToken ct)
     {
@@ -245,13 +272,14 @@ public class StudentsController : ControllerBase
 
     [Authorize(Roles = $"{AuthRoles.Admin},{AuthRoles.Student}")]
     [HttpGet("{id:guid}/disciplines")]
-    public async Task<IActionResult> GetDisciplines(Guid id, CancellationToken ct)
+    public async Task<IActionResult> GetDisciplines(
+        Guid id, [FromQuery] bool currentPlanOnly = false, CancellationToken ct = default)
     {
         var accessResult = EnsureStudentAccess(id);
         if (accessResult is not null)
             return accessResult;
 
-        return Ok(await _gradeService.GetStudentDisciplinesAsync(id, ct));
+        return Ok(await _gradeService.GetStudentDisciplinesAsync(id, currentPlanOnly, ct));
     }
 
     [Authorize(Roles = $"{AuthRoles.Admin},{AuthRoles.Student}")]

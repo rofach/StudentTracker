@@ -23,6 +23,8 @@ public interface IMovementService
         int pageSize = 20,
         CancellationToken ct = default);
     Task<ExternalTransferDto> CreateTransferAsync(Guid studentId, CreateTransferDto dto, CancellationToken ct = default);
+    Task<ExternalTransferDto> TransferOutAsync(Guid studentId, TransferStudentOutDto dto, CancellationToken ct = default);
+    Task<StudentDto> ReturnFromExternalTransferAsync(Guid studentId, ReturnStudentFromExternalTransferDto dto, CancellationToken ct = default);
     Task<AcademicLeaveDto> CreateLeaveAsync(Guid studentId, CreateLeaveDto dto, CancellationToken ct = default);
     Task<AcademicLeaveDto> CloseLeaveAsync(Guid leaveId, CloseAcademicLeaveDto dto, CancellationToken ct = default);
     Task<AcademicLeaveDto> UpdateLeaveAsync(Guid leaveId, UpdateAcademicLeaveDto dto, CancellationToken ct = default);

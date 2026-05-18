@@ -2,6 +2,7 @@ using UniversityHistory.Application.Auth;
 using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Auth;
 using UniversityHistory.Application.Interfaces.Services;
+using UniversityHistory.Application.Mappings;
 using UniversityHistory.Domain.Exceptions;
 using UniversityHistory.Domain.Interfaces.Repositories;
 
@@ -28,29 +29,33 @@ public class StudentAccountService : IStudentAccountService
 
     public async Task<StudentCreatedResultDto> CreateStudentAsync(StudentCreateDto dto, CancellationToken ct = default)
     {
-        var email = dto.Email!;
+        return await CreateStudentWithAccountAsync(dto, ct);
+    }
+
+    public async Task<StudentCreatedResultDto> CreateTransferredStudentAsync(
+        CreateTransferredStudentDto dto,
+        CancellationToken ct = default)
+    {
+        var studentDto = dto.ToStudentCreateDto();
+        var email = studentDto.Email!;
 
         await _identityAccountManager.EnsureRoleExistsAsync(AuthRoles.Student, ct);
         await _identityAccountManager.EnsureEmailIsAvailableAsync(email, null, ct);
 
         return await _unitOfWork.ExecuteInTransactionAsync(async innerCt =>
         {
-            var student = await _studentService.CreateAsync(dto, innerCt);
-            var password = CreateGeneratedPassword();
+            var result = await CreateStudentWithAccountCoreAsync(studentDto, email, innerCt);
 
-            var account = await _identityAccountManager.CreateAccountAsync(
-                email,
-                email,
-                password.Value,
-                student.StudentId,
-                emailConfirmed: true,
+            await EnrollTransferredStudentAsync(
+                result.Student.StudentId,
+                dto.GroupId,
+                dto.SubgroupId,
+                dto.DateFrom,
+                dto.InstitutionId,
+                dto.Notes,
                 innerCt);
 
-            await _identityAccountManager.EnsureRoleAssignedAsync(account.UserId, AuthRoles.Student, innerCt);
-
-            return new StudentCreatedResultDto(
-                student,
-                new StudentAccountPasswordDto(email, password.Value, password.GeneratedRandomly));
+            return result;
         }, ct);
     }
 
@@ -123,6 +128,113 @@ public class StudentAccountService : IStudentAccountService
     private GeneratedPassword CreateGeneratedPassword()
     {
         return new GeneratedPassword(_passwordGenerator.Generate(), true);
+    }
+
+    private async Task<StudentCreatedResultDto> CreateStudentWithAccountAsync(StudentCreateDto dto, CancellationToken ct)
+    {
+        var email = dto.Email!;
+
+        await _identityAccountManager.EnsureRoleExistsAsync(AuthRoles.Student, ct);
+        await _identityAccountManager.EnsureEmailIsAvailableAsync(email, null, ct);
+
+        return await _unitOfWork.ExecuteInTransactionAsync(async innerCt =>
+        {
+            return await CreateStudentWithAccountCoreAsync(dto, email, innerCt);
+        }, ct);
+    }
+
+    private async Task<StudentCreatedResultDto> CreateStudentWithAccountCoreAsync(
+        StudentCreateDto dto,
+        string email,
+        CancellationToken ct)
+    {
+        var student = await _studentService.CreateAsync(dto, ct);
+        var password = CreateGeneratedPassword();
+
+        var account = await _identityAccountManager.CreateAccountAsync(
+            email,
+            email,
+            password.Value,
+            student.StudentId,
+            emailConfirmed: true,
+            ct);
+
+        await _identityAccountManager.EnsureRoleAssignedAsync(account.UserId, AuthRoles.Student, ct);
+
+        return new StudentCreatedResultDto(
+            student,
+            new StudentAccountPasswordDto(email, password.Value, password.GeneratedRandomly));
+    }
+
+    private async Task EnrollTransferredStudentAsync(
+        Guid studentId,
+        Guid groupId,
+        Guid? subgroupId,
+        DateOnly dateFrom,
+        Guid institutionId,
+        string? notes,
+        CancellationToken ct)
+    {
+        _ = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(institutionId, ct)
+            ?? throw new NotFoundException("Institution", institutionId);
+
+        var group = await _unitOfWork.Groups.GetByIdAsync(groupId, ct)
+            ?? throw new NotFoundException("StudyGroup", groupId);
+
+        if (subgroupId.HasValue && !group.Subgroups.Any(sg => sg.SubgroupId == subgroupId.Value))
+            throw new DomainException($"Subgroup {subgroupId.Value} does not belong to Group {groupId}.");
+
+        if (await _unitOfWork.Enrollments.HasOverlapAsync(studentId, dateFrom, null, null, ct))
+            throw new DomainException("Для студента вже існує активне або таке, що перетинається, зарахування.");
+
+        var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException("Student", studentId);
+
+        student.Status = Domain.Enums.StudentStatus.Active;
+        _unitOfWork.Students.Update(student);
+
+        var enrollment = new Domain.Entities.StudentGroupEnrollment
+        {
+            StudentId = studentId,
+            GroupId = groupId,
+            DateFrom = dateFrom,
+            ReasonStart = "Переведення з іншого університету"
+        };
+        _unitOfWork.Enrollments.Add(enrollment);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        if (subgroupId.HasValue)
+        {
+            _unitOfWork.SubgroupEnrollments.Add(new Domain.Entities.StudentSubgroupEnrollment
+            {
+                EnrollmentId = enrollment.EnrollmentId,
+                SubgroupId = subgroupId.Value,
+                DateFrom = dateFrom,
+                Reason = "Переведення з іншого університету"
+            });
+        }
+
+        var activePlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(groupId, dateFrom, ct);
+        if (activePlan is not null)
+        {
+            var courses = StudyPlanService.GenerateCourseEnrollments(
+                enrollment.EnrollmentId,
+                activePlan.GroupPlanAssignmentId,
+                dateFrom,
+                activePlan.Plan);
+            _unitOfWork.StudyPlans.AddCourseEnrollments(courses);
+        }
+
+        _unitOfWork.ExternalTransfers.Add(new Domain.Entities.ExternalTransfer
+        {
+            StudentId = studentId,
+            InstitutionId = institutionId,
+            TransferType = Domain.Enums.TransferType.In,
+            TransferDate = dateFrom,
+            Notes = notes
+        });
+
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 
     private readonly record struct GeneratedPassword(string Value, bool GeneratedRandomly);

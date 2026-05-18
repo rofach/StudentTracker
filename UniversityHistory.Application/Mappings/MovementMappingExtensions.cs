@@ -54,6 +54,13 @@ public static class MovementMappingExtensions
             transfer.Notes);
     }
 
+    public static InstitutionDto ToDto(this Institution institution)
+    {
+        return new InstitutionDto(
+            institution.InstitutionId,
+            institution.InstitutionName);
+    }
+
     public static StudentInternalTransferSummaryDto ToSummaryDto(this StudentGroupTransfer transfer)
     {
         var differenceItems = transfer.DifferenceItems;

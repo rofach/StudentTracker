@@ -41,6 +41,11 @@ public record ExternalTransferDto(
     string? Notes
 );
 
+public record InstitutionDto(
+    Guid InstitutionId,
+    string InstitutionName
+);
+
 public record StudentMovementDto(
     IEnumerable<AcademicLeaveDto> Leaves,
     IEnumerable<ExternalTransferDto> Transfers,
@@ -51,6 +56,22 @@ public record CreateTransferDto(
     Guid InstitutionId,
     string TransferType,
     DateOnly TransferDate,
+    string? Notes
+);
+
+public record TransferStudentOutDto(
+    Guid InstitutionId,
+    DateOnly TransferDate,
+    string ReasonEnd,
+    string? Notes
+);
+
+public record ReturnStudentFromExternalTransferDto(
+    Guid InstitutionId,
+    Guid GroupId,
+    Guid? SubgroupId,
+    DateOnly DateFrom,
+    string ReasonStart,
     string? Notes
 );
 

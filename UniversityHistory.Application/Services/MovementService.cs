@@ -88,6 +88,120 @@ public class MovementService : IMovementService
         return created.ToDto(institution.InstitutionName);
     }
 
+    public async Task<ExternalTransferDto> TransferOutAsync(Guid studentId, TransferStudentOutDto dto, CancellationToken ct = default)
+    {
+        return await _unitOfWork.ExecuteInTransactionAsync(async innerCt =>
+        {
+            var student = await _unitOfWork.Students.GetByIdAsync(studentId, innerCt)
+                ?? throw new NotFoundException(nameof(Student), studentId);
+
+            _ = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(dto.InstitutionId, innerCt)
+                ?? throw new NotFoundException(nameof(Institution), dto.InstitutionId);
+
+            var enrollment = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, innerCt)
+                ?? throw new DomainException("У студента немає активного зарахування для зовнішнього переведення.");
+
+            await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(enrollment.EnrollmentId, dto.TransferDate, innerCt);
+
+            if (dto.TransferDate < enrollment.DateFrom)
+                throw new DomainException("Дата зовнішнього переведення не може бути раніше дати початку поточного зарахування.");
+
+            var existingCourses = (await _unitOfWork.StudyPlans
+                .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, innerCt)).ToList();
+            var plannedToRemove = existingCourses
+                .Where(course => course.Status == CourseStatus.Planned && !course.GradeRecords.Any())
+                .ToList();
+            if (plannedToRemove.Count > 0)
+            {
+                _unitOfWork.StudyPlans.RemoveCourseEnrollments(plannedToRemove);
+            }
+
+            var openSubgroupEnrollment = await _unitOfWork.SubgroupEnrollments
+                .GetOpenByEnrollmentIdAsync(enrollment.EnrollmentId, innerCt);
+            if (openSubgroupEnrollment is not null)
+            {
+                if (dto.TransferDate < openSubgroupEnrollment.DateFrom)
+                    throw new DomainException("Дата зовнішнього переведення не може бути раніше дати початку поточної підгрупи.");
+
+                openSubgroupEnrollment.DateTo = dto.TransferDate;
+                _unitOfWork.SubgroupEnrollments.Update(openSubgroupEnrollment);
+            }
+
+            enrollment.DateTo = dto.TransferDate;
+            enrollment.ReasonEnd = dto.ReasonEnd;
+            _unitOfWork.Enrollments.Update(enrollment);
+
+            student.Status = StudentStatus.Expelled;
+            _unitOfWork.Students.Update(student);
+
+            var transfer = new ExternalTransfer
+            {
+                StudentId = studentId,
+                InstitutionId = dto.InstitutionId,
+                TransferType = TransferType.Out,
+                TransferDate = dto.TransferDate,
+                Notes = dto.Notes
+            };
+
+            _unitOfWork.ExternalTransfers.Add(transfer);
+            await _unitOfWork.SaveChangesAsync(innerCt);
+
+            var institution = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(dto.InstitutionId, innerCt)
+                ?? throw new NotFoundException(nameof(Institution), dto.InstitutionId);
+
+            return transfer.ToDto(institution.InstitutionName);
+        }, ct);
+    }
+
+    public async Task<StudentDto> ReturnFromExternalTransferAsync(
+        Guid studentId,
+        ReturnStudentFromExternalTransferDto dto,
+        CancellationToken ct = default)
+    {
+        return await _unitOfWork.ExecuteInTransactionAsync(async innerCt =>
+        {
+            var student = await _unitOfWork.Students.GetByIdAsync(studentId, innerCt)
+                ?? throw new NotFoundException(nameof(Student), studentId);
+
+            _ = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(dto.InstitutionId, innerCt)
+                ?? throw new NotFoundException(nameof(Institution), dto.InstitutionId);
+
+            var activeEnrollment = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, innerCt);
+            if (activeEnrollment is not null)
+                throw new DomainException("Повернення з іншого університету неможливе, поки у студента є активне зарахування.");
+
+            var transfers = await _unitOfWork.ExternalTransfers.GetByStudentIdAsync(studentId, innerCt);
+            if (!transfers.Any(static transfer => transfer.TransferType == TransferType.Out))
+                throw new DomainException("Повернення доступне лише для студента, у якого вже є зафіксоване вибуття до іншого університету.");
+
+            student.Status = StudentStatus.Active;
+            _unitOfWork.Students.Update(student);
+
+            await EnrollStudentAsync(
+                new EnrollStudentDto(
+                    studentId,
+                    dto.GroupId,
+                    dto.SubgroupId,
+                    dto.DateFrom,
+                    dto.ReasonStart),
+                innerCt);
+
+            var transfer = new ExternalTransfer
+            {
+                StudentId = studentId,
+                InstitutionId = dto.InstitutionId,
+                TransferType = TransferType.In,
+                TransferDate = dto.DateFrom,
+                Notes = dto.Notes
+            };
+
+            _unitOfWork.ExternalTransfers.Add(transfer);
+            await _unitOfWork.SaveChangesAsync(innerCt);
+
+            return student.ToDto();
+        }, ct);
+    }
+
     public async Task<AcademicLeaveDto> CreateLeaveAsync(Guid studentId, CreateLeaveDto dto, CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
@@ -117,14 +231,9 @@ public class MovementService : IMovementService
 
         var leave = dto.ToEntity();
         var created = _unitOfWork.AcademicLeaves.Add(leave);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        if (dto.StartDate <= today && (!dto.EndDate.HasValue || dto.EndDate.Value >= today))
-        {
-            enrollment.Student.Status = StudentStatus.OnLeave;
-            _unitOfWork.Students.Update(enrollment.Student);
-        }
-
+        await RecalculateStudentLeaveStatusAsync(enrollment.StudentId, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         return created.ToDto();
     }
@@ -143,24 +252,9 @@ public class MovementService : IMovementService
         leave.EndDate = dto.EndDate;
         leave.ReturnReason = dto.ReturnReason;
         _unitOfWork.AcademicLeaves.Update(leave);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        if (dto.EndDate <= today)
-        {
-            var hasAnotherActiveLeave = (await _unitOfWork.AcademicLeaves
-                    .GetByStudentIdAsync(leave.Enrollment.StudentId, ct))
-                .Any(existing =>
-                    existing.LeaveId != leave.LeaveId &&
-                    existing.StartDate <= today &&
-                    (!existing.EndDate.HasValue || existing.EndDate.Value >= today));
-
-            if (!hasAnotherActiveLeave && leave.Enrollment.Student.Status == StudentStatus.OnLeave)
-            {
-                leave.Enrollment.Student.Status = StudentStatus.Active;
-                _unitOfWork.Students.Update(leave.Enrollment.Student);
-            }
-        }
-
+        await RecalculateStudentLeaveStatusAsync(leave.Enrollment.StudentId, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         return leave.ToDto();
     }
@@ -202,6 +296,7 @@ public class MovementService : IMovementService
         leave.Reason = dto.Reason;
         leave.ReturnReason = dto.ReturnReason;
         _unitOfWork.AcademicLeaves.Update(leave);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         await RecalculateStudentLeaveStatusAsync(enrollment.StudentId, ct);
         await _unitOfWork.SaveChangesAsync(ct);
@@ -234,5 +329,79 @@ public class MovementService : IMovementService
             _unitOfWork.Students.Update(student);
         }
     }
-}
 
+    private async Task EnrollStudentAsync(EnrollStudentDto dto, CancellationToken ct)
+    {
+        _ = await _unitOfWork.Students.GetByIdAsync(dto.StudentId, ct)
+            ?? throw new NotFoundException(nameof(Student), dto.StudentId);
+        var group = await _unitOfWork.Groups.GetByIdAsync(dto.GroupId, ct)
+            ?? throw new NotFoundException(nameof(StudyGroup), dto.GroupId);
+
+        if (dto.SubgroupId.HasValue && !group.Subgroups.Any(sg => sg.SubgroupId == dto.SubgroupId.Value))
+            throw new DomainException($"Subgroup {dto.SubgroupId.Value} does not belong to Group {dto.GroupId}.");
+
+        if (await _unitOfWork.Enrollments.HasOverlapAsync(dto.StudentId, dto.DateFrom, null, null, ct))
+            throw new EnrollmentOverlapException(dto.StudentId, dto.DateFrom, null);
+
+        var enrollment = new StudentGroupEnrollment
+        {
+            StudentId = dto.StudentId,
+            GroupId = dto.GroupId,
+            DateFrom = dto.DateFrom,
+            ReasonStart = dto.ReasonStart
+        };
+        _unitOfWork.Enrollments.Add(enrollment);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        if (dto.SubgroupId.HasValue)
+        {
+            _unitOfWork.SubgroupEnrollments.Add(new StudentSubgroupEnrollment
+            {
+                EnrollmentId = enrollment.EnrollmentId,
+                SubgroupId = dto.SubgroupId.Value,
+                DateFrom = dto.DateFrom,
+                DateTo = null,
+                Reason = dto.ReasonStart
+            });
+        }
+
+        var activePlan = await _unitOfWork.GroupPlanAssignments.GetActiveOnDateAsync(dto.GroupId, dto.DateFrom, ct);
+        if (activePlan is not null)
+        {
+            var coveredDisciplineIds = await GetCoveredDisciplineIdsAsync(dto.StudentId, ct);
+            var courses = StudyPlanService.GenerateCourseEnrollments(
+                    enrollment.EnrollmentId,
+                    activePlan.GroupPlanAssignmentId,
+                    dto.DateFrom,
+                    activePlan.Plan)
+                .Where(course => !coveredDisciplineIds.Contains(course.PlanDiscipline.DisciplineId))
+                .ToList();
+            _unitOfWork.StudyPlans.AddCourseEnrollments(courses);
+        }
+
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    private static HashSet<Guid> GetCoveredDisciplineIds(IEnumerable<StudentCourseEnrollment> courses)
+    {
+        return courses
+            .Where(course => course.Status != CourseStatus.Planned || course.GradeRecords.Any())
+            .Select(course => course.PlanDiscipline.DisciplineId)
+            .ToHashSet();
+    }
+
+    private async Task<HashSet<Guid>> GetCoveredDisciplineIdsAsync(Guid studentId, CancellationToken ct)
+    {
+        var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
+        var courses = new List<StudentCourseEnrollment>();
+
+        foreach (var enrollment in enrollments)
+        {
+            var enrollmentCourses = await _unitOfWork.StudyPlans
+                .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct);
+            courses.AddRange(enrollmentCourses);
+        }
+
+        return GetCoveredDisciplineIds(courses);
+    }
+}

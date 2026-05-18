@@ -7,7 +7,7 @@ public record GradeDto(
     int SemesterNo,
     int AcademicYearStart,
     string AcademicYearLabel,
-    string GradeValue,
+    int GradeValue,
     DateOnly AssessmentDate
 );
 
@@ -28,7 +28,7 @@ public record StudentDisciplineOptionDto(
 );
 
 public record UpsertGradeDto(
-    string GradeValue,
+    int GradeValue,
     DateOnly AssessmentDate
 );
 

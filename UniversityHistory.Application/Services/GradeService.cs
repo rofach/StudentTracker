@@ -57,13 +57,14 @@ public class GradeService : IGradeService
 
     public async Task<IReadOnlyList<StudentDisciplineOptionDto>> GetStudentDisciplinesAsync(
         Guid studentId,
+        bool currentPlanOnly = false,
         CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         return await _studentDisciplinesHandler.HandleAsync(
-            new GetStudentDisciplinesQuery(studentId),
+            new GetStudentDisciplinesQuery(studentId, currentPlanOnly),
             ct);
     }
 
@@ -73,8 +74,8 @@ public class GradeService : IGradeService
         UpsertGradeDto dto,
         CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.GradeValue))
-            throw new DomainException("Grade value is required.");
+        if (dto.GradeValue < 0 || dto.GradeValue > 100)
+            throw new DomainException("Grade value must be between 0 and 100.");
 
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
@@ -99,14 +100,14 @@ public class GradeService : IGradeService
             {
                 CourseEnrollmentId = courseEnrollmentId,
                 CourseEnrollment = courseEnrollment,
-                GradeValue = dto.GradeValue.Trim(),
+                GradeValue = dto.GradeValue,
                 AssessmentDate = dto.AssessmentDate
             };
             _unitOfWork.Grades.Add(grade);
         }
         else
         {
-            existingGrade.GradeValue = dto.GradeValue.Trim();
+            existingGrade.GradeValue = dto.GradeValue;
             existingGrade.AssessmentDate = dto.AssessmentDate;
             grade = existingGrade;
             _unitOfWork.Grades.Update(existingGrade);

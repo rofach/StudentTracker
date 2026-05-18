@@ -27,6 +27,53 @@ public class CreateTransferDtoValidator : AppValidator<CreateTransferDto>
     }
 }
 
+public class TransferStudentOutDtoValidator : AppValidator<TransferStudentOutDto>
+{
+    public TransferStudentOutDtoValidator()
+    {
+        RuleFor(x => x.InstitutionId)
+            .NotEmpty();
+
+        RuleFor(x => x.TransferDate)
+            .NotDefaultDate();
+
+        RuleFor(x => x.ReasonEnd)
+            .NotEmpty()
+            .MaximumLength(200);
+
+        When(x => !string.IsNullOrWhiteSpace(x.Notes), () =>
+        {
+            RuleFor(x => x.Notes!)
+                .OptionalText(200);
+        });
+    }
+}
+
+public class ReturnStudentFromExternalTransferDtoValidator : AppValidator<ReturnStudentFromExternalTransferDto>
+{
+    public ReturnStudentFromExternalTransferDtoValidator()
+    {
+        RuleFor(x => x.InstitutionId)
+            .NotEmpty();
+
+        RuleFor(x => x.GroupId)
+            .NotEmpty();
+
+        RuleFor(x => x.DateFrom)
+            .NotDefaultDate();
+
+        RuleFor(x => x.ReasonStart)
+            .NotEmpty()
+            .MaximumLength(200);
+
+        When(x => !string.IsNullOrWhiteSpace(x.Notes), () =>
+        {
+            RuleFor(x => x.Notes!)
+                .OptionalText(200);
+        });
+    }
+}
+
 public class CreateLeaveDtoValidator : AppValidator<CreateLeaveDto>
 {
     public CreateLeaveDtoValidator()

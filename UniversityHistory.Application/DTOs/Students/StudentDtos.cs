@@ -20,6 +20,20 @@ public record StudentCreateDto(
     string? Phone
 );
 
+public record CreateTransferredStudentDto(
+    string FirstName,
+    string LastName,
+    string? Patronymic,
+    DateOnly? BirthDate,
+    string? Email,
+    string? Phone,
+    Guid InstitutionId,
+    Guid GroupId,
+    Guid? SubgroupId,
+    DateOnly DateFrom,
+    string? Notes
+);
+
 public record StudentUpdateDto(
     string FirstName,
     string LastName,

@@ -46,6 +46,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
   const [error, setError] = useState<string | null>(null)
 
   const [semesterFilter, setSemesterFilter] = useState<string>("all")
+  const [planScope, setPlanScope] = useState<"all" | "current">("all")
   const [searchText, setSearchText] = useState("")
   const debouncedSearchText = useDebouncedValue(searchText, 250)
 
@@ -61,7 +62,10 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
     setIsLoading(true)
     setError(null)
 
-    Promise.all([getStudentDisciplines(studentId), getStudentGrades(studentId, 1, 200)])
+    Promise.all([
+      getStudentDisciplines(studentId, planScope === "current"),
+      getStudentGrades(studentId, 1, 200),
+    ])
       .then(([disciplineRows, gradesPage]) => {
         if (!isActive) {
           return
@@ -69,6 +73,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
 
         setDisciplines(disciplineRows)
         setGrades(gradesPage.items)
+        setSemesterFilter("all")
       })
       .catch((err: unknown) => {
         if (!isActive) {
@@ -88,7 +93,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
     return () => {
       isActive = false
     }
-  }, [studentId])
+  }, [studentId, planScope])
 
   const semesterOptions = useMemo(() => {
     const map = new Map<string, SemesterOption>()
@@ -250,6 +255,14 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
       <section className="panel">
         <h2>Фільтри предметів</h2>
         <div className="filters-row">
+          <label>
+            План
+            <select value={planScope} onChange={(event) => setPlanScope(event.target.value as "all" | "current")}>
+              <option value="all">Усі плани</option>
+              <option value="current">Поточний план</option>
+            </select>
+          </label>
+
           <label>
             Семестр
             <select value={semesterFilter} onChange={(event) => setSemesterFilter(event.target.value)}>

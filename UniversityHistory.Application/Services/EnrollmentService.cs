@@ -113,6 +113,17 @@ public class EnrollmentService : IEnrollmentService
         var coveredDisciplineIds = await GetCoveredDisciplineIdsAsync(studentId, ct);
         var activeSemesterNo = await GetActiveSemesterNoAsync(studentId, dto.MoveDate, ct);
 
+        var pendingDifferenceDisciplines = activePlan.Plan.PlanDisciplines
+            .Where(pd => pd.SemesterNo <= activeSemesterNo)
+            .Where(pd => !coveredDisciplineIds.Contains(pd.DisciplineId))
+            .ToList();
+
+        var totalDifferenceCredits = pendingDifferenceDisciplines.Sum(pd => pd.Credits);
+        if (totalDifferenceCredits > 20)
+        {
+            throw new DomainException($"Cannot transfer: the academic difference is {totalDifferenceCredits} credits, which exceeds the maximum allowed of 20 credits.");
+        }
+
         var toRemove = oldCourses
             .Where(ce => ce.Status == CourseStatus.Planned && !ce.GradeRecords.Any())
             .ToList();
@@ -159,9 +170,7 @@ public class EnrollmentService : IEnrollmentService
         _unitOfWork.GroupTransfers.Add(groupTransfer);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        var differenceItems = activePlan.Plan.PlanDisciplines
-            .Where(pd => pd.SemesterNo <= activeSemesterNo)
-            .Where(pd => !coveredDisciplineIds.Contains(pd.DisciplineId))
+        var differenceItems = pendingDifferenceDisciplines
             .Select(pd => new AcademicDifferenceItem
             {
                 TransferId = groupTransfer.TransferId,

@@ -31,8 +31,8 @@ public class GetClassmatesQueryHandler : IGetClassmatesQueryHandler
                 s.last_name               AS LastName,
                 g.group_code              AS GroupCode,
                 other_e.group_id          AS GroupId,
-                sse.subgroup_id           AS SubgroupId,
-                sse.subgroup_name         AS SubgroupName,
+                se.subgroup_id           AS SubgroupId,
+                sg.subgroup_name         AS SubgroupName,
                 CASE
                     WHEN mine_e.date_from > other_e.date_from THEN mine_e.date_from
                     ELSE other_e.date_from
@@ -50,23 +50,17 @@ public class GetClassmatesQueryHandler : IGetClassmatesQueryHandler
              AND other_e.student_id <> {studentId}
             JOIN Student s ON s.student_id = other_e.student_id
             JOIN Study_Group g ON g.group_id = other_e.group_id
-            OUTER APPLY (
-                SELECT TOP 1
-                    se.subgroup_id   AS subgroup_id,
-                    sg.subgroup_name AS subgroup_name
-                FROM Student_Subgroup_Enrollment se
-                JOIN Subgroup sg ON sg.subgroup_id = se.subgroup_id
-                WHERE se.enrollment_id = other_e.enrollment_id
-                  AND se.date_from <= CASE
-                        WHEN mine_e.date_from > other_e.date_from THEN mine_e.date_from
-                        ELSE other_e.date_from
-                    END
-                  AND (se.date_to IS NULL OR se.date_to >= CASE
-                        WHEN mine_e.date_from > other_e.date_from THEN mine_e.date_from
-                        ELSE other_e.date_from
-                    END)
-                ORDER BY se.date_from DESC, se.subgroup_enrollment_id DESC
-            ) sse
+            LEFT JOIN Student_Subgroup_Enrollment se 
+                ON se.enrollment_id = other_e.enrollment_id
+               AND se.date_from <= CASE
+                     WHEN mine_e.date_from > other_e.date_from THEN mine_e.date_from
+                     ELSE other_e.date_from
+                 END
+               AND (se.date_to IS NULL OR se.date_to >= CASE
+                     WHEN mine_e.date_from > other_e.date_from THEN mine_e.date_from
+                     ELSE other_e.date_from
+                 END)
+            LEFT JOIN Subgroup sg ON sg.subgroup_id = se.subgroup_id
             WHERE mine_e.student_id = {studentId}
               AND mine_e.date_from <= ISNULL(other_e.date_to, '9999-12-31')
               AND ISNULL(mine_e.date_to, '9999-12-31') >= other_e.date_from

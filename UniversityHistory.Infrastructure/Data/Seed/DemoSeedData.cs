@@ -7,7 +7,7 @@ using UniversityHistory.Domain.Enums;
 
 namespace UniversityHistory.Infrastructure.Data.Seed;
 
-internal static class DemoSeedData
+internal static partial class DemoSeedData
 {
     private static readonly DateOnly ReferenceDate = new(2026, 4, 21);
     private const string EntryReason = "Вступ";
@@ -146,9 +146,9 @@ internal static class DemoSeedData
 
     private static Institution[] BuildInstitutions() =>
     [
-        new Institution { InstitutionId = Id(1), InstitutionName = "Національний технічний університет України «КПІ імені Ігоря Сікорського»", City = "Київ", Country = "Україна" },
-        new Institution { InstitutionId = Id(2), InstitutionName = "Львівська політехніка", City = "Львів", Country = "Україна" },
-        new Institution { InstitutionId = Id(3), InstitutionName = "Харківський національний університет радіоелектроніки", City = "Харків", Country = "Україна" }
+        new Institution { InstitutionId = Id(1), InstitutionName = "Національний технічний університет України «КПІ імені Ігоря Сікорського»" },
+        new Institution { InstitutionId = Id(2), InstitutionName = "Львівська політехніка" },
+        new Institution { InstitutionId = Id(3), InstitutionName = "Харківський національний університет радіоелектроніки" }
     ];
 
     private static AcademicUnit[] BuildAcademicUnits() =>
@@ -158,6 +158,24 @@ internal static class DemoSeedData
             AcademicUnitId = Id(1),
             Name = "Факультет комп'ютерних наук та інженерії",
             Type = AcademicUnitType.Faculty
+        },
+        new AcademicUnit
+        {
+            AcademicUnitId = Id(2),
+            Name = "Інститут прикладної математики та кібернетики",
+            Type = AcademicUnitType.Institute
+        },
+        new AcademicUnit
+        {
+            AcademicUnitId = Id(3),
+            Name = "Навчально-науковий інститут економіки та менеджменту",
+            Type = AcademicUnitType.Institute
+        },
+        new AcademicUnit
+        {
+            AcademicUnitId = Id(4),
+            Name = "Факультет лінгвістики та права",
+            Type = AcademicUnitType.Faculty
         }
     ];
 
@@ -166,14 +184,22 @@ internal static class DemoSeedData
         new Department { DepartmentId = Id(1), AcademicUnitId = Id(1), Name = "Кафедра програмної інженерії" },
         new Department { DepartmentId = Id(2), AcademicUnitId = Id(1), Name = "Кафедра комп'ютерних наук" },
         new Department { DepartmentId = Id(3), AcademicUnitId = Id(1), Name = "Кафедра комп'ютерної інженерії" },
-        new Department { DepartmentId = Id(4), AcademicUnitId = Id(1), Name = "Кафедра комп'ютерних технологій" }
+        new Department { DepartmentId = Id(4), AcademicUnitId = Id(1), Name = "Кафедра комп'ютерних технологій" },
+        new Department { DepartmentId = Id(5), AcademicUnitId = Id(2), Name = "Кафедра кібернетики та штучного інтелекту" },
+        new Department { DepartmentId = Id(6), AcademicUnitId = Id(3), Name = "Кафедра міжнародної економіки" },
+        new Department { DepartmentId = Id(7), AcademicUnitId = Id(3), Name = "Кафедра менеджменту та маркетингу" },
+        new Department { DepartmentId = Id(8), AcademicUnitId = Id(4), Name = "Кафедра теорії та практики перекладу" },
+        new Department { DepartmentId = Id(9), AcademicUnitId = Id(4), Name = "Кафедра інформаційного права" }
     ];
 
     private static PlanDefinition[] BuildPlans() =>
     [
         new PlanDefinition(1, "121", "Програмна інженерія 2025", new DateOnly(2025, 9, 1), BuildSoftwareEngineeringCourses()),
         new PlanDefinition(2, "122", "Комп'ютерні науки 2025", new DateOnly(2025, 9, 1), BuildComputerScienceCourses()),
-        new PlanDefinition(3, "123", "Комп'ютерна інженерія 2025", new DateOnly(2025, 9, 1), BuildComputerEngineeringCourses())
+        new PlanDefinition(3, "123", "Комп'ютерна інженерія 2025", new DateOnly(2025, 9, 1), BuildComputerEngineeringCourses()),
+        new PlanDefinition(4, "122", "Кібернетика та ШІ 2025", new DateOnly(2025, 9, 1), BuildCyberneticsCourses()),
+        new PlanDefinition(5, "051", "Міжнародна економіка 2025", new DateOnly(2025, 9, 1), BuildEconomicsCourses()),
+        new PlanDefinition(6, "035", "Прикладна лінгвістика 2025", new DateOnly(2025, 9, 1), BuildLinguisticsCourses())
     ];
 
     private static GroupDefinition[] BuildGroups() =>
@@ -183,7 +209,10 @@ internal static class DemoSeedData
         new GroupDefinition(3, "КН-24", 2, 2, new DateOnly(2024, 9, 1)),
         new GroupDefinition(4, "КН-25", 2, 2, new DateOnly(2025, 9, 1)),
         new GroupDefinition(5, "КТ-25", 4, 3, new DateOnly(2025, 9, 1)),
-        new GroupDefinition(6, "КІ-25", 3, 3, new DateOnly(2025, 9, 1))
+        new GroupDefinition(6, "КІ-25", 3, 3, new DateOnly(2025, 9, 1)),
+        new GroupDefinition(7, "ШІ-25", 5, 4, new DateOnly(2025, 9, 1)),
+        new GroupDefinition(8, "МЕ-25", 6, 5, new DateOnly(2025, 9, 1)),
+        new GroupDefinition(9, "ПЛ-25", 8, 6, new DateOnly(2025, 9, 1))
     ];
 
     private static Subgroup[] BuildSubgroups(IEnumerable<GroupDefinition> groups) =>
@@ -230,7 +259,19 @@ internal static class DemoSeedData
             new StudentDefinition(29, "Кирило", "Ковтун", "Олександрович", new DateOnly(2006, 4, 24)),
             new StudentDefinition(30, "Поліна", "Нагорна", "Сергіївна", new DateOnly(2006, 7, 7)),
             new StudentDefinition(31, "Арсен", "Паламарчук", "Юрійович", new DateOnly(2006, 9, 19)),
-            new StudentDefinition(32, "Соломія", "Петренко", "Василівна", new DateOnly(2006, 12, 2))
+            new StudentDefinition(32, "Соломія", "Петренко", "Василівна", new DateOnly(2006, 12, 2)),
+            // Students for ШІ-25 (Group 7)
+            new StudentDefinition(33, "Олег", "Сидоренко", "Іванович", new DateOnly(2006, 1, 15)),
+            new StudentDefinition(34, "Марина", "Коваленко", "Олександрівна", new DateOnly(2006, 3, 20)),
+            new StudentDefinition(35, "Іван", "Мороз", "Віталійович", new DateOnly(2006, 5, 25)),
+            // Students for МЕ-25 (Group 8)
+            new StudentDefinition(36, "Наталія", "Кравченко", "Сергіївна", new DateOnly(2006, 7, 10)),
+            new StudentDefinition(37, "Антон", "Вовк", "Миколайович", new DateOnly(2006, 9, 5)),
+            new StudentDefinition(38, "Дарія", "Григоренко", "Андріївна", new DateOnly(2006, 11, 12)),
+            // Students for ПЛ-25 (Group 9)
+            new StudentDefinition(39, "Євген", "Ткаченко", "Володимирович", new DateOnly(2006, 2, 8)),
+            new StudentDefinition(40, "Валерія", "Онищенко", "Ігорівна", new DateOnly(2006, 4, 18)),
+            new StudentDefinition(41, "Станіслав", "Лисенко", "Петрович", new DateOnly(2006, 6, 22))
         };
 
         return definitions
@@ -288,6 +329,22 @@ internal static class DemoSeedData
         new EnrollmentDefinition(31, 31, 6, new DateOnly(2025, 9, 1), null, EntryReason, null, 2),
         new EnrollmentDefinition(32, 32, 6, new DateOnly(2025, 9, 1), null, EntryReason, null, null),
 
+        // Group 7 (ШІ-25)
+        new EnrollmentDefinition(33, 33, 7, new DateOnly(2025, 9, 1), null, EntryReason, null, 1),
+        new EnrollmentDefinition(34, 34, 7, new DateOnly(2025, 9, 1), null, EntryReason, null, 2),
+        new EnrollmentDefinition(35, 35, 7, new DateOnly(2025, 9, 1), null, EntryReason, null, null),
+
+        // Group 8 (МЕ-25)
+        new EnrollmentDefinition(36, 36, 8, new DateOnly(2025, 9, 1), null, EntryReason, null, 1),
+        new EnrollmentDefinition(37, 37, 8, new DateOnly(2025, 9, 1), null, EntryReason, null, 2),
+        new EnrollmentDefinition(38, 38, 8, new DateOnly(2025, 9, 1), null, EntryReason, null, null),
+
+        // Group 9 (ПЛ-25)
+        new EnrollmentDefinition(39, 39, 9, new DateOnly(2025, 9, 1), null, EntryReason, null, 1),
+        new EnrollmentDefinition(40, 40, 9, new DateOnly(2025, 9, 1), null, EntryReason, null, 2),
+        new EnrollmentDefinition(41, 41, 9, new DateOnly(2025, 9, 1), null, EntryReason, null, null),
+
+        // Transfers
         new EnrollmentDefinition(101, 3, 4, new DateOnly(2026, 2, 11), null, TransferReason, null, null, false),
         new EnrollmentDefinition(102, 15, 6, new DateOnly(2026, 2, 2), null, TransferReason, null, null, false)
     ];
@@ -452,12 +509,12 @@ internal static class DemoSeedData
         AddManualCourse(101, 4, "Теорія інформації та кодування", CourseStatus.Planned, 2026);
 
         AddManualCourse(102, 6, "Вступ до комп'ютерної інженерії", CourseStatus.InProgress, 2025);
-        AddManualCourse(102, 6, "Комп'ютерна електроніка", CourseStatus.Completed, 2025, "90");
+        AddManualCourse(102, 6, "Комп'ютерна електроніка", CourseStatus.Completed, 2025, 90);
         AddManualCourse(102, 6, "Комп'ютерна схемотехніка", CourseStatus.Planned, 2026);
 
         return (courses.ToArray(), grades.ToArray());
 
-        void AddManualCourse(int enrollmentId, int groupId, string disciplineName, CourseStatus status, int academicYearStart, string? gradeValue = null)
+        void AddManualCourse(int enrollmentId, int groupId, string disciplineName, CourseStatus status, int academicYearStart, int? gradeValue = null)
         {
             var assignment = assignmentByGroupId[Id(groupId)];
             var courseId = Id(nextCourseId++);
@@ -472,13 +529,13 @@ internal static class DemoSeedData
                 Status = status
             });
 
-            if (!string.IsNullOrWhiteSpace(gradeValue))
+            if (gradeValue.HasValue)
             {
                 grades.Add(new GradeRecord
                 {
                     GradeId = Id(nextGradeId++),
                     CourseEnrollmentId = courseId,
-                    GradeValue = gradeValue,
+                    GradeValue = gradeValue.Value,
                     AssessmentDate = new DateOnly(2026, 4, 15)
                 });
             }
@@ -603,124 +660,6 @@ internal static class DemoSeedData
         return planDisciplines.ToArray();
     }
 
-    private static IReadOnlyList<PlanCourseDefinition> BuildSoftwareEngineeringCourses() =>
-    [
-        new("Українська мова за професійним спрямуванням", 3m, ControlType.Credit),
-        new("Вища математика", 11m, ControlType.Exam),
-        new("Фізика (вибрані розділи)", 6m, ControlType.Credit),
-        new("Теорія ймовірностей та математична статистика", 5m, ControlType.Exam),
-        new("Підготовка до тестів з іноземної мови", 3m, ControlType.Credit),
-        new("Іноземна мова за професійним спрямуванням", 9m, ControlType.Credit),
-        new("Програмування та алгоритмічні мови", 9m, ControlType.Exam),
-        new("Дискретна математика", 7m, ControlType.Exam),
-        new("Методи та засоби комп'ютерних інформаційних технологій", 3m, ControlType.Credit),
-        new("Вступ до інженерії програмного забезпечення", 3m, ControlType.Credit),
-        new("Об'єктно-орієнтоване програмування", 9m, ControlType.Exam),
-        new("Алгоритми та структури даних", 4m, ControlType.Exam),
-        new("Комп'ютерна схемотехніка та архітектура комп'ютерів", 8m, ControlType.Exam),
-        new("Чисельні методи", 4m, ControlType.Exam),
-        new("Людино-машинний інтерфейс", 4m, ControlType.Credit),
-        new("Курсова робота з об'єктно-орієнтованого програмування", 3m, ControlType.Coursework),
-        new("Організація баз даних та знань", 6m, ControlType.Exam),
-        new("Операційні системи", 5m, ControlType.Exam),
-        new("Вебпрограмування", 4m, ControlType.Credit),
-        new("Аналіз вимог до програмного забезпечення", 4m, ControlType.Credit),
-        new("Навчальна практика", 1m, ControlType.Credit),
-        new("Паралельні обчислювальні процеси", 5m, ControlType.Exam),
-        new("Проектування та архітектура програмного забезпечення", 4m, ControlType.Exam),
-        new("Курсова робота з баз даних", 3m, ControlType.Coursework),
-        new("Виробнича проєктно-технологічна практика", 6m, ControlType.Credit),
-        new("Емпіричні методи програмної інженерії", 4m, ControlType.Exam),
-        new("Моделювання та аналіз програмного забезпечення", 4m, ControlType.Exam),
-        new("Професійна практика програмної інженерії", 3m, ControlType.Credit),
-        new("Захист інформації в комп'ютерних системах", 4m, ControlType.Credit),
-        new("Якість програмного забезпечення та тестування", 4m, ControlType.Exam),
-        new("Економіка програмного забезпечення", 4m, ControlType.Credit),
-        new("Адміністрування операційних систем", 4m, ControlType.Credit),
-        new("Проєктно-дослідницька практика", 12m, ControlType.Credit),
-        new("Кваліфікаційна робота", 6m, ControlType.Coursework)
-    ];
-
-    private static IReadOnlyList<PlanCourseDefinition> BuildComputerScienceCourses() =>
-    [
-        new("Українська мова за професійним спрямуванням", 3m, ControlType.Credit),
-        new("Вища математика", 11m, ControlType.Exam),
-        new("Іноземна мова", 6m, ControlType.Exam),
-        new("Фізика (вибрані розділи)", 6m, ControlType.Credit),
-        new("Теорія ймовірностей та математична статистика", 5m, ControlType.Exam),
-        new("Англійська мова (фахового спрямування)", 3m, ControlType.Credit),
-        new("Підготовка до тестів з іноземної мови", 3m, ControlType.Credit),
-        new("Методи та засоби комп'ютерних інформаційних технологій", 3m, ControlType.Credit),
-        new("Програмування та алгоритмічні мови", 9m, ControlType.Exam),
-        new("Дискретна математика", 7m, ControlType.Exam),
-        new("Вступ до спеціальності", 3m, ControlType.Credit),
-        new("Об'єктно-орієнтоване програмування", 9m, ControlType.Exam),
-        new("Алгоритми та структури даних", 4m, ControlType.Exam),
-        new("Комп'ютерна схемотехніка та архітектура комп'ютерів", 8m, ControlType.Exam),
-        new("Чисельні методи", 4m, ControlType.Exam),
-        new("Теорія інформації та кодування", 3m, ControlType.Credit),
-        new("Методи оптимізації та дослідження операцій", 4m, ControlType.Credit),
-        new("Курсова робота з ООП", 3m, ControlType.Coursework),
-        new("Операційні системи", 5m, ControlType.Exam),
-        new("Організація баз даних і знань", 6m, ControlType.Exam),
-        new("Технологія створення програмних продуктів", 4m, ControlType.Exam),
-        new("Вебпрограмування", 4m, ControlType.Credit),
-        new("Навчальна практика", 1m, ControlType.Credit),
-        new("Комп'ютерні мережі", 4m, ControlType.Credit),
-        new("Паралельні обчислення та розподілені системи", 5m, ControlType.Exam),
-        new("Курсова робота з баз даних", 3m, ControlType.Coursework),
-        new("Виробнича проектно-технологічна практика", 6m, ControlType.Credit),
-        new("Технології захисту інформації", 4m, ControlType.Credit),
-        new("Моделювання процесів та SMART-систем", 4m, ControlType.Exam),
-        new("Інтелектуальний аналіз даних", 4m, ControlType.Exam),
-        new("Проектування інформаційних систем", 4m, ControlType.Exam),
-        new("Управління ІТ-проектами", 4m, ControlType.Exam),
-        new("CASE-технології", 4m, ControlType.Exam),
-        new("Проектно-дослідницька практика", 12m, ControlType.Credit),
-        new("Кваліфікаційна робота", 6m, ControlType.Coursework)
-    ];
-
-    private static IReadOnlyList<PlanCourseDefinition> BuildComputerEngineeringCourses() =>
-    [
-        new("Українська мова за професійним спрямуванням", 3m, ControlType.Credit),
-        new("Вища математика", 11m, ControlType.Exam),
-        new("Іноземна мова за професійним спрямуванням", 6m, ControlType.Credit),
-        new("Фізика (вибрані розділи)", 6m, ControlType.Credit),
-        new("Теорія ймовірностей та математична статистика", 4m, ControlType.Exam),
-        new("Підготовка до тестів з іноземної мови", 3m, ControlType.Credit),
-        new("Методи та засоби комп'ютерних інформаційних технологій", 3m, ControlType.Credit),
-        new("Програмування та алгоритмічні мови", 9m, ControlType.Exam),
-        new("Дискретна математика", 7m, ControlType.Exam),
-        new("Вступ до комп'ютерної інженерії", 3m, ControlType.Credit),
-        new("Комп'ютерна електроніка", 4m, ControlType.Credit),
-        new("Комп'ютерна схемотехніка", 5m, ControlType.Exam),
-        new("Об'єктно-орієнтоване програмування", 4m, ControlType.Credit),
-        new("Прикладна теорія цифрових автоматів", 3m, ControlType.Exam),
-        new("Курсова робота з комп'ютерної схемотехніки", 3m, ControlType.Coursework),
-        new("Архітектура комп'ютерів", 6m, ControlType.Exam),
-        new("Системне програмування", 4m, ControlType.Exam),
-        new("Чисельні методи", 4m, ControlType.Credit),
-        new("Теорія інформації та кодування", 3m, ControlType.Credit),
-        new("Інструментальні засоби проектування та розробки сучасних електронних пристроїв", 4m, ControlType.Exam),
-        new("Організація баз даних і знань", 6m, ControlType.Exam),
-        new("Сучасні технології FPGA розробки", 4m, ControlType.Credit),
-        new("Вебпрограмування", 4m, ControlType.Exam),
-        new("Навчальна практика", 1m, ControlType.Credit),
-        new("Комп'ютерні мережі", 5m, ControlType.Exam),
-        new("Курсова робота з комп'ютерних мереж", 3m, ControlType.Coursework),
-        new("Хмарні технології", 4m, ControlType.Credit),
-        new("Виробнича проектно-технологічна практика", 6m, ControlType.Credit),
-        new("Технології захисту інформації", 4m, ControlType.Exam),
-        new("Проектування та розробка інтернет речей", 4m, ControlType.Exam),
-        new("DevOps-практики", 4m, ControlType.Exam),
-        new("Розробка мобільних застосунків", 4m, ControlType.Credit),
-        new("Економіка та управління проектами", 3m, ControlType.Credit),
-        new("Інженерія програмного забезпечення", 4m, ControlType.Exam),
-        new("Конструювання та програмування роботів", 4m, ControlType.Exam),
-        new("Проектно-дослідницька практика", 12m, ControlType.Credit),
-        new("Кваліфікаційна робота", 6m, ControlType.Coursework)
-    ];
-
     private static string BuildDescription(string name) => name switch
     {
         "Вища математика" => "Математична база для аналізу, моделювання та розв’язування інженерних задач.",
@@ -733,10 +672,10 @@ internal static class DemoSeedData
         _ => $"Навчальна дисципліна «{name}» із професійної підготовки здобувачів ІТ-спеціальностей."
     };
 
-    private static string BuildGradeValue(int studentId, int semesterNo, Guid disciplineId)
+    private static int BuildGradeValue(int studentId, int semesterNo, Guid disciplineId)
     {
         var value = 72 + Math.Abs(HashCode.Combine(studentId, semesterNo, disciplineId)) % 24;
-        return value.ToString(CultureInfo.InvariantCulture);
+        return value;
     }
 
     private static DateOnly BuildAssessmentDate(int academicYearStart, int semesterNo) =>
