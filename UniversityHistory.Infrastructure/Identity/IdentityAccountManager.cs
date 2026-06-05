@@ -85,7 +85,8 @@ public class IdentityAccountManager : IIdentityAccountManager
         string password,
         Guid? studentId,
         bool emailConfirmed,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        bool skipPasswordValidation = false)
     {
         var user = new ApplicationUser
         {
@@ -96,7 +97,16 @@ public class IdentityAccountManager : IIdentityAccountManager
             StudentId = studentId,
         };
 
-        var result = await _userManager.CreateAsync(user, password);
+        IdentityResult result;
+        if (skipPasswordValidation)
+        {
+            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, password);
+            result = await _userManager.CreateAsync(user);
+        }
+        else
+        {
+            result = await _userManager.CreateAsync(user, password);
+        }
         EnsureIdentitySuccess(result, "Не вдалося створити обліковий запис.");
 
         return await MapAsync(user);
@@ -154,9 +164,22 @@ public class IdentityAccountManager : IIdentityAccountManager
         EnsureIdentitySuccess(result, "Не вдалося синхронізувати email облікового запису.");
     }
 
-    public async Task SetPasswordAsync(Guid userId, string password, CancellationToken ct = default)
+    public async Task SetPasswordAsync(
+        Guid userId,
+        string password,
+        CancellationToken ct = default,
+        bool skipPasswordValidation = false)
     {
         var user = await GetRequiredUserAsync(userId);
+
+        if (skipPasswordValidation)
+        {
+            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, password);
+            user.SecurityStamp = Guid.NewGuid().ToString();
+            var updateResult = await _userManager.UpdateAsync(user);
+            EnsureIdentitySuccess(updateResult, "Не вдалося оновити пароль користувача.");
+            return;
+        }
 
         IdentityResult result;
         if (await _userManager.HasPasswordAsync(user))

@@ -101,14 +101,19 @@ public class StudentAccountService : IStudentAccountService
                     password.Value,
                     studentId,
                     emailConfirmed: true,
-                    innerCt);
+                    innerCt,
+                    skipPasswordValidation: password.GeneratedRandomly);
 
                 await _identityAccountManager.EnsureRoleAssignedAsync(account.UserId, AuthRoles.Student, innerCt);
             }
             else
             {
                 await _identityAccountManager.SyncEmailAsync(account.UserId, student.Email!, innerCt);
-                await _identityAccountManager.SetPasswordAsync(account.UserId, password.Value, innerCt);
+                await _identityAccountManager.SetPasswordAsync(
+                    account.UserId,
+                    password.Value,
+                    innerCt,
+                    skipPasswordValidation: password.GeneratedRandomly);
             }
 
             return new StudentAccountPasswordDto(student.Email!, password.Value, password.GeneratedRandomly);
@@ -158,7 +163,8 @@ public class StudentAccountService : IStudentAccountService
             password.Value,
             student.StudentId,
             emailConfirmed: true,
-            ct);
+            ct,
+            skipPasswordValidation: password.GeneratedRandomly);
 
         await _identityAccountManager.EnsureRoleAssignedAsync(account.UserId, AuthRoles.Student, ct);
 

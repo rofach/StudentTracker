@@ -17,7 +17,8 @@ public interface IIdentityAccountManager
         string password,
         Guid? studentId,
         bool emailConfirmed,
-        CancellationToken ct = default);
+        CancellationToken ct = default,
+        bool skipPasswordValidation = false);
     Task UpdateAccountAsync(
         Guid userId,
         string userName,
@@ -26,5 +27,9 @@ public interface IIdentityAccountManager
         bool emailConfirmed,
         CancellationToken ct = default);
     Task SyncEmailAsync(Guid userId, string email, CancellationToken ct = default);
-    Task SetPasswordAsync(Guid userId, string password, CancellationToken ct = default);
+    Task SetPasswordAsync(
+        Guid userId,
+        string password,
+        CancellationToken ct = default,
+        bool skipPasswordValidation = false);
 }
