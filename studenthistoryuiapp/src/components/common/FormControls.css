@@ -63,6 +63,7 @@ button:hover:not(:disabled) {
   flex-wrap: wrap;
   align-items: end;
   gap: 10px;
+  margin-bottom: 12px;
 }
 
 .filters-row label,
@@ -95,6 +96,18 @@ button:hover:not(:disabled) {
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+.filters-row .checkbox-field {
+  align-items: start;
+}
+
+.filters-row .checkbox-field input[type="checkbox"] {
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  justify-self: start;
+  box-shadow: none;
 }
 
 .inline-actions {

@@ -22,6 +22,12 @@
   box-shadow: var(--shadow-sm);
 }
 
+.panel > button + .content-grid,
+.panel > button + .table-wrap,
+.panel > button + .status-state {
+  margin-top: 12px;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));

@@ -318,7 +318,7 @@ export function AdminGroupsPage({ navigate }: AdminGroupsPageProps) {
       {isGroupsInitialLoading ? <Spinner label="Завантаження груп..." /> : null}
       {error ? <StatusState tone="error" message={error} /> : null}
 
-      {!isGroupsInitialLoading && !error ? (
+      {!isGroupsInitialLoading && hasLoadedGroups ? (
         <div className="content-grid content-grid--two-columns">
           <section className="panel">
             <div className="section-heading">

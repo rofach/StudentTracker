@@ -169,7 +169,7 @@ export function AdminDisciplinesPage() {
       {isInitialLoading ? <Spinner label="Завантаження предметів..." /> : null}
       {error ? <StatusState tone="error" message={error} /> : null}
 
-      {!isInitialLoading && !error ? (
+      {!isInitialLoading && hasLoadedData ? (
         <div className="content-grid content-grid--two-columns">
           <section className="panel">
             <div className="section-heading">

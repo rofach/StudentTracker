@@ -30,6 +30,7 @@ export function AdminStructurePage() {
   const [newUnitType, setNewUnitType] = useState("Faculty")
   const [newDepartmentName, setNewDepartmentName] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [hasLoadedStructure, setHasLoadedStructure] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -58,12 +59,20 @@ export function AdminStructurePage() {
     setError(null)
 
     loadData()
+      .then(() => {
+        if (!isActive) {
+          return
+        }
+
+        setHasLoadedStructure(true)
+      })
       .catch((err: unknown) => {
         if (!isActive) {
           return
         }
 
         setError(err instanceof Error ? err.message : "Не вдалося завантажити структуру.")
+        setHasLoadedStructure(true)
       })
       .finally(() => {
         if (!isActive) {
@@ -135,7 +144,7 @@ export function AdminStructurePage() {
       {isLoading ? <Spinner label="Завантаження структури..." /> : null}
       {error ? <StatusState tone="error" message={error} /> : null}
 
-      {!isLoading && !error ? (
+      {!isLoading && hasLoadedStructure ? (
         <div className="content-grid content-grid--two-columns">
           <div className="page-stack">
             <section className="panel">
