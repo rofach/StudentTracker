@@ -35,9 +35,14 @@ import type {
   UpdateDifferenceItemDto,
   UpdateAcademicLeaveDto,
   AssignSubgroupDto,
+  GroupPlanAssignmentDto,
 } from "../types/api"
 import { deleteJson, fetchJson, patchJson, postJson, putJson } from "./http"
 import { getActiveGroups } from "./groupsApi"
+
+export function getStudentPlans(studentId: EntityId): Promise<GroupPlanAssignmentDto[]> {
+  return fetchJson<GroupPlanAssignmentDto[]>(`/students/${studentId}/plans`)
+}
 
 export function getStudents(page: number, pageSize: number): Promise<PagedResult<StudentDto>> {
   return fetchJson<PagedResult<StudentDto>>("/students", undefined, { page, pageSize })
@@ -128,11 +133,13 @@ export function getStudentMovements(studentId: EntityId): Promise<StudentMovemen
 
 export function getStudentDisciplines(
   studentId: EntityId,
-  currentPlanOnly = false,
+  planId?: string,
 ): Promise<StudentDisciplineOptionDto[]> {
-  return fetchJson<StudentDisciplineOptionDto[]>(`/students/${studentId}/disciplines`, undefined, {
-    currentPlanOnly,
-  })
+  const params: Record<string, any> = {};
+  if (planId) {
+    params.planId = planId;
+  }
+  return fetchJson<StudentDisciplineOptionDto[]>(`/students/${studentId}/disciplines`, undefined, params)
 }
 
 export function getStudentGrades(
@@ -238,3 +245,5 @@ export function moveEnrollmentSubgroup(enrollmentId: EntityId, dto: MoveStudentT
 export async function getSelectableGroups(date?: string) {
   return getActiveGroups(date)
 }
+
+

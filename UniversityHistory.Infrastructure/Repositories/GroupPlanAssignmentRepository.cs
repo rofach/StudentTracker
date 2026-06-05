@@ -30,6 +30,20 @@ public class GroupPlanAssignmentRepository : IGroupPlanAssignmentRepository
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<IEnumerable<GroupPlanAssignment>> GetActiveByPlanIdOnDateAsync(
+        Guid planId,
+        DateOnly date,
+        CancellationToken ct = default)
+    {
+        return await _db.GroupPlanAssignments
+            .Where(a => a.PlanId == planId
+                     && a.DateFrom <= date
+                     && (a.DateTo == null || a.DateTo >= date))
+            .OrderBy(a => a.GroupId)
+            .ThenByDescending(a => a.DateFrom)
+            .ToListAsync(ct);
+    }
+
     public async Task<IEnumerable<GroupPlanAssignment>> GetByGroupIdAsync(Guid groupId, CancellationToken ct = default)
     {
         return await _db.GroupPlanAssignments

@@ -5,16 +5,6 @@ internal static class StudentTimelineViewSql
     public const string Create = """
         CREATE VIEW vw_student_timeline
         AS
-        WITH transfer_diff AS (
-            SELECT
-                adi.transfer_id,
-                COUNT(*) AS total_count,
-                SUM(CASE WHEN adi.status = 'Pending' THEN 1 ELSE 0 END) AS pending_count,
-                SUM(CASE WHEN adi.status = 'Completed' THEN 1 ELSE 0 END) AS completed_count,
-                SUM(CASE WHEN adi.status = 'Waived' THEN 1 ELSE 0 END) AS waived_count
-            FROM academic_difference_item adi
-            GROUP BY adi.transfer_id
-        )
         SELECT
             timeline.student_id,
             timeline.event_type,
@@ -25,6 +15,7 @@ internal static class StudentTimelineViewSql
             timeline.department_name,
             timeline.academic_unit_name,
             timeline.academic_unit_type,
+            timeline.event_order,
             timeline.sort_priority,
             timeline.event_key
         FROM (
@@ -38,6 +29,7 @@ internal static class StudentTimelineViewSql
                 d.name AS department_name,
                 au.name AS academic_unit_name,
                 au.type AS academic_unit_type,
+                40 AS event_order,
                 10 AS sort_priority,
                 CONCAT('EnrollmentStart:', CONVERT(nvarchar(36), e.enrollment_id)) AS event_key
             FROM student_group_enrollment e
@@ -64,6 +56,7 @@ internal static class StudentTimelineViewSql
                 d.name,
                 au.name,
                 au.type,
+                10,
                 20,
                 CONCAT('EnrollmentEnd:', CONVERT(nvarchar(36), e.enrollment_id))
             FROM student_group_enrollment e
@@ -84,6 +77,7 @@ internal static class StudentTimelineViewSql
                 d.name,
                 au.name,
                 au.type,
+                40,
                 30,
                 CONCAT('AcademicLeaveStart:', CONVERT(nvarchar(36), al.leave_id))
             FROM academic_leave al
@@ -110,6 +104,7 @@ internal static class StudentTimelineViewSql
                 d.name,
                 au.name,
                 au.type,
+                10,
                 40,
                 CONCAT('AcademicLeaveEnd:', CONVERT(nvarchar(36), al.leave_id))
             FROM academic_leave al
@@ -132,6 +127,7 @@ internal static class StudentTimelineViewSql
                 d.name,
                 au.name,
                 au.type,
+                20,
                 50,
                 CONCAT('SubgroupChange:', CONVERT(nvarchar(36), se.subgroup_enrollment_id))
             FROM student_subgroup_enrollment se
@@ -153,18 +149,7 @@ internal static class StudentTimelineViewSql
                     new_g.group_code,
                     ' (',
                     t.reason,
-                    ')',
-                    CASE WHEN ISNULL(diff.total_count, 0) > 0
-                        THEN CONCAT(
-                            '. Academic difference: pending=',
-                            ISNULL(diff.pending_count, 0),
-                            ', completed=',
-                            ISNULL(diff.completed_count, 0),
-                            ', waived=',
-                            ISNULL(diff.waived_count, 0)
-                        )
-                        ELSE ''
-                    END
+                    ')'
                 ),
                 t.transfer_date,
                 CAST(NULL AS date),
@@ -172,6 +157,7 @@ internal static class StudentTimelineViewSql
                 new_d.name,
                 new_au.name,
                 new_au.type,
+                20,
                 60,
                 CONCAT('GroupTransfer:', CONVERT(nvarchar(36), t.transfer_id))
             FROM student_group_transfer t
@@ -181,7 +167,6 @@ internal static class StudentTimelineViewSql
             JOIN study_group new_g ON new_g.group_id = new_e.group_id
             JOIN department new_d ON new_d.department_id = new_g.department_id
             JOIN academic_unit new_au ON new_au.academic_unit_id = new_d.academic_unit_id
-            LEFT JOIN transfer_diff diff ON diff.transfer_id = t.transfer_id
 
             UNION ALL
 
@@ -203,6 +188,7 @@ internal static class StudentTimelineViewSql
                 CAST(NULL AS nvarchar(200)),
                 CAST(NULL AS nvarchar(200)),
                 CAST(NULL AS nvarchar(20)),
+                20,
                 70,
                 CONCAT('ExternalTransfer:', CONVERT(nvarchar(36), et.transfer_id))
             FROM external_transfers et

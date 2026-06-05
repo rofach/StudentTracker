@@ -52,6 +52,7 @@ public class StudentAccountService : IStudentAccountService
                 dto.SubgroupId,
                 dto.DateFrom,
                 dto.InstitutionId,
+                dto.NewInstitutionName,
                 dto.Notes,
                 innerCt);
 
@@ -171,12 +172,31 @@ public class StudentAccountService : IStudentAccountService
         Guid groupId,
         Guid? subgroupId,
         DateOnly dateFrom,
-        Guid institutionId,
+        Guid? institutionId,
+        string? newInstitutionName,
         string? notes,
         CancellationToken ct)
     {
-        _ = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(institutionId, ct)
-            ?? throw new NotFoundException("Institution", institutionId);
+        Guid actualInstitutionId;
+        if (!institutionId.HasValue || institutionId.Value == Guid.Empty)
+        {
+            if (string.IsNullOrWhiteSpace(newInstitutionName))
+                throw new DomainException("Необхідно вказати заклад або назву нового закладу.");
+
+            var newInst = new Domain.Entities.Institution
+            {
+                InstitutionName = newInstitutionName.Trim()
+            };
+            _unitOfWork.ExternalTransfers.AddInstitution(newInst);
+            await _unitOfWork.SaveChangesAsync(ct);
+            actualInstitutionId = newInst.InstitutionId;
+        }
+        else
+        {
+            actualInstitutionId = institutionId.Value;
+            _ = await _unitOfWork.ExternalTransfers.GetInstitutionByIdAsync(actualInstitutionId, ct)
+                ?? throw new NotFoundException("Institution", actualInstitutionId);
+        }
 
         var group = await _unitOfWork.Groups.GetByIdAsync(groupId, ct)
             ?? throw new NotFoundException("StudyGroup", groupId);
@@ -228,7 +248,7 @@ public class StudentAccountService : IStudentAccountService
         _unitOfWork.ExternalTransfers.Add(new Domain.Entities.ExternalTransfer
         {
             StudentId = studentId,
-            InstitutionId = institutionId,
+            InstitutionId = actualInstitutionId,
             TransferType = Domain.Enums.TransferType.In,
             TransferDate = dateFrom,
             Notes = notes

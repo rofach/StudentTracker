@@ -50,12 +50,27 @@ export function StudentOverviewPage({ studentId }: StudentOverviewPageProps) {
     }
   }, [studentId])
 
-  const currentEnrollment = useMemo(
-    () => data?.enrollments.find((item) => item.dateTo === null) ?? data?.enrollments[0] ?? null,
-    [data],
-  )
+  const currentEnrollment = useMemo(() => {
+    if (!data?.enrollments || data.enrollments.length === 0) return null
+    const now = new Date()
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
 
-  const currentPlan = useMemo(() => data?.plans.find((item) => item.dateTo === null) ?? data?.plans[0] ?? null, [data])
+    const active = data.enrollments.find(
+      (item) => item.dateFrom <= todayStr && (item.dateTo === null || item.dateTo >= todayStr)
+    )
+    return active ?? data.enrollments[0] ?? null
+  }, [data])
+
+  const currentPlan = useMemo(() => {
+    if (!data?.plans || data.plans.length === 0) return null
+    const now = new Date()
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+
+    const active = data.plans.find(
+      (item) => item.dateFrom <= todayStr && (item.dateTo === null || item.dateTo >= todayStr)
+    )
+    return active ?? data.plans[0] ?? null
+  }, [data])
 
 
 

@@ -66,10 +66,16 @@ export function AdminStudentViewPage({ studentId, navigate }: AdminStudentViewPa
     }
   }, [studentId])
 
-  const currentEnrollment = useMemo(
-    () => student?.enrollments.find((item) => item.dateTo === null) ?? student?.enrollments[0] ?? null,
-    [student],
-  )
+  const currentEnrollment = useMemo(() => {
+    if (!student?.enrollments || student.enrollments.length === 0) return null
+    const now = new Date()
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+
+    const active = student.enrollments.find(
+      (item) => item.dateFrom <= todayStr && (item.dateTo === null || item.dateTo >= todayStr)
+    )
+    return active ?? student.enrollments[0] ?? null
+  }, [student])
 
   if (isLoading) {
     return <Spinner label="Завантаження картки студента..." />

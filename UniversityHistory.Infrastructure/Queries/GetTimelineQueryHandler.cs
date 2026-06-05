@@ -27,7 +27,8 @@ public class GetTimelineQueryHandler : IGetTimelineQueryHandler
         var count = await baseQuery.CountAsync(ct);
 
         var items = await baseQuery
-            .OrderBy(x => x.DateFrom)
+            .OrderByDescending(x => x.DateFrom)
+            .ThenBy(x => x.EventOrder)
             .ThenBy(x => x.SortPriority)
             .ThenBy(x => x.EventKey)
             .Skip((query.Page - 1) * query.PageSize)

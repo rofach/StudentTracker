@@ -85,7 +85,14 @@ public class CreateTransferredStudentDtoValidator : AppValidator<CreateTransferr
             .OptionalPhoneNumber();
 
         RuleFor(x => x.InstitutionId)
-            .NotEmpty();
+            .NotEmpty()
+            .When(x => string.IsNullOrWhiteSpace(x.NewInstitutionName))
+            .WithMessage("Оберіть заклад або вкажіть назву нового.");
+
+        RuleFor(x => x.NewInstitutionName)
+            .NotEmpty()
+            .When(x => !x.InstitutionId.HasValue || x.InstitutionId == Guid.Empty)
+            .WithMessage("Вкажіть назву нового закладу.");
 
         RuleFor(x => x.GroupId)
             .NotEmpty();

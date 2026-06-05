@@ -40,10 +40,8 @@ function getCuratedDescription(item: TimelineEventDto): string {
         : "Повернення з академвідпустки"
     case "SubgroupChange":
       return item.description.replace("Subgroup changed to", "Переведено до підгрупи")
-    case "GroupTransfer": {
-      const [baseDescription] = item.description.split(". Academic difference:")
-      return baseDescription.replace("Transferred from group", "Переведено з групи").replace(" to ", " до ")
-    }
+    case "GroupTransfer":
+      return item.description.replace("Transferred from group", "Переведено з групи").replace(" to ", " до ")
     case "ExternalTransfer":
       return item.description
     default:

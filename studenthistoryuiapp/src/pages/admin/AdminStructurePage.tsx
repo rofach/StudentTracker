@@ -12,6 +12,15 @@ import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import type { AcademicUnitDto, DepartmentDto, EntityId } from "../../types/api"
 
+const academicUnitTypeLabels: Record<string, string> = {
+  Faculty: "Факультет",
+  Institute: "Інститут",
+}
+
+function formatAcademicUnitType(type: string) {
+  return academicUnitTypeLabels[type] ?? type
+}
+
 export function AdminStructurePage() {
   const [units, setUnits] = useState<AcademicUnitDto[]>([])
   const [departments, setDepartments] = useState<DepartmentDto[]>([])
@@ -179,7 +188,7 @@ export function AdminStructurePage() {
                           onClick={() => setSelectedUnitId(unit.academicUnitId)}
                         >
                           <td>{unit.name}</td>
-                          <td>{unit.type}</td>
+                          <td>{formatAcademicUnitType(unit.type)}</td>
                         </tr>
                       ))}
                     </tbody>

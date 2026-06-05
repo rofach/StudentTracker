@@ -57,14 +57,14 @@ public class GradeService : IGradeService
 
     public async Task<IReadOnlyList<StudentDisciplineOptionDto>> GetStudentDisciplinesAsync(
         Guid studentId,
-        bool currentPlanOnly = false,
+        Guid? planId = null,
         CancellationToken ct = default)
     {
         _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         return await _studentDisciplinesHandler.HandleAsync(
-            new GetStudentDisciplinesQuery(studentId, currentPlanOnly),
+            new GetStudentDisciplinesQuery(studentId, planId),
             ct);
     }
 

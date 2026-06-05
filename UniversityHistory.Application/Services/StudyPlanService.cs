@@ -81,6 +81,10 @@ public class StudyPlanService : IStudyPlanService
         var pd = dto.ToEntity(planId, controlType);
         _unitOfWork.StudyPlans.AddPlanDiscipline(pd);
         await _unitOfWork.SaveChangesAsync(ct);
+
+        await AddDisciplineToActiveAssignmentsAsync(pd, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
         return (await _unitOfWork.StudyPlans.GetPlanDisciplineAsync(planId, dto.DisciplineId, ct))!.ToDto();
     }
 
@@ -90,11 +94,32 @@ public class StudyPlanService : IStudyPlanService
             ?? throw new NotFoundException(nameof(StudyPlan), planId);
         var pd = await _unitOfWork.StudyPlans.GetPlanDisciplineAsync(planId, disciplineId, ct)
             ?? throw new NotFoundException("PlanDiscipline", $"plan={planId}, discipline={disciplineId}");
+        var previousSemesterNo = pd.SemesterNo;
         var controlType = Enum.Parse<ControlType>(dto.ControlType, ignoreCase: true);
+
+        if (previousSemesterNo != dto.SemesterNo)
+        {
+            var courseEnrollments = await _unitOfWork.StudyPlans
+                .GetCourseEnrollmentsByPlanDisciplineIdAsync(pd.PlanDisciplineId, ct);
+
+            if (courseEnrollments.Any(ce => ce.GradeRecords.Any()))
+            {
+                throw new DomainException(
+                    $"Cannot change semester for discipline {disciplineId} in plan {planId}: " +
+                    "students already have grade records for it.");
+            }
+        }
+
         pd.SemesterNo = dto.SemesterNo;
         pd.ControlType = controlType;
         pd.Credits = dto.Credits;
         _unitOfWork.StudyPlans.UpdatePlanDiscipline(pd);
+
+        if (previousSemesterNo != dto.SemesterNo)
+        {
+            await RecalculateCourseEnrollmentAcademicYearsAsync(pd.PlanDisciplineId, dto.SemesterNo, ct);
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
         return (await _unitOfWork.StudyPlans.GetPlanDisciplineAsync(planId, disciplineId, ct))!.ToDto();
     }
@@ -209,9 +234,18 @@ public class StudyPlanService : IStudyPlanService
                 .Select(ce => ce.PlanDiscipline.DisciplineId)
                 .ToHashSet();
 
-            var newCourses = GenerateCourseEnrollments(
-                    enrollment.EnrollmentId, newAssignment.GroupPlanAssignmentId, dto.NewPlanDateFrom, newPlan)
-                .Where(ce => !progressedDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
+            var newCourses = newPlan.PlanDisciplines
+                .Where(pd => !progressedDisciplineIds.Contains(pd.DisciplineId))
+                .OrderBy(pd => pd.SemesterNo).ThenBy(pd => pd.DisciplineId)
+                .Select(pd => new StudentCourseEnrollment
+                {
+                    EnrollmentId = enrollment.EnrollmentId,
+                    GroupPlanAssignmentId = newAssignment.GroupPlanAssignmentId,
+                    PlanDisciplineId = pd.PlanDisciplineId,
+                    PlanDiscipline = pd,
+                    AcademicYearStart = CalculateAcademicYearStart(dto.NewPlanDateFrom, pd.SemesterNo),
+                    Status = CourseStatus.Planned
+                })
                 .ToList();
 
             if (newCourses.Count > 0)
@@ -237,6 +271,62 @@ public class StudyPlanService : IStudyPlanService
                 Status = CourseStatus.Planned
             })
             .ToList();
+    }
+
+    private async Task AddDisciplineToActiveAssignmentsAsync(PlanDiscipline planDiscipline, CancellationToken ct)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var activeAssignments = await _unitOfWork.GroupPlanAssignments
+            .GetActiveByPlanIdOnDateAsync(planDiscipline.PlanId, today, ct);
+
+        foreach (var assignment in activeAssignments)
+        {
+            var activeEnrollments = await _unitOfWork.Enrollments
+                .GetActiveByGroupIdOnDateAsync(assignment.GroupId, today, ct);
+
+            foreach (var enrollment in activeEnrollments)
+            {
+                await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(
+                    enrollment.EnrollmentId,
+                    today,
+                    ct);
+
+                var existingDisciplineIds = (await _unitOfWork.StudyPlans
+                        .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, ct))
+                    .Select(ce => ce.PlanDiscipline.DisciplineId)
+                    .ToHashSet();
+
+                if (existingDisciplineIds.Contains(planDiscipline.DisciplineId))
+                    continue;
+
+                _unitOfWork.StudyPlans.AddCourseEnrollments(
+                [
+                    new StudentCourseEnrollment
+                    {
+                        EnrollmentId = enrollment.EnrollmentId,
+                        GroupPlanAssignmentId = assignment.GroupPlanAssignmentId,
+                        PlanDisciplineId = planDiscipline.PlanDisciplineId,
+                        AcademicYearStart = CalculateAcademicYearStart(assignment.DateFrom, planDiscipline.SemesterNo),
+                        Status = CourseStatus.Planned
+                    }
+                ]);
+            }
+        }
+    }
+
+    private async Task RecalculateCourseEnrollmentAcademicYearsAsync(
+        Guid planDisciplineId,
+        int semesterNo,
+        CancellationToken ct)
+    {
+        var courseEnrollments = await _unitOfWork.StudyPlans
+            .GetCourseEnrollmentsByPlanDisciplineIdAsync(planDisciplineId, ct);
+
+        foreach (var courseEnrollment in courseEnrollments)
+        {
+            courseEnrollment.AcademicYearStart =
+                CalculateAcademicYearStart(courseEnrollment.GroupPlanAssignment.DateFrom, semesterNo);
+        }
     }
 
     private static int CalculateAcademicYearStart(DateOnly startDate, int semesterNo) =>

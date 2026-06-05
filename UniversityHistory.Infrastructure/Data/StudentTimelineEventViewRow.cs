@@ -11,6 +11,7 @@ public class StudentTimelineEventViewRow
     public string? DepartmentName { get; set; }
     public string? AcademicUnitName { get; set; }
     public string? AcademicUnitType { get; set; }
+    public int EventOrder { get; set; }
     public int SortPriority { get; set; }
     public string EventKey { get; set; } = string.Empty;
 }

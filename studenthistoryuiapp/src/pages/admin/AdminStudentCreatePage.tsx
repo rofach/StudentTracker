@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getGroupSubgroups } from "../../api/groupsApi"
 import { getInstitutions } from "../../api/institutionsApi"
 import { createStudent, createTransferredStudent, getSelectableGroups } from "../../api/studentsApi"
@@ -37,6 +37,7 @@ const emptyForm: StudentCreateDto = {
 const emptyTransferredForm: CreateTransferredStudentDto = {
   ...emptyForm,
   institutionId: "",
+  newInstitutionName: null,
   groupId: "",
   subgroupId: null,
   dateFrom: "",
@@ -88,6 +89,7 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
   const [form, setForm] = useState<StudentCreateDto>(emptyForm)
   const [isTransferredIn, setIsTransferredIn] = useState(false)
   const [transferredForm, setTransferredForm] = useState<CreateTransferredStudentDto>(emptyTransferredForm)
+  const [newInstitutionName, setNewInstitutionName] = useState("")
   const [institutions, setInstitutions] = useState<InstitutionDto[]>([])
   const [groups, setGroups] = useState<ActiveGroupDto[]>([])
   const [subgroupOptions, setSubgroupOptions] = useState<SubgroupOption[]>([])
@@ -172,18 +174,39 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
     }
   }, [isTransferredIn, transferredForm.groupId])
 
+  const isSavingRef = useRef(false)
+
   const handleCreate = async () => {
+    if (isSavingRef.current) return
+    isSavingRef.current = true
     setIsSaving(true)
     setError(null)
 
     try {
+      let payloadInstitutionId: string | null = transferredForm.institutionId
+      let payloadNewInstitutionName: string | null = null
+
+      if (isTransferredIn && payloadInstitutionId === "custom") {
+        if (!newInstitutionName.trim()) {
+          throw new Error("Введіть назву нового закладу.")
+        }
+        payloadInstitutionId = null
+        payloadNewInstitutionName = newInstitutionName.trim()
+      }
+
       const created = isTransferredIn
-        ? await createTransferredStudent({ ...transferredForm, ...form })
+        ? await createTransferredStudent({
+            ...transferredForm,
+            ...form,
+            institutionId: payloadInstitutionId,
+            newInstitutionName: payloadNewInstitutionName,
+          })
         : await createStudent(form)
 
       setCreatedResult(created)
       setForm(emptyForm)
       setTransferredForm(emptyTransferredForm)
+      setNewInstitutionName("")
       setIsTransferredIn(false)
       pushToast({ tone: "info", title: "Успішно", message: "Студента створено, акаунт згенеровано." })
     } catch (err: unknown) {
@@ -191,6 +214,7 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
       setError(nextError)
       pushToast({ tone: "error", message: nextError })
     } finally {
+      isSavingRef.current = false
       setIsSaving(false)
     }
   }
@@ -284,7 +308,7 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
             <label>
               Заклад, з якого переведено
               <select
-                value={transferredForm.institutionId}
+                value={transferredForm.institutionId ?? ""}
                 onChange={(event) =>
                   setTransferredForm((prev) => ({ ...prev, institutionId: event.target.value }))
                 }
@@ -295,8 +319,20 @@ export function AdminStudentCreatePage({ navigate }: AdminStudentCreatePageProps
                     {institution.institutionName}
                   </option>
                 ))}
+                <option value="custom">Створити новий...</option>
               </select>
             </label>
+            {transferredForm.institutionId === "custom" && (
+              <label>
+                Назва нового закладу
+                <input
+                  type="text"
+                  value={newInstitutionName}
+                  onChange={(event) => setNewInstitutionName(event.target.value)}
+                  placeholder="Введіть повну назву..."
+                />
+              </label>
+            )}
             <label>
               Група для зарахування
               <select

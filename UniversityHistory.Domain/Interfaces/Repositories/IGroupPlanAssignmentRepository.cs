@@ -6,6 +6,7 @@ public interface IGroupPlanAssignmentRepository
 {
     Task<GroupPlanAssignment?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<GroupPlanAssignment?> GetActiveOnDateAsync(Guid groupId, DateOnly date, CancellationToken ct = default);
+    Task<IEnumerable<GroupPlanAssignment>> GetActiveByPlanIdOnDateAsync(Guid planId, DateOnly date, CancellationToken ct = default);
     Task<IEnumerable<GroupPlanAssignment>> GetByGroupIdAsync(Guid groupId, CancellationToken ct = default);
     Task<IEnumerable<GroupPlanAssignment>> GetByGroupIdsAsync(IEnumerable<Guid> groupIds, CancellationToken ct = default);
     Task<bool> HasOverlapAsync(Guid groupId, DateOnly dateFrom, DateOnly? dateTo, Guid? excludeId = null, CancellationToken ct = default);

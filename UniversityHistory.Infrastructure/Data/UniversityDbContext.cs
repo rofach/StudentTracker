@@ -497,6 +497,7 @@ public class UniversityDbContext : IdentityDbContext<ApplicationUser, IdentityRo
             e.Property(x => x.DepartmentName).HasColumnName("department_name");
             e.Property(x => x.AcademicUnitName).HasColumnName("academic_unit_name");
             e.Property(x => x.AcademicUnitType).HasColumnName("academic_unit_type");
+            e.Property(x => x.EventOrder).HasColumnName("event_order");
             e.Property(x => x.SortPriority).HasColumnName("sort_priority");
             e.Property(x => x.EventKey).HasColumnName("event_key");
         });

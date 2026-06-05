@@ -117,6 +117,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
   const [leaveDate, setLeaveDate] = useState(todayValue())
   const [leaveEndDate, setLeaveEndDate] = useState("")
   const [leaveReason, setLeaveReason] = useState("")
+  const [allowRepeatedLeave, setAllowRepeatedLeave] = useState(false)
 
   const [selectedLeaveId, setSelectedLeaveId] = useState<EntityId | "">("")
   const [editLeaveStartDate, setEditLeaveStartDate] = useState("")
@@ -201,14 +202,22 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
     }
   }, [studentId])
 
-  const currentEnrollment = useMemo(
-    () => student?.enrollments.find((item) => item.dateTo === null) ?? null,
-    [student],
-  )
-  const openPlan = useMemo(
-    () => student?.plans.find((item) => item.dateTo === null) ?? null,
-    [student],
-  )
+  const currentEnrollment = useMemo(() => {
+    if (!student?.enrollments || student.enrollments.length === 0) return null
+    const todayStr = todayValue()
+    const active = student.enrollments.find(
+      (item) => item.dateFrom <= todayStr && (item.dateTo === null || item.dateTo >= todayStr),
+    )
+    return active ?? null
+  }, [student])
+  const openPlan = useMemo(() => {
+    if (!student?.plans || student.plans.length === 0) return null
+    const todayStr = todayValue()
+    const active = student.plans.find(
+      (item) => item.dateFrom <= todayStr && (item.dateTo === null || item.dateTo >= todayStr),
+    )
+    return active ?? null
+  }, [student])
   const leaves = useMemo(() => sortLeaves(student?.leaves ?? []), [student?.leaves])
   const activeLeaveToday = useMemo(
     () => leaves.find((item) => isLeaveActiveOnDate(item, todayValue())) ?? null,
@@ -533,6 +542,14 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                   <input type="text" value={leaveReason} onChange={(event) => setLeaveReason(event.target.value)} />
                 </label>
               </div>
+              <label className="checkbox-field">
+                <input
+                  type="checkbox"
+                  checked={allowRepeatedLeave}
+                  onChange={(event) => setAllowRepeatedLeave(event.target.checked)}
+                />
+                <span>Дозволити повторну академвідпустку для цього зарахування</span>
+              </label>
               <button
                 type="button"
                 disabled={isSaving || activeLeaveToday !== null || leaveReason.trim().length === 0}
@@ -544,6 +561,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                         startDate: leaveDate,
                         endDate: leaveEndDate || null,
                         reason: leaveReason.trim(),
+                        allowRepeatedLeave,
                       }),
                     "Академвідпустку оформлено.",
                   )
@@ -833,11 +851,14 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
         </section>
 
         <section className="panel">
-          <h2>Поновлення після переведення</h2>
+          <h2>Повернення з іншого закладу</h2>
           {currentEnrollment ? (
             <StatusState tone="info" message="Перед поновленням необхідно закрити поточне зарахування." />
           ) : student.status !== "Expelled" ? (
-            <StatusState tone="info" message="Студент не відрахований (поновлювати можна лише відрахованих або переведених студентів)." />
+            <StatusState
+              tone="info"
+              message="Операція доступна лише для студента без активного зарахування, який був відрахований або раніше вибув до іншого закладу."
+            />
           ) : (
             <>
               <div className="form-grid">
@@ -940,7 +961,7 @@ export function AdminStudentOperationsPage({ studentId, navigate }: AdminStudent
                         notes: returnNotes.trim() || null,
                       })
                     },
-                    "Студента поновлено після переведення.",
+                    "Студента повернуто з іншого закладу та повторно зараховано.",
                   )
                 }
               >

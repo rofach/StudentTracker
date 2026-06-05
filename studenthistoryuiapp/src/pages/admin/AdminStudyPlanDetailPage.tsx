@@ -33,6 +33,12 @@ const controlTypeLabels: Record<string, string> = {
   Coursework: "Курсова робота",
 }
 
+const controlTypeOptions = [
+  { value: "Exam", label: "Екзамен" },
+  { value: "Credit", label: "Залік" },
+  { value: "Coursework", label: "Курсова робота" },
+] as const
+
 function formatControlType(controlType: string) {
   return controlTypeLabels[controlType] ?? controlType
 }
@@ -40,7 +46,7 @@ function formatControlType(controlType: string) {
 const emptyDisciplineForm: AddPlanDisciplineDto = {
   disciplineId: "",
   semesterNo: 1,
-  controlType: "",
+  controlType: "Exam",
   credits: 0,
 }
 
@@ -57,7 +63,7 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
   const [addForm, setAddForm] = useState<AddPlanDisciplineDto>(emptyDisciplineForm)
   const [editForm, setEditForm] = useState<UpdatePlanDisciplineDto>({
     semesterNo: 1,
-    controlType: "",
+    controlType: "Exam",
     credits: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -260,11 +266,16 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
               </label>
               <label>
                 Контроль
-                <input
-                  type="text"
+                <select
                   value={addForm.controlType}
                   onChange={(event) => setAddForm((prev) => ({ ...prev, controlType: event.target.value }))}
-                />
+                >
+                  {controlTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 Кредити
@@ -348,11 +359,16 @@ export function AdminStudyPlanDetailPage({ planId, navigate }: AdminStudyPlanDet
                     </label>
                     <label>
                       Контроль
-                      <input
-                        type="text"
+                      <select
                         value={editForm.controlType}
                         onChange={(event) => setEditForm((prev) => ({ ...prev, controlType: event.target.value }))}
-                      />
+                      >
+                        {controlTypeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                     <label>
                       Кредити

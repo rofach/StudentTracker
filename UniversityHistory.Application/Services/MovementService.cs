@@ -171,8 +171,13 @@ public class MovementService : IMovementService
                 throw new DomainException("Повернення з іншого університету неможливе, поки у студента є активне зарахування.");
 
             var transfers = await _unitOfWork.ExternalTransfers.GetByStudentIdAsync(studentId, innerCt);
-            if (!transfers.Any(static transfer => transfer.TransferType == TransferType.Out))
-                throw new DomainException("Повернення доступне лише для студента, у якого вже є зафіксоване вибуття до іншого університету.");
+            var hasTransferOut = transfers.Any(static transfer => transfer.TransferType == TransferType.Out);
+            if (!hasTransferOut && student.Status != StudentStatus.Expelled)
+            {
+                throw new DomainException(
+                    "Повернення з іншого університету доступне лише для студента, " +
+                    "який був відрахований або має зафіксоване зовнішнє вибуття.");
+            }
 
             student.Status = StudentStatus.Active;
             _unitOfWork.Students.Update(student);
@@ -221,6 +226,13 @@ public class MovementService : IMovementService
 
         if (dto.EndDate.HasValue && dto.EndDate.Value < dto.StartDate)
             throw new DomainException("EndDate cannot be before StartDate.");
+
+        if (!dto.AllowRepeatedLeave && await _unitOfWork.AcademicLeaves.HasAnyByEnrollmentIdAsync(dto.EnrollmentId, ct))
+        {
+            throw new DomainException(
+                "Для цього зарахування вже була оформлена академічна відпустка. " +
+                "Повторна академічна відпустка можлива лише після нового зарахування.");
+        }
 
         var openLeave = await _unitOfWork.AcademicLeaves.GetOpenByEnrollmentIdAsync(dto.EnrollmentId, ct);
         if (openLeave is not null)

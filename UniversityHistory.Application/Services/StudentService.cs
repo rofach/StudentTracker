@@ -1,4 +1,4 @@
-using UniversityHistory.Application.DTOs;
+п»їusing UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Queries.GetStudentSearch;
 using UniversityHistory.Application.Mappings;
@@ -110,16 +110,16 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         if (student.Status is StudentStatus.Graduated)
-            throw new DomainException("Випущеного студента не можна відрахувати.");
+            throw new DomainException("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 
         if (student.Status is StudentStatus.Expelled)
-            throw new DomainException("Студент вже відрахований.");
+            throw new DomainException("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 
         var today = DateOnly.FromDateTime(DateTime.Today);
         var leaves = await _unitOfWork.AcademicLeaves.GetByStudentIdAsync(studentId, ct);
         var hasOpenLeave = leaves.Any(l => l.StartDate <= today && (!l.EndDate.HasValue || l.EndDate.Value >= today));
         if (hasOpenLeave)
-            throw new DomainException("Перед відрахуванням необхідно закрити активну академвідпустку.");
+            throw new DomainException("пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 
         student.Status = StudentStatus.Expelled;
         _unitOfWork.Students.Update(student);
@@ -133,10 +133,10 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
             ?? throw new NotFoundException(nameof(Student), studentId);
 
         if (student.Status is StudentStatus.Graduated)
-            throw new DomainException("Студент вже випущений.");
+            throw new DomainException("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 
         if (student.Status is not StudentStatus.Active)
-            throw new DomainException("Випустити можна лише активного студента. Спочатку закрийте академвідпустку або поновіть студента.");
+            throw new DomainException("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 
         var today = DateOnly.FromDateTime(DateTime.Today);
         student.Status = StudentStatus.Graduated;
@@ -161,6 +161,32 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
             openSubgroup.DateTo = date;
             _unitOfWork.SubgroupEnrollments.Update(openSubgroup);
         }
+    }
+
+    public async Task<IEnumerable<GroupPlanAssignmentDto>> GetStudentPlansAsync(Guid studentId, CancellationToken ct = default)
+    {
+        _ = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
+            ?? throw new NotFoundException(nameof(Student), studentId);
+
+        var enrollments = await _unitOfWork.Enrollments.GetByStudentIdAsync(studentId, ct);
+        var groupIds = enrollments.Select(e => e.GroupId).Distinct().ToList();
+        
+        var allGroupPlans = (await _unitOfWork.GroupPlanAssignments.GetByGroupIdsAsync(groupIds, ct))
+            .ToLookup(gpa => gpa.GroupId);
+
+        var plans = new List<GroupPlanAssignmentDto>();
+        foreach (var enrollment in enrollments)
+        {
+            foreach (var gpa in allGroupPlans[enrollment.GroupId])
+            {
+                var enrollEnd = enrollment.DateTo ?? DateOnly.MaxValue;
+                var planEnd   = gpa.DateTo ?? DateOnly.MaxValue;
+                if (gpa.DateFrom <= enrollEnd && planEnd >= enrollment.DateFrom)
+                    plans.Add(gpa.ToDto());
+            }
+        }
+
+        return plans.DistinctBy(p => p.GroupPlanAssignmentId);
     }
 
     public async Task<StudentDetailDto> GetDetailAsync(Guid studentId, CancellationToken ct = default)
@@ -227,4 +253,5 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
         return _groupOnDateHandler.HandleAsync(new GetStudentGroupOnDateQuery(studentId, targetDate), ct);
     }
 }
+
 

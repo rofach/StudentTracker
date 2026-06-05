@@ -312,7 +312,8 @@ export type StudentCreateDto = {
 }
 
 export type CreateTransferredStudentDto = StudentCreateDto & {
-  institutionId: EntityId
+  institutionId: EntityId | null
+  newInstitutionName: string | null
   groupId: EntityId
   subgroupId: EntityId | null
   dateFrom: string
@@ -361,6 +362,7 @@ export type CreateLeaveDto = {
   startDate: string
   endDate?: string | null
   reason: string
+  allowRepeatedLeave?: boolean
 }
 
 export type CloseAcademicLeaveDto = {

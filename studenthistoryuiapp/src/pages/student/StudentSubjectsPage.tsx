@@ -4,13 +4,14 @@ import {
   getStudentAverageGrade,
   getStudentDisciplines,
   getStudentGrades,
+  getStudentPlans,
   upsertStudentGrade,
 } from "../../api/studentsApi"
 import { Spinner } from "../../components/common/Spinner"
 import { StatusState } from "../../components/common/StatusState"
 import { useToast } from "../../components/common/ToastCenter"
 import { useDebouncedValue } from "../../hooks/useDebouncedValue"
-import type { AverageGradeDto, EntityId, GradeDto, StudentDisciplineOptionDto } from "../../types/api"
+import type { AverageGradeDto, EntityId, GradeDto, StudentDisciplineOptionDto, GroupPlanAssignmentDto } from "../../types/api"
 import { formatDate } from "../../utils/format"
 
 type StudentSubjectsPageProps = {
@@ -46,7 +47,8 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
   const [error, setError] = useState<string | null>(null)
 
   const [semesterFilter, setSemesterFilter] = useState<string>("all")
-  const [planScope, setPlanScope] = useState<"all" | "current">("all")
+  const [planId, setPlanId] = useState<string>("")
+  const [studentPlans, setStudentPlans] = useState<GroupPlanAssignmentDto[]>([])
   const [searchText, setSearchText] = useState("")
   const debouncedSearchText = useDebouncedValue(searchText, 250)
 
@@ -58,12 +60,28 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
 
   useEffect(() => {
     let isActive = true
+    getStudentPlans(studentId)
+      .then((plans) => {
+        if (isActive) {
+          setStudentPlans(plans)
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load student plans:", err)
+      })
+    return () => {
+      isActive = false
+    }
+  }, [studentId])
+
+  useEffect(() => {
+    let isActive = true
 
     setIsLoading(true)
     setError(null)
 
     Promise.all([
-      getStudentDisciplines(studentId, planScope === "current"),
+      getStudentDisciplines(studentId, planId || undefined),
       getStudentGrades(studentId, 1, 200),
     ])
       .then(([disciplineRows, gradesPage]) => {
@@ -93,7 +111,7 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
     return () => {
       isActive = false
     }
-  }, [studentId, planScope])
+  }, [studentId, planId])
 
   const semesterOptions = useMemo(() => {
     const map = new Map<string, SemesterOption>()
@@ -257,9 +275,13 @@ export function StudentSubjectsPage({ studentId, editable = false }: StudentSubj
         <div className="filters-row">
           <label>
             План
-            <select value={planScope} onChange={(event) => setPlanScope(event.target.value as "all" | "current")}>
-              <option value="all">Усі плани</option>
-              <option value="current">Поточний план</option>
+            <select value={planId} onChange={(event) => setPlanId(event.target.value)}>
+              <option value="">Усі плани</option>
+              {studentPlans.map((assignment) => (
+                <option key={assignment.groupPlanAssignmentId} value={assignment.planId}>
+                  {assignment.planName || "Без назви"} ({formatDate(assignment.dateFrom)} — {assignment.dateTo ? formatDate(assignment.dateTo) : "теперішній час"})
+                </option>
+              ))}
             </select>
           </label>
 

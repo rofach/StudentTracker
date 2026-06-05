@@ -79,7 +79,8 @@ public record CreateLeaveDto(
     Guid EnrollmentId,
     DateOnly StartDate,
     DateOnly? EndDate,
-    string Reason
+    string Reason,
+    bool AllowRepeatedLeave = false
 );
 
 public record CloseAcademicLeaveDto(

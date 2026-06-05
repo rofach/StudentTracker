@@ -121,6 +121,17 @@ public class StudentsController : ControllerBase
     }
 
     [Authorize(Roles = $"{AuthRoles.Admin},{AuthRoles.Student}")]
+    [HttpGet("{id:guid}/plans")]
+    public async Task<IActionResult> GetPlans(Guid id, CancellationToken ct)
+    {
+        var accessResult = EnsureStudentAccess(id);
+        if (accessResult is not null)
+            return accessResult;
+
+        return Ok(await _studentService.GetStudentPlansAsync(id, ct));
+    }
+
+    [Authorize(Roles = $"{AuthRoles.Admin},{AuthRoles.Student}")]
     [HttpGet("{id:guid}/details")]
     public async Task<IActionResult> GetDetails(Guid id, CancellationToken ct)
     {
@@ -273,13 +284,13 @@ public class StudentsController : ControllerBase
     [Authorize(Roles = $"{AuthRoles.Admin},{AuthRoles.Student}")]
     [HttpGet("{id:guid}/disciplines")]
     public async Task<IActionResult> GetDisciplines(
-        Guid id, [FromQuery] bool currentPlanOnly = false, CancellationToken ct = default)
+        Guid id, [FromQuery] Guid? planId = null, CancellationToken ct = default)
     {
         var accessResult = EnsureStudentAccess(id);
         if (accessResult is not null)
             return accessResult;
 
-        return Ok(await _gradeService.GetStudentDisciplinesAsync(id, currentPlanOnly, ct));
+        return Ok(await _gradeService.GetStudentDisciplinesAsync(id, planId, ct));
     }
 
     [Authorize(Roles = $"{AuthRoles.Admin},{AuthRoles.Student}")]
@@ -322,4 +333,6 @@ public class StudentsController : ControllerBase
         return null;
     }
 }
+
+
 
