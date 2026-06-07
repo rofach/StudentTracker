@@ -154,9 +154,10 @@ public class EnrollmentService : IEnrollmentService
         _unitOfWork.Enrollments.Add(newEnrollment);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        var planDisciplinesDict = activePlan.Plan.PlanDisciplines.ToDictionary(pd => pd.PlanDisciplineId, pd => pd.DisciplineId);
         var newCourses = StudyPlanService.GenerateCourseEnrollments(
                 newEnrollment.EnrollmentId, activePlan.GroupPlanAssignmentId, dto.MoveDate, activePlan.Plan)
-            .Where(ce => !coveredDisciplineIds.Contains(ce.PlanDiscipline.DisciplineId))
+            .Where(ce => !coveredDisciplineIds.Contains(planDisciplinesDict[ce.PlanDisciplineId]))
             .ToList();
         _unitOfWork.StudyPlans.AddCourseEnrollments(newCourses);
 

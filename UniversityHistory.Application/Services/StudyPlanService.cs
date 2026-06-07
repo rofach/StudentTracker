@@ -200,6 +200,9 @@ public class StudyPlanService : IStudyPlanService
         
         if (current is not null)
         {
+            if (current.PlanId == dto.NewPlanId)
+                throw new DomainException("The group is already assigned to this study plan.");
+
             if (dto.NewPlanDateFrom <= current.DateFrom)
                 throw new DomainException("DateFrom must be after the current assignment's start date.");
             current.DateTo = dto.NewPlanDateFrom.AddDays(-1);
@@ -242,7 +245,6 @@ public class StudyPlanService : IStudyPlanService
                     EnrollmentId = enrollment.EnrollmentId,
                     GroupPlanAssignmentId = newAssignment.GroupPlanAssignmentId,
                     PlanDisciplineId = pd.PlanDisciplineId,
-                    PlanDiscipline = pd,
                     AcademicYearStart = CalculateAcademicYearStart(dto.NewPlanDateFrom, pd.SemesterNo),
                     Status = CourseStatus.Planned
                 })
@@ -266,7 +268,6 @@ public class StudyPlanService : IStudyPlanService
                 EnrollmentId = enrollmentId,
                 GroupPlanAssignmentId = groupPlanAssignmentId,
                 PlanDisciplineId = pd.PlanDisciplineId,
-                PlanDiscipline = pd,
                 AcademicYearStart = CalculateAcademicYearStart(startDate, pd.SemesterNo),
                 Status = CourseStatus.Planned
             })

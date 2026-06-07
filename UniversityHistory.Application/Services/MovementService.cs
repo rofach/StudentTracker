@@ -381,12 +381,13 @@ public class MovementService : IMovementService
         if (activePlan is not null)
         {
             var coveredDisciplineIds = await GetCoveredDisciplineIdsAsync(dto.StudentId, ct);
+            var planDisciplinesDict = activePlan.Plan.PlanDisciplines.ToDictionary(pd => pd.PlanDisciplineId, pd => pd.DisciplineId);
             var courses = StudyPlanService.GenerateCourseEnrollments(
                     enrollment.EnrollmentId,
                     activePlan.GroupPlanAssignmentId,
                     dto.DateFrom,
                     activePlan.Plan)
-                .Where(course => !coveredDisciplineIds.Contains(course.PlanDiscipline.DisciplineId))
+                .Where(course => !coveredDisciplineIds.Contains(planDisciplinesDict[course.PlanDisciplineId]))
                 .ToList();
             _unitOfWork.StudyPlans.AddCourseEnrollments(courses);
         }
