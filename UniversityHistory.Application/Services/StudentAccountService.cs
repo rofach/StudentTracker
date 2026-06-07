@@ -126,7 +126,7 @@ public class StudentAccountService : IStudentAccountService
             ?? throw new NotFoundException("Student", studentId);
 
         if (string.IsNullOrWhiteSpace(student.Email))
-            throw new DomainException("Для студента не вказано email. Неможливо створити або оновити обліковий запис.");
+            throw new DomainException("No email is specified for the student. Cannot create or update the account.");
 
         return student;
     }
@@ -187,7 +187,7 @@ public class StudentAccountService : IStudentAccountService
         if (!institutionId.HasValue || institutionId.Value == Guid.Empty)
         {
             if (string.IsNullOrWhiteSpace(newInstitutionName))
-                throw new DomainException("Необхідно вказати заклад або назву нового закладу.");
+                throw new DomainException("It is required to specify an institution or the name of a new institution.");
 
             var newInst = new Domain.Entities.Institution
             {
@@ -211,7 +211,7 @@ public class StudentAccountService : IStudentAccountService
             throw new DomainException($"Subgroup {subgroupId.Value} does not belong to Group {groupId}.");
 
         if (await _unitOfWork.Enrollments.HasOverlapAsync(studentId, dateFrom, null, null, ct))
-            throw new DomainException("Для студента вже існує активне або таке, що перетинається, зарахування.");
+            throw new DomainException("An active or overlapping enrollment already exists for the student.");
 
         var student = await _unitOfWork.Students.GetByIdAsync(studentId, ct)
             ?? throw new NotFoundException("Student", studentId);

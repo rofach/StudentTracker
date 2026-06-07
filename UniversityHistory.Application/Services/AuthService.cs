@@ -22,10 +22,10 @@ public class AuthService : IAuthService
     public async Task<AuthSessionDto> LoginAsync(LoginRequestDto dto, CancellationToken ct = default)
     {
         var account = await _identityAccountManager.FindByLoginAsync(dto.Login, ct)
-            ?? throw new DomainException("Невірний логін або пароль.");
+            ?? throw new DomainException("Invalid login or password.");
 
         if (!await _identityAccountManager.CheckPasswordAsync(account.UserId, dto.Password, ct))
-            throw new DomainException("Невірний логін або пароль.");
+            throw new DomainException("Invalid login or password.");
 
         EnsureHasRole(account);
 
@@ -47,7 +47,7 @@ public class AuthService : IAuthService
     private static void EnsureHasRole(IdentityAccountDescriptor account)
     {
         if (account.Roles.Count == 0)
-            throw new DomainException("Для користувача не налаштовано роль.");
+            throw new DomainException("No role is configured for the user.");
     }
 
     private static CurrentUserDto MapCurrentUser(IdentityAccountDescriptor account)

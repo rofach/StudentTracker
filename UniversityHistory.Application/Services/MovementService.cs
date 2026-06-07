@@ -99,12 +99,12 @@ public class MovementService : IMovementService
                 ?? throw new NotFoundException(nameof(Institution), dto.InstitutionId);
 
             var enrollment = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, innerCt)
-                ?? throw new DomainException("У студента немає активного зарахування для зовнішнього переведення.");
+                ?? throw new DomainException("The student has no active enrollment for external transfer.");
 
             await _studyProcessRule.EnsureEnrollmentModificationAllowedAsync(enrollment.EnrollmentId, dto.TransferDate, innerCt);
 
             if (dto.TransferDate < enrollment.DateFrom)
-                throw new DomainException("Дата зовнішнього переведення не може бути раніше дати початку поточного зарахування.");
+                throw new DomainException("The date of external transfer cannot be earlier than the start date of the current enrollment.");
 
             var existingCourses = (await _unitOfWork.StudyPlans
                 .GetCourseEnrollmentsByEnrollmentIdAsync(enrollment.EnrollmentId, innerCt)).ToList();
@@ -121,7 +121,7 @@ public class MovementService : IMovementService
             if (openSubgroupEnrollment is not null)
             {
                 if (dto.TransferDate < openSubgroupEnrollment.DateFrom)
-                    throw new DomainException("Дата зовнішнього переведення не може бути раніше дати початку поточної підгрупи.");
+                    throw new DomainException("The date of external transfer cannot be earlier than the start date of the current subgroup.");
 
                 openSubgroupEnrollment.DateTo = dto.TransferDate;
                 _unitOfWork.SubgroupEnrollments.Update(openSubgroupEnrollment);
@@ -168,15 +168,15 @@ public class MovementService : IMovementService
 
             var activeEnrollment = await _unitOfWork.Enrollments.GetActiveByStudentIdAsync(studentId, innerCt);
             if (activeEnrollment is not null)
-                throw new DomainException("Повернення з іншого університету неможливе, поки у студента є активне зарахування.");
+                throw new DomainException("Return from another university is not possible while the student has an active enrollment.");
 
             var transfers = await _unitOfWork.ExternalTransfers.GetByStudentIdAsync(studentId, innerCt);
             var hasTransferOut = transfers.Any(static transfer => transfer.TransferType == TransferType.Out);
             if (!hasTransferOut && student.Status != StudentStatus.Expelled)
             {
                 throw new DomainException(
-                    "Повернення з іншого університету доступне лише для студента, " +
-                    "який був відрахований або має зафіксоване зовнішнє вибуття.");
+                    "Return from another university is only available for a student " +
+                    "who was expelled or has a recorded external departure.");
             }
 
             student.Status = StudentStatus.Active;
@@ -230,8 +230,8 @@ public class MovementService : IMovementService
         if (!dto.AllowRepeatedLeave && await _unitOfWork.AcademicLeaves.HasAnyByEnrollmentIdAsync(dto.EnrollmentId, ct))
         {
             throw new DomainException(
-                "Для цього зарахування вже була оформлена академічна відпустка. " +
-                "Повторна академічна відпустка можлива лише після нового зарахування.");
+                "An academic leave has already been processed for this enrollment. " +
+                "A repeated academic leave is only possible after a new enrollment.");
         }
 
         var openLeave = await _unitOfWork.AcademicLeaves.GetOpenByEnrollmentIdAsync(dto.EnrollmentId, ct);

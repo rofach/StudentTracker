@@ -98,16 +98,21 @@ button:hover:not(:disabled) {
   min-width: 0;
 }
 
-.filters-row .checkbox-field {
-  align-items: start;
+.filters-row .checkbox-field,
+.form-grid .checkbox-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
-.filters-row .checkbox-field input[type="checkbox"] {
+.filters-row .checkbox-field input[type="checkbox"],
+.form-grid .checkbox-field input[type="checkbox"] {
   width: auto;
   max-width: none;
   min-width: 0;
-  justify-self: start;
   box-shadow: none;
+  margin: 0;
 }
 
 .inline-actions {
