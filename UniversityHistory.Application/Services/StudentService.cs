@@ -1,4 +1,4 @@
-﻿using UniversityHistory.Application.DTOs;
+using UniversityHistory.Application.DTOs;
 using UniversityHistory.Application.Interfaces.Services;
 using UniversityHistory.Application.Queries.GetStudentSearch;
 using UniversityHistory.Application.Mappings;
@@ -182,11 +182,15 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
                 var enrollEnd = enrollment.DateTo ?? DateOnly.MaxValue;
                 var planEnd   = gpa.DateTo ?? DateOnly.MaxValue;
                 if (gpa.DateFrom <= enrollEnd && planEnd >= enrollment.DateFrom)
-                    plans.Add(gpa.ToDto());
+                {
+                    var actualStart = gpa.DateFrom > enrollment.DateFrom ? gpa.DateFrom : enrollment.DateFrom;
+                    var actualEnd = planEnd < enrollEnd ? gpa.DateTo : enrollment.DateTo;
+                    plans.Add(gpa.ToDto() with { DateFrom = actualStart, DateTo = actualEnd });
+                }
             }
         }
 
-        return plans.DistinctBy(p => p.GroupPlanAssignmentId);
+        return plans.Distinct();
     }
 
     public async Task<StudentDetailDto> GetDetailAsync(Guid studentId, CancellationToken ct = default)
@@ -209,7 +213,11 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
                 var enrollEnd = enrollment.DateTo ?? DateOnly.MaxValue;
                 var planEnd   = gpa.DateTo ?? DateOnly.MaxValue;
                 if (gpa.DateFrom <= enrollEnd && planEnd >= enrollment.DateFrom)
-                    plans.Add(gpa.ToDto());
+                {
+                    var actualStart = gpa.DateFrom > enrollment.DateFrom ? gpa.DateFrom : enrollment.DateFrom;
+                    var actualEnd = planEnd < enrollEnd ? gpa.DateTo : enrollment.DateTo;
+                    plans.Add(gpa.ToDto() with { DateFrom = actualStart, DateTo = actualEnd });
+                }
             }
         }
 
@@ -219,7 +227,7 @@ public async Task ExpelStudentAsync(Guid studentId, ExpelStudentDto dto, Cancell
 
         return student.ToDto(
             enrollments.Select(static e => e.ToDto()),
-            plans.DistinctBy(p => p.GroupPlanAssignmentId),
+            plans.Distinct(),
             movements.Leaves,
             movements.Transfers,
             isOnAcademicLeave,
